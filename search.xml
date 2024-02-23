@@ -1,47 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>[SWPUCTF 2021 新生赛]pop</title>
-    <url>/2024/02/20/SWPUCTF-2021-%E6%96%B0%E7%94%9F%E8%B5%9B-pop/</url>
-    <content><![CDATA[<p>第一次给了php反序列化</p>
-<span id="more"></span>
-
-<p><img src="/../img/$%7Bfiilename%7D/ctf1.png"></p>
-<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>把admin和passwd的值修改，满足判断条件，即可输出flag</p>
-<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><p>要修改admin和passwd就要触发Getflag()—&gt;要用到类w33m中的__toString并修改w22m和w00m—&gt;类w22m的echo触发—&gt;new一个即可触发destruct</p>
-<p>这样即可触发一系列的反应来达到目的</p>
-<h1 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h1><h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>private变量和protect变量serialize出来的值两边会有乱码，所以不能直接复制，要先进行url编码再复制</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240220174755867.png"></p>
-<p>可以看到admin旁边的那个白色框，其实它就是url编码的%00,但是复制的时候计算机可能会把他当成终止符，所以复制不了，要进行下面的编码处理</p>
-<h2 id="编码的一些知识点"><a href="#编码的一些知识点" class="headerlink" title="编码的一些知识点"></a>编码的一些知识点</h2><h3 id="url编码方式"><a href="#url编码方式" class="headerlink" title="url编码方式"></a>url编码方式</h3><p>取每个字符的ASCII码值后转为16进制最后在前面加上百分号即可(汉字是将其转化为字节流后对每个字节进行上述转换)</p>
-<h3 id="哪些字符需要转码"><a href="#哪些字符需要转码" class="headerlink" title="哪些字符需要转码"></a>哪些字符需要转码</h3><p>在url编码中字符又分为__保留字符__和__非保留字符__，在整个url(不算参数值部分)中，除了保留字符和非保留字符外的所有字符都要编码,参数值中基本上非保留字符的字符都要编码</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240220183618808-1708435470804-6.png"></p>
-<p>在浏览器中会自动识别带%的东西，所以不会进行二次编码，再把%编码为%25,所以我们就可以直接将url编码后的pop上传.</p>
-]]></content>
-      <tags>
-        <tag>ctf</tag>
-        <tag>php反序列化</tag>
-        <tag>入门</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>HDCTF Junior 2024 Winter WP</title>
     <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
     <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
 
-<h1 id="朴实无华的http"><a href="#朴实无华的http" class="headerlink" title="朴实无华的http"></a>朴实无华的http</h1><p><img src="/../img/$%7Bfiilename%7D/image-20240222183840891.png"></p>
+<h1 id="朴实无华的http"><a href="#朴实无华的http" class="headerlink" title="朴实无华的http"></a>朴实无华的http</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240222183840891.png" ></p>
 <p>这是刚刚拿到题的样子,F12没反应,ctrl+U看看</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222183956685.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222183956685.png" ></p>
 <p>没什么卵用,只知道把F12和F1 ban掉了</p>
 <p>题目没给什么描述,源码也没有信息,直接开扫,dirsearch.py启动!</p>
 <p>最后扫出来个robot.txt</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222184449835.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184449835.png" ></p>
 <p>进入你，httttttp.php</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222184604048.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184604048.png" ></p>
 <p>接下来就很常规的把Referer,UA填好,就进入了经典试ip环节,用收集的词典在burpsuite爆一下就出来了.</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222185535104.png" alt="兄弟爆一下，说说你心里话"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185535104.png"  alt="兄弟爆一下，说说你心里话"></p>
 <h1 id="ez-unserialize"><a href="#ez-unserialize" class="headerlink" title="ez_unserialize"></a>ez_unserialize</h1><p>最想吐的一集，虽然拿了个一血，但这题差点把我血都放完了</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222185800522.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185800522.png" ></p>
 <p>因为一开始服务器挺卡的，点这题老是调到别的地方，我还以为题目出错了，一看原来有个$_GET[‘entrance’]，够坏哈</p>
 <h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>这题的思路到是比较明确，想出来并不要多少时间,漏洞点是在$fuction($cmd),于是我们对这两个值进行覆盖即可rce，</p>
 <p>那么就反推回去</p>
@@ -49,14 +25,14 @@
 <p>开始下手</p>
 <h2 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h2><p>这里的base64解码编码，private变量旁边的%00弄得我好崩溃.</p>
 <p>先看我的payload:</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222190634907.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222190634907.png" ></p>
 <p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”%00pop%00exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
 <p>以为到这里就差不多得了?想多了</p>
 <h2 id="绕过wakeup"><a href="#绕过wakeup" class="headerlink" title="绕过wakeup"></a>绕过wakeup</h2><p>这个需要版本限制，具体不记得</p>
 <p>我们知道wakeup触发时机是在unserialize之前，那么这里我们肯定不能让它触发.</p>
 <p>绕过的方式是:修改pop链属性个数使他大于真实个数即可绕过</p>
 <h2 id="private旁边的-00"><a href="#private旁边的-00" class="headerlink" title="private旁边的%00"></a>private旁边的%00</h2><p>这里够我喝一壶的了</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222191033249.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222191033249.png" ></p>
 <p>注意看，这个变量叫pop,它的两边有两个不知道什么东西的东西,其实它是ASCII里面的0，在url中是%00.</p>
 <p>按我之前的经验来看，我们只需手动添加%00在pop两边，接着$_GET传参即可,但是你先别急</p>
 <p>这里GET传进去的pop链是要经过base64编码解码的，于是像上面说的这样子干，那么我们传入的便是%00,而不是经过服务器解析后的那个符号0,所以php理所当然是识别不了%00的，所以识别不了pop，一个地方崩整个崩</p>
@@ -64,29 +40,29 @@
 <p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”‘<strong>.chr(0).</strong>‘pop’<strong>.chr(0).</strong>‘exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
 <p>接着就是无限制的rce，不多赘述</p>
 <h1 id="フィナーレ。"><a href="#フィナーレ。" class="headerlink" title="フィナーレ。"></a>フィナーレ。</h1><p>这题是考察php特性和无参数rce</p>
-<h2 id="第一关"><a href="#第一关" class="headerlink" title="第一关"></a>第一关</h2><p><img src="/../img/$%7Bfiilename%7D/image-20240222192112186.png"></p>
+<h2 id="第一关"><a href="#第一关" class="headerlink" title="第一关"></a>第一关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192112186.png" ></p>
 <p>这里是强等于,0e绕过不能用,那就用数组绕过,当md5()里面传入一个数组时，编译器会报错但不影响它继续执行后返回null，结果null&#x3D;&#x3D;&#x3D;null，成功绕过</p>
-<h2 id="第二关"><a href="#第二关" class="headerlink" title="第二关"></a>第二关</h2><p><img src="/../img/$%7Bfiilename%7D/image-20240222192647039.png"></p>
+<h2 id="第二关"><a href="#第二关" class="headerlink" title="第二关"></a>第二关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192647039.png" ></p>
 <p>这里直接传入114514就好了，目的应该不是考察intval绕过，让我们认识这个函数而已</p>
-<h2 id="第三关"><a href="#第三关" class="headerlink" title="第三关"></a>第三关</h2><p><img src="/../img/$%7Bfiilename%7D/image-20240222193337316.png"></p>
+<h2 id="第三关"><a href="#第三关" class="headerlink" title="第三关"></a>第三关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222193337316.png" ></p>
 <p>说是命令执行，但这样写没反应，应该是有过滤，抓个包看看</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222193645229.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222193645229.png" ></p>
 <p>果然啊，果然，过滤了好多，linux指令在这里我是不会用了,用php的函数写的</p>
 <p>scandir():查看目录下有什么文件,传的参数就是路径</p>
 <p>readfile():读取文件</p>
 <p>这里先print_r(scandir(.))查看根目录(为什么是print_r不是echo,因为这里返回的是数组，echo处理不了)</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222194101516.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194101516.png" ></p>
 <p>这里我们在前三层找到flag文件，读取</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222194422918.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194422918.png" ></p>
 <p>这里的readfile()平替很多,比如highlight_file,show_source,网上还有几个吧</p>
 <h1 id="カゲロウデイズ"><a href="#カゲロウデイズ" class="headerlink" title="カゲロウデイズ"></a>カゲロウデイズ</h1><p>运气最好的一集，说是考察脚本能力，但我一个脚本没写，全靠运气</p>
 <p>题目说了密码在css文件里面</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222194810531.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194810531.png" ></p>
 <p>这里我们复制下来，在记事本可以把注释批量去掉</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222194905273.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194905273.png" ></p>
 <p>一看就是base64，但我做到这里的时候没有去解码，而是直接拿去burpsuite爆了，结果啥都没爆出来，然后我就拿去解码了</p>
-<p><img src="/../img/$%7Bfiilename%7D/image-20240222195102450.png"></p>
-<p>然后我想是不是要写个脚本把这些字符拼接起来，然后我在乱翻的时候，哎哟我，这不key is 谁谁谁吗，然后直接拿去试，还真得了，全靠运气<img src="/../img/$%7Bfiilename%7D/image-20240222195234074.png"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222195102450.png" ></p>
+<p>然后我想是不是要写个脚本把这些字符拼接起来，然后我在乱翻的时候，哎哟我，这不key is 谁谁谁吗，然后直接拿去试，还真得了，全靠运气<img   src="/../img/$%7Bfiilename%7D/image-20240222195234074.png" ></p>
 <p>又是点击题，反正上次也是用连点器做出来的，这次也用了，没想到了设置了点击间隔时间的限制，然后我调到0.2s点一次完了给他挂个30来分钟就出来了，就当休息一下哈哈哈</p>
 <h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>  记录一下第一次打的完整的ctf，早上准备开打的时候简直兴奋的发抖，打开题目像癫了一样乱搞，现在回想还真是浪费精力啊，这是一场持久战，还是得慢慢来,最后也是差一题ak，已经超出我的预期了。</p>
 <p>  复盘了一下今天的操作，感觉有几方面需要说出来指正</p>
@@ -97,8 +73,32 @@
 ]]></content>
       <tags>
         <tag>ctf</tag>
-        <tag>入门</tag>
         <tag>wp</tag>
+        <tag>入门</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>[SWPUCTF 2021 新生赛]pop</title>
+    <url>/2024/02/20/SWPUCTF-2021-%E6%96%B0%E7%94%9F%E8%B5%9B-pop/</url>
+    <content><![CDATA[<p>第一次给了php反序列化</p>
+<span id="more"></span>
+
+<p><img   src="/../img/$%7Bfiilename%7D/ctf1.png" ></p>
+<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>把admin和passwd的值修改，满足判断条件，即可输出flag</p>
+<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><p>要修改admin和passwd就要触发Getflag()—&gt;要用到类w33m中的__toString并修改w22m和w00m—&gt;类w22m的echo触发—&gt;new一个即可触发destruct</p>
+<p>这样即可触发一系列的反应来达到目的</p>
+<h1 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h1><h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>private变量和protect变量serialize出来的值两边会有乱码，所以不能直接复制，要先进行url编码再复制</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240220174755867.png" ></p>
+<p>可以看到admin旁边的那个白色框，其实它就是url编码的%00,但是复制的时候计算机可能会把他当成终止符，所以复制不了，要进行下面的编码处理</p>
+<h2 id="编码的一些知识点"><a href="#编码的一些知识点" class="headerlink" title="编码的一些知识点"></a>编码的一些知识点</h2><h3 id="url编码方式"><a href="#url编码方式" class="headerlink" title="url编码方式"></a>url编码方式</h3><p>取每个字符的ASCII码值后转为16进制最后在前面加上百分号即可(汉字是将其转化为字节流后对每个字节进行上述转换)</p>
+<h3 id="哪些字符需要转码"><a href="#哪些字符需要转码" class="headerlink" title="哪些字符需要转码"></a>哪些字符需要转码</h3><p>在url编码中字符又分为__保留字符__和__非保留字符__，在整个url(不算参数值部分)中，除了保留字符和非保留字符外的所有字符都要编码,参数值中基本上非保留字符的字符都要编码</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240220183618808-1708435470804-6.png" ></p>
+<p>在浏览器中会自动识别带%的东西，所以不会进行二次编码，再把%编码为%25,所以我们就可以直接将url编码后的pop上传.</p>
+]]></content>
+      <tags>
+        <tag>ctf</tag>
+        <tag>入门</tag>
+        <tag>php反序列化</tag>
       </tags>
   </entry>
 </search>
