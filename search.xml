@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>[SWPUCTF 2021 新生赛]pop</title>
+    <url>/2024/02/20/SWPUCTF-2021-%E6%96%B0%E7%94%9F%E8%B5%9B-pop/</url>
+    <content><![CDATA[<p>第一次给了php反序列化</p>
+<span id="more"></span>
+
+<p><img   src="/../img/$%7Bfiilename%7D/ctf1.png" ></p>
+<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>把admin和passwd的值修改，满足判断条件，即可输出flag</p>
+<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><p>要修改admin和passwd就要触发Getflag()—&gt;要用到类w33m中的__toString并修改w22m和w00m—&gt;类w22m的echo触发—&gt;new一个即可触发destruct</p>
+<p>这样即可触发一系列的反应来达到目的</p>
+<h1 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h1><h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>private变量和protect变量serialize出来的值两边会有乱码，所以不能直接复制，要先进行url编码再复制</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240220174755867.png" ></p>
+<p>可以看到admin旁边的那个白色框，其实它就是url编码的%00,但是复制的时候计算机可能会把他当成终止符，所以复制不了，要进行下面的编码处理</p>
+<h2 id="编码的一些知识点"><a href="#编码的一些知识点" class="headerlink" title="编码的一些知识点"></a>编码的一些知识点</h2><h3 id="url编码方式"><a href="#url编码方式" class="headerlink" title="url编码方式"></a>url编码方式</h3><p>取每个字符的ASCII码值后转为16进制最后在前面加上百分号即可(汉字是将其转化为字节流后对每个字节进行上述转换)</p>
+<h3 id="哪些字符需要转码"><a href="#哪些字符需要转码" class="headerlink" title="哪些字符需要转码"></a>哪些字符需要转码</h3><p>在url编码中字符又分为__保留字符__和__非保留字符__，在整个url(不算参数值部分)中，除了保留字符和非保留字符外的所有字符都要编码,参数值中基本上非保留字符的字符都要编码</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240220183618808-1708435470804-6.png" ></p>
+<p>在浏览器中会自动识别带%的东西，所以不会进行二次编码，再把%编码为%25,所以我们就可以直接将url编码后的pop上传.</p>
+]]></content>
+      <tags>
+        <tag>ctf</tag>
+        <tag>php反序列化</tag>
+        <tag>入门</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>HDCTF Junior 2024 Winter WP</title>
     <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
     <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
@@ -73,32 +97,8 @@
 ]]></content>
       <tags>
         <tag>ctf</tag>
+        <tag>入门</tag>
         <tag>wp</tag>
-        <tag>入门</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>[SWPUCTF 2021 新生赛]pop</title>
-    <url>/2024/02/20/SWPUCTF-2021-%E6%96%B0%E7%94%9F%E8%B5%9B-pop/</url>
-    <content><![CDATA[<p>第一次给了php反序列化</p>
-<span id="more"></span>
-
-<p><img   src="/../img/$%7Bfiilename%7D/ctf1.png" ></p>
-<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>把admin和passwd的值修改，满足判断条件，即可输出flag</p>
-<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><p>要修改admin和passwd就要触发Getflag()—&gt;要用到类w33m中的__toString并修改w22m和w00m—&gt;类w22m的echo触发—&gt;new一个即可触发destruct</p>
-<p>这样即可触发一系列的反应来达到目的</p>
-<h1 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h1><h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>private变量和protect变量serialize出来的值两边会有乱码，所以不能直接复制，要先进行url编码再复制</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240220174755867.png" ></p>
-<p>可以看到admin旁边的那个白色框，其实它就是url编码的%00,但是复制的时候计算机可能会把他当成终止符，所以复制不了，要进行下面的编码处理</p>
-<h2 id="编码的一些知识点"><a href="#编码的一些知识点" class="headerlink" title="编码的一些知识点"></a>编码的一些知识点</h2><h3 id="url编码方式"><a href="#url编码方式" class="headerlink" title="url编码方式"></a>url编码方式</h3><p>取每个字符的ASCII码值后转为16进制最后在前面加上百分号即可(汉字是将其转化为字节流后对每个字节进行上述转换)</p>
-<h3 id="哪些字符需要转码"><a href="#哪些字符需要转码" class="headerlink" title="哪些字符需要转码"></a>哪些字符需要转码</h3><p>在url编码中字符又分为__保留字符__和__非保留字符__，在整个url(不算参数值部分)中，除了保留字符和非保留字符外的所有字符都要编码,参数值中基本上非保留字符的字符都要编码</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240220183618808-1708435470804-6.png" ></p>
-<p>在浏览器中会自动识别带%的东西，所以不会进行二次编码，再把%编码为%25,所以我们就可以直接将url编码后的pop上传.</p>
-]]></content>
-      <tags>
-        <tag>ctf</tag>
-        <tag>入门</tag>
-        <tag>php反序列化</tag>
       </tags>
   </entry>
 </search>
