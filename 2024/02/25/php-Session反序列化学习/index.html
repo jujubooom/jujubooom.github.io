@@ -9,7 +9,7 @@
     
     <title>
         
-            标签: ctf |
+            php_Session反序列化学习 |
         
         Ewoji&#39;s Home
     </title>
@@ -90,7 +90,7 @@
                         </li>
                     
                         <li class="menu-item">
-                            <a class="active"
+                            <a class=""
                                href="/tags"
                             >标签</a>
                         </li>
@@ -140,7 +140,7 @@
                 </li>
             
                 <li class="drawer-menu-item flex-center">
-                    <a class="active"
+                    <a class=""
                        href="/tags"
                     >标签</a>
                 </li>
@@ -172,45 +172,186 @@
             <div class="main-content border-box">
                 
 
-                    <div class="fade-in-down-animation">
-    <div class="tag-container border-box">
-        <div class="tag-name"><i class="fas fa-hashtag"></i>&nbsp;ctf
-        </div>
-        <div class="tag-post-list">
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
             
-<div class="archive-list-container border-box">
-    
-        <section class="archive-item border-box">
-            <div class="archive-item-header border-box">
-                <span class="archive-year">2024</span>
-            </div>
-            <ul class="archive-item-body border-box">
+
+            <div class="post-content-bottom border-box">
                 
-                    <li class="post-item border-box">
-                        <span class="post-date border-box">02-22</span>
-                        <a class="post-title border-box text-ellipsis"
-                           href="/2024/02/22/HDCTF-Junior-2024-Winter-WP/"
-                        >HDCTF Junior 2024 Winter WP</a>
-                    </li>
+                    <div class="post-title">
+                        php_Session反序列化学习
+                    </div>
                 
-                    <li class="post-item border-box">
-                        <span class="post-date border-box">02-20</span>
-                        <a class="post-title border-box text-ellipsis"
-                           href="/2024/02/20/SWPUCTF-2021-%E6%96%B0%E7%94%9F%E8%B5%9B-pop/"
-                        >[SWPUCTF 2021 新生赛]pop</a>
-                    </li>
+
                 
-            </ul>
-        </section>
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/avatar.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Ewoji</span>
+                                
+                                    <span class="author-badge">Lv1</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2024-02-25 17:21:30</span>
+            </span>
+
+            <span class="meta-info-item post-update-date">
+                <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                <span class="datetime" data-updated="Sun Feb 25 2024 22:10:18 GMT+0800">2024-02-25 22:10:18</span>
+            </span>
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E5%AD%A6%E4%B9%A0/">学习</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <i class="icon fas fa-tags"></i>&nbsp;
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E5%AD%A6%E4%B9%A0/">学习</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">php反序列化</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E5%85%A5%E9%97%A8/">入门</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
     
 </div>
 
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body">
+                    
+
+                    <h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
+
+<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
+<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
+<p>简单写个前后端</p>
+<p>注册</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
+<p>填入后可以看到在tem目录下的session文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
+<p>登录</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
+<p>我们就实现了这个功能</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1>
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E5%AD%A6%E4%B9%A0/">学习</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">php反序列化</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E5%85%A5%E9%97%A8/">入门</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2024/02/22/HDCTF-Junior-2024-Winter-WP/"
+                                   title="HDCTF Junior 2024 Winter WP"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">HDCTF Junior 2024 Winter WP</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
         </div>
+
+        
     </div>
-    
-
-
-
 </div>
 
 
@@ -264,6 +405,19 @@
     </div>
 
     <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="tools-list border-box">
+        <!-- PC TOC show toggle -->
+        
+
+        <!-- PC go comment -->
+        
+    </ul>
+</div>
+
+        </div>
     
 
     <!-- side tools -->
@@ -380,6 +534,20 @@
 
 
 <div class="">
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
     
 
     <!-- category-page -->
