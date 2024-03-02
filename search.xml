@@ -78,6 +78,60 @@
       </tags>
   </entry>
   <entry>
+    <title>PHP特性学习</title>
+    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="CTFSHOW刷题"><a href="#CTFSHOW刷题" class="headerlink" title="CTFSHOW刷题"></a>CTFSHOW刷题</h1><span id="more"></span>
+
+<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
+<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
+<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
+<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
+<p>所以把4476转为16进制，在开头加入0x传入即可</p>
+<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
+<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
+<p>i:不区分大小写匹配</p>
+<p>m:以每行为一个单位匹配</p>
+<p>^:匹配单位的开头</p>
+<p>$:匹配单位的末尾</p>
+<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
+<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
+<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
+<p><strong>payload:%0aphp</strong></p>
+<p>%0a是url编码的换行符</p>
+<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
+<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
+<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
+<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
+<p>上面说了0开头会以八进制识别</p>
+<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
+<p>要想输出flag，有三个条件</p>
+<p>1.num不能强等于4476</p>
+<p>2.num中不能有字母</p>
+<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
+<p>第一种方法:</p>
+<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
+<p>第二种方法:</p>
+<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
+<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
+<p>弱等于，用以上第一种方法</p>
+<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
+<p>传入.&#x2F;flag.php即可</p>
+<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p>先写到这里</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+        <category>ctfshow</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
+        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>php</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>XXE漏洞学习</title>
     <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
