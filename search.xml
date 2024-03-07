@@ -1,6 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>PHP特性ctfshow</title>
+    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
+<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
+<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
+<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
+<p>所以把4476转为16进制，在开头加入0x传入即可</p>
+<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
+<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
+<p>i:不区分大小写匹配</p>
+<p>m:以每行为一个单位匹配</p>
+<p>^:匹配单位的开头</p>
+<p>$:匹配单位的末尾</p>
+<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
+<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
+<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
+<p><strong>payload:%0aphp</strong></p>
+<p>%0a是url编码的换行符</p>
+<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
+<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
+<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
+<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
+<p>上面说了0开头会以八进制识别</p>
+<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
+<p>要想输出flag，有三个条件</p>
+<p>1.num不能强等于4476</p>
+<p>2.num中不能有字母</p>
+<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
+<p>第一种方法:</p>
+<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
+<p>第二种方法:</p>
+<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
+<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
+<p>弱等于，用以上第一种方法</p>
+<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
+<p>传入.&#x2F;flag.php即可</p>
+<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
+<p>强度于，数组绕过</p>
+<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
+<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
+<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+        <category>ctfshow</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>ctf</tag>
+        <tag>php</tag>
+        <tag>入门</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>HDCTF Junior 2024 Winter WP</title>
+    <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
+    <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
+
+<h1 id="朴实无华的http"><a href="#朴实无华的http" class="headerlink" title="朴实无华的http"></a>朴实无华的http</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240222183840891.png" ></p>
+<p>这是刚刚拿到题的样子,F12没反应,ctrl+U看看</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222183956685.png" ></p>
+<p>没什么卵用,只知道把F12和F1 ban掉了</p>
+<p>题目没给什么描述,源码也没有信息,直接开扫,dirsearch.py启动!</p>
+<p>最后扫出来个robot.txt</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184449835.png" ></p>
+<p>进入你，httttttp.php</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184604048.png" ></p>
+<p>接下来就很常规的把Referer,UA填好,就进入了经典试ip环节,用收集的词典在burpsuite爆一下就出来了.</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185535104.png"  alt="兄弟爆一下，说说你心里话"></p>
+<h1 id="ez-unserialize"><a href="#ez-unserialize" class="headerlink" title="ez_unserialize"></a>ez_unserialize</h1><p>最想吐的一集，虽然拿了个一血，但这题差点把我血都放完了</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185800522.png" ></p>
+<p>因为一开始服务器挺卡的，点这题老是调到别的地方，我还以为题目出错了，一看原来有个$_GET[‘entrance’]，够坏哈</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>这题的思路到是比较明确，想出来并不要多少时间,漏洞点是在$fuction($cmd),于是我们对这两个值进行覆盖即可rce，</p>
+<p>那么就反推回去</p>
+<p>什么能触发invoke呢—&gt;damn类中的toString可以触发,什么触发toString—&gt;类pop的set，什么触发set—&gt;类air的call,什么触发call—&gt;类hnusec的destruct</p>
+<p>开始下手</p>
+<h2 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h2><p>这里的base64解码编码，private变量旁边的%00弄得我好崩溃.</p>
+<p>先看我的payload:</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222190634907.png" ></p>
+<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”%00pop%00exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
+<p>以为到这里就差不多得了?想多了</p>
+<h2 id="绕过wakeup"><a href="#绕过wakeup" class="headerlink" title="绕过wakeup"></a>绕过wakeup</h2><p>这个需要版本限制，具体不记得</p>
+<p>我们知道wakeup触发时机是在unserialize之前，那么这里我们肯定不能让它触发.</p>
+<p>绕过的方式是:修改pop链属性个数使他大于真实个数即可绕过</p>
+<h2 id="private旁边的-00"><a href="#private旁边的-00" class="headerlink" title="private旁边的%00"></a>private旁边的%00</h2><p>这里够我喝一壶的了</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222191033249.png" ></p>
+<p>注意看，这个变量叫pop,它的两边有两个不知道什么东西的东西,其实它是ASCII里面的0，在url中是%00.</p>
+<p>按我之前的经验来看，我们只需手动添加%00在pop两边，接着$_GET传参即可,但是你先别急</p>
+<p>这里GET传进去的pop链是要经过base64编码解码的，于是像上面说的这样子干，那么我们传入的便是%00,而不是经过服务器解析后的那个符号0,所以php理所当然是识别不了%00的，所以识别不了pop，一个地方崩整个崩</p>
+<p>问题到这里很明确了——如何让php识别pop旁边那两个东西呢?这里用php中的chr()函数，它会将ascii十进制数转化为符号,我们还要注意字符串的拼接用.来连接</p>
+<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”‘<strong>.chr(0).</strong>‘pop’<strong>.chr(0).</strong>‘exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
+<p>接着就是无限制的rce，不多赘述</p>
+<h1 id="フィナーレ。"><a href="#フィナーレ。" class="headerlink" title="フィナーレ。"></a>フィナーレ。</h1><p>这题是考察php特性和无参数rce</p>
+<h2 id="第一关"><a href="#第一关" class="headerlink" title="第一关"></a>第一关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192112186.png" ></p>
+<p>这里是强等于,0e绕过不能用,那就用数组绕过,当md5()里面传入一个数组时，编译器会报错但不影响它继续执行后返回null，结果null&#x3D;&#x3D;&#x3D;null，成功绕过</p>
+<h2 id="第二关"><a href="#第二关" class="headerlink" title="第二关"></a>第二关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192647039.png" ></p>
+<p>这里直接传入114514就好了，目的应该不是考察intval绕过，让我们认识这个函数而已</p>
+<h2 id="第三关"><a href="#第三关" class="headerlink" title="第三关"></a>第三关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222193337316.png" ></p>
+<p>说是命令执行，但这样写没反应，应该是有过滤，抓个包看看</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222193645229.png" ></p>
+<p>果然啊，果然，过滤了好多，linux指令在这里我是不会用了,用php的函数写的</p>
+<p>scandir():查看目录下有什么文件,传的参数就是路径</p>
+<p>readfile():读取文件</p>
+<p>这里先print_r(scandir(.))查看根目录(为什么是print_r不是echo,因为这里返回的是数组，echo处理不了)</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194101516.png" ></p>
+<p>这里我们在前三层找到flag文件，读取</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194422918.png" ></p>
+<p>这里的readfile()平替很多,比如highlight_file,show_source,网上还有几个吧</p>
+<h1 id="カゲロウデイズ"><a href="#カゲロウデイズ" class="headerlink" title="カゲロウデイズ"></a>カゲロウデイズ</h1><p>运气最好的一集，说是考察脚本能力，但我一个脚本没写，全靠运气</p>
+<p>题目说了密码在css文件里面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194810531.png" ></p>
+<p>这里我们复制下来，在记事本可以把注释批量去掉</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194905273.png" ></p>
+<p>一看就是base64，但我做到这里的时候没有去解码，而是直接拿去burpsuite爆了，结果啥都没爆出来，然后我就拿去解码了</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222195102450.png" ></p>
+<p>然后我想是不是要写个脚本把这些字符拼接起来，然后我在乱翻的时候，哎哟我，这不key is 谁谁谁吗，然后直接拿去试，还真得了，全靠运气<img   src="/../img/$%7Bfiilename%7D/image-20240222195234074.png" ></p>
+<p>又是点击题，反正上次也是用连点器做出来的，这次也用了，没想到了设置了点击间隔时间的限制，然后我调到0.2s点一次完了给他挂个30来分钟就出来了，就当休息一下哈哈哈</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>  记录一下第一次打的完整的ctf，早上准备开打的时候简直兴奋的发抖，打开题目像癫了一样乱搞，现在回想还真是浪费精力啊，这是一场持久战，还是得慢慢来,最后也是差一题ak，已经超出我的预期了。</p>
+<p>  复盘了一下今天的操作，感觉有几方面需要说出来指正</p>
+<p>  1.资料乱开，又不关，导致全面页面，乱糟糟(最后burpsuite还差点干爆我电脑)</p>
+<p>  2.没有备份的习惯，解题过程中看到的很多信息都是要记录的，今天重新复制粘贴占了蛮多时间</p>
+<p>  3.赛前准备不足，虽然知道今天应该会有http的题，但是忘记去找ip了，今天去找又花了蛮久，痛啊</p>
+<p>道阻且长，同志们还需努力.</p>
+]]></content>
+      <tags>
+        <tag>ctf</tag>
+        <tag>入门</tag>
+        <tag>wp</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>nodejs-ctfshow</title>
     <url>/2024/03/02/nodejs-ctfshow/</url>
     <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
@@ -70,68 +205,10 @@
         <category>学习</category>
       </categories>
       <tags>
-        <tag>ctfshow</tag>
         <tag>学习</tag>
         <tag>入门</tag>
+        <tag>ctfshow</tag>
         <tag>js</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP特性ctfshow</title>
-    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
-<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
-<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
-<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
-<p>所以把4476转为16进制，在开头加入0x传入即可</p>
-<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
-<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
-<p>i:不区分大小写匹配</p>
-<p>m:以每行为一个单位匹配</p>
-<p>^:匹配单位的开头</p>
-<p>$:匹配单位的末尾</p>
-<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
-<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
-<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
-<p><strong>payload:%0aphp</strong></p>
-<p>%0a是url编码的换行符</p>
-<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
-<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
-<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
-<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
-<p>上面说了0开头会以八进制识别</p>
-<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
-<p>要想输出flag，有三个条件</p>
-<p>1.num不能强等于4476</p>
-<p>2.num中不能有字母</p>
-<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
-<p>第一种方法:</p>
-<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
-<p>第二种方法:</p>
-<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
-<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
-<p>弱等于，用以上第一种方法</p>
-<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
-<p>传入.&#x2F;flag.php即可</p>
-<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
-<p>强度于，数组绕过</p>
-<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
-<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
-<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-        <category>ctfshow</category>
-      </categories>
-      <tags>
-        <tag>ctfshow</tag>
-        <tag>学习</tag>
-        <tag>入门</tag>
-        <tag>ctf</tag>
-        <tag>php</tag>
       </tags>
   </entry>
   <entry>
@@ -264,85 +341,8 @@
       </categories>
       <tags>
         <tag>学习</tag>
-        <tag>入门</tag>
         <tag>ctf</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>HDCTF Junior 2024 Winter WP</title>
-    <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
-    <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
-
-<h1 id="朴实无华的http"><a href="#朴实无华的http" class="headerlink" title="朴实无华的http"></a>朴实无华的http</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240222183840891.png" ></p>
-<p>这是刚刚拿到题的样子,F12没反应,ctrl+U看看</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222183956685.png" ></p>
-<p>没什么卵用,只知道把F12和F1 ban掉了</p>
-<p>题目没给什么描述,源码也没有信息,直接开扫,dirsearch.py启动!</p>
-<p>最后扫出来个robot.txt</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184449835.png" ></p>
-<p>进入你，httttttp.php</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184604048.png" ></p>
-<p>接下来就很常规的把Referer,UA填好,就进入了经典试ip环节,用收集的词典在burpsuite爆一下就出来了.</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185535104.png"  alt="兄弟爆一下，说说你心里话"></p>
-<h1 id="ez-unserialize"><a href="#ez-unserialize" class="headerlink" title="ez_unserialize"></a>ez_unserialize</h1><p>最想吐的一集，虽然拿了个一血，但这题差点把我血都放完了</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185800522.png" ></p>
-<p>因为一开始服务器挺卡的，点这题老是调到别的地方，我还以为题目出错了，一看原来有个$_GET[‘entrance’]，够坏哈</p>
-<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>这题的思路到是比较明确，想出来并不要多少时间,漏洞点是在$fuction($cmd),于是我们对这两个值进行覆盖即可rce，</p>
-<p>那么就反推回去</p>
-<p>什么能触发invoke呢—&gt;damn类中的toString可以触发,什么触发toString—&gt;类pop的set，什么触发set—&gt;类air的call,什么触发call—&gt;类hnusec的destruct</p>
-<p>开始下手</p>
-<h2 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h2><p>这里的base64解码编码，private变量旁边的%00弄得我好崩溃.</p>
-<p>先看我的payload:</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222190634907.png" ></p>
-<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”%00pop%00exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
-<p>以为到这里就差不多得了?想多了</p>
-<h2 id="绕过wakeup"><a href="#绕过wakeup" class="headerlink" title="绕过wakeup"></a>绕过wakeup</h2><p>这个需要版本限制，具体不记得</p>
-<p>我们知道wakeup触发时机是在unserialize之前，那么这里我们肯定不能让它触发.</p>
-<p>绕过的方式是:修改pop链属性个数使他大于真实个数即可绕过</p>
-<h2 id="private旁边的-00"><a href="#private旁边的-00" class="headerlink" title="private旁边的%00"></a>private旁边的%00</h2><p>这里够我喝一壶的了</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222191033249.png" ></p>
-<p>注意看，这个变量叫pop,它的两边有两个不知道什么东西的东西,其实它是ASCII里面的0，在url中是%00.</p>
-<p>按我之前的经验来看，我们只需手动添加%00在pop两边，接着$_GET传参即可,但是你先别急</p>
-<p>这里GET传进去的pop链是要经过base64编码解码的，于是像上面说的这样子干，那么我们传入的便是%00,而不是经过服务器解析后的那个符号0,所以php理所当然是识别不了%00的，所以识别不了pop，一个地方崩整个崩</p>
-<p>问题到这里很明确了——如何让php识别pop旁边那两个东西呢?这里用php中的chr()函数，它会将ascii十进制数转化为符号,我们还要注意字符串的拼接用.来连接</p>
-<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”‘<strong>.chr(0).</strong>‘pop’<strong>.chr(0).</strong>‘exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
-<p>接着就是无限制的rce，不多赘述</p>
-<h1 id="フィナーレ。"><a href="#フィナーレ。" class="headerlink" title="フィナーレ。"></a>フィナーレ。</h1><p>这题是考察php特性和无参数rce</p>
-<h2 id="第一关"><a href="#第一关" class="headerlink" title="第一关"></a>第一关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192112186.png" ></p>
-<p>这里是强等于,0e绕过不能用,那就用数组绕过,当md5()里面传入一个数组时，编译器会报错但不影响它继续执行后返回null，结果null&#x3D;&#x3D;&#x3D;null，成功绕过</p>
-<h2 id="第二关"><a href="#第二关" class="headerlink" title="第二关"></a>第二关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192647039.png" ></p>
-<p>这里直接传入114514就好了，目的应该不是考察intval绕过，让我们认识这个函数而已</p>
-<h2 id="第三关"><a href="#第三关" class="headerlink" title="第三关"></a>第三关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222193337316.png" ></p>
-<p>说是命令执行，但这样写没反应，应该是有过滤，抓个包看看</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222193645229.png" ></p>
-<p>果然啊，果然，过滤了好多，linux指令在这里我是不会用了,用php的函数写的</p>
-<p>scandir():查看目录下有什么文件,传的参数就是路径</p>
-<p>readfile():读取文件</p>
-<p>这里先print_r(scandir(.))查看根目录(为什么是print_r不是echo,因为这里返回的是数组，echo处理不了)</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194101516.png" ></p>
-<p>这里我们在前三层找到flag文件，读取</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194422918.png" ></p>
-<p>这里的readfile()平替很多,比如highlight_file,show_source,网上还有几个吧</p>
-<h1 id="カゲロウデイズ"><a href="#カゲロウデイズ" class="headerlink" title="カゲロウデイズ"></a>カゲロウデイズ</h1><p>运气最好的一集，说是考察脚本能力，但我一个脚本没写，全靠运气</p>
-<p>题目说了密码在css文件里面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194810531.png" ></p>
-<p>这里我们复制下来，在记事本可以把注释批量去掉</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194905273.png" ></p>
-<p>一看就是base64，但我做到这里的时候没有去解码，而是直接拿去burpsuite爆了，结果啥都没爆出来，然后我就拿去解码了</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222195102450.png" ></p>
-<p>然后我想是不是要写个脚本把这些字符拼接起来，然后我在乱翻的时候，哎哟我，这不key is 谁谁谁吗，然后直接拿去试，还真得了，全靠运气<img   src="/../img/$%7Bfiilename%7D/image-20240222195234074.png" ></p>
-<p>又是点击题，反正上次也是用连点器做出来的，这次也用了，没想到了设置了点击间隔时间的限制，然后我调到0.2s点一次完了给他挂个30来分钟就出来了，就当休息一下哈哈哈</p>
-<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>  记录一下第一次打的完整的ctf，早上准备开打的时候简直兴奋的发抖，打开题目像癫了一样乱搞，现在回想还真是浪费精力啊，这是一场持久战，还是得慢慢来,最后也是差一题ak，已经超出我的预期了。</p>
-<p>  复盘了一下今天的操作，感觉有几方面需要说出来指正</p>
-<p>  1.资料乱开，又不关，导致全面页面，乱糟糟(最后burpsuite还差点干爆我电脑)</p>
-<p>  2.没有备份的习惯，解题过程中看到的很多信息都是要记录的，今天重新复制粘贴占了蛮多时间</p>
-<p>  3.赛前准备不足，虽然知道今天应该会有http的题，但是忘记去找ip了，今天去找又花了蛮久，痛啊</p>
-<p>道阻且长，同志们还需努力.</p>
-]]></content>
-      <tags>
         <tag>入门</tag>
-        <tag>ctf</tag>
-        <tag>wp</tag>
       </tags>
   </entry>
 </search>
