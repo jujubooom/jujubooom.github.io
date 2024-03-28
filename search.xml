@@ -78,6 +78,16 @@
       </tags>
   </entry>
   <entry>
+    <title>JavaWeb中级学习笔记</title>
+    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
+
+]]></content>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>JavaWeb基础学习笔记</title>
     <url>/2024/03/19/JavaWeb%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
@@ -126,16 +136,6 @@
       <categories>
         <category>学习</category>
       </categories>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>JavaWeb中级学习笔记</title>
-    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
-
-]]></content>
       <tags>
         <tag>java</tag>
       </tags>
@@ -307,6 +307,72 @@
       </tags>
   </entry>
   <entry>
+    <title>php_Session反序列化学习</title>
+    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
+
+<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
+<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
+<p>简单写个前后端</p>
+<p>注册</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
+<p>填入后可以看到在tem目录下的session文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
+<p>登录</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
+<p>我们就实现了这个功能</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
+<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
+<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
+<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
+<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
+<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
+<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
+<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
+<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
+<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
+<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
+<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
+<p>之后再打开登录文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
+<p>修改成功</p>
+<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
+<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
+<p>题面，看源码，抓包无果，直接开扫</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
+<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
+<p>发现漏洞点</p>
+<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
+<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
+<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
+<p>最后的payload如下 :</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
+<p>然后连接读取flag即可</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>php反序列化</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>nodejs-ctfshow</title>
     <url>/2024/03/02/nodejs-ctfshow/</url>
     <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
@@ -384,72 +450,6 @@
       </tags>
   </entry>
   <entry>
-    <title>php_Session反序列化学习</title>
-    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
-
-<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
-<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
-<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
-<p>简单写个前后端</p>
-<p>注册</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
-<p>填入后可以看到在tem目录下的session文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
-<p>登录</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
-<p>我们就实现了这个功能</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
-<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
-<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
-<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
-<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
-<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
-<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
-<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
-<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
-<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
-<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
-<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
-<p>之后再打开登录文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
-<p>修改成功</p>
-<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
-<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
-<p>题面，看源码，抓包无果，直接开扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
-<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
-<p>发现漏洞点</p>
-<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
-<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
-<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
-<p>最后的payload如下 :</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
-<p>然后连接读取flag即可</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>php反序列化</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用kali-linux和docker搭建漏洞复现平台日记</title>
     <url>/2024/03/11/%E4%BD%BF%E7%94%A8kali-linux%E5%92%8Cdocker%E6%90%AD%E5%BB%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%B9%B3%E5%8F%B0%E6%97%A5%E8%AE%B0/</url>
     <content><![CDATA[<h3 id="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"><a href="#其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧" class="headerlink" title="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"></a>其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧</h3><span id="more"></span>
@@ -518,58 +518,6 @@
       </tags>
   </entry>
   <entry>
-    <title>node.js原型链污染</title>
-    <url>/2024/03/11/node-js%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
-    <content><![CDATA[<h1 id="好东西"><a href="#好东西" class="headerlink" title="好东西"></a>好东西</h1><span id="more"></span>
-
-<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>原型链污染其实就是围绕着两个属性做文章</p>
-<p>属性<code>__proto__</code></p>
-<p>属性<code>prototype</code></p>
-<h2 id="从用法角度介绍"><a href="#从用法角度介绍" class="headerlink" title="从用法角度介绍"></a>从用法角度介绍</h2><p>试想一些通用的方法，我们是如何调用的呢，如<code>toString()</code></p>
-<p>我们在nodejs命令执行中写过一个</p>
-<p>payload:eval&#x3D;require(‘child_process’).spawnSync(‘tac’,[‘fl001g.txt’]).stdout.toString()</p>
-<p>那时我上官网文档里查看了一下child_process类中并没有toString()方法</p>
-<p>那它哪来的呢？</p>
-<h2 id="proto-和prototype"><a href="#proto-和prototype" class="headerlink" title="__proto__和prototype"></a><code>__proto__</code>和prototype</h2><p>首先这两都是属性，都是默认内置在每个对象当中</p>
-<p>prototype指向一个原型对象，这个对象很基础，包含了很多通用的方法和属性，比如刚刚的<code>toString()</code></p>
-<p><code>__proto__</code>则指向object.prototype，实际上也是指向原型对象</p>
-<p>问题还没解答，那toString()怎么用的呢?</p>
-<p>这就要说一下prototype的一些机制，当调用一个对象中的属性和方法时，先是在对象中寻找，若有则用，若无则去prototype指向的原型的对象中去找.</p>
-<p>以下为实验</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164432778.png"  alt="image-20240311164432778"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164445047.png"  alt="image-20240311164445047"></p>
-<p>可见b对象虽为空，但还是输出了go中的2</p>
-<p>到这里理论已经形成，下面看看实战</p>
-<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>题目给了源码，快进到路由中的login.js</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311165617963.png"  alt="image-20240311165617963"></p>
-<p>要求:让secert(作者是故意还是不小心打错的)中的ctfshow等于36dboy即可输出flag</p>
-<p>很容易就想到了原型链污染，在原型对象中注入一个ctfshow:36dboy即可</p>
-<p>那注入点在哪？</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170233201.png"  alt="image-20240311170233201"></p>
-<p>这里搞了个什么处理，打开utils中的common.js康康</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170337591.png"  alt="image-20240311170337591"></p>
-<p>真是炸炸又刚刚啊，简单介绍一下就是把我们写入的数据copy到了user对象中</p>
-<p>详细解释:</p>
-<p>1.传入两个对象，一个是user,一个是req.body,req.body由我们所控</p>
-<p>2.定义一个key不断读取req.body中的键名</p>
-<p>3.如果这个键名在user中存在，则继续调用copy，如果不存在则在则让user创建一个和key同名的键名，并且存储和req.body中相同的键值</p>
-<p>4.key读完了自动就跳出循环了</p>
-<p>抓个包看看它咋写</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311171328658.png"  alt="image-20240311171328658"></p>
-<p><code>payload:&#123;&quot;__proto__&quot;:&#123;&quot;ctfshow&quot;:&quot;36dboy&quot;&#125;&#125;</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172433837.png"  alt="image-20240311172433837"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172445135.png"  alt="image-20240311172445135"></p>
-<p>带出来了</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>学习</tag>
-        <tag>js</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>文件包含漏洞</title>
     <url>/2024/03/13/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>开</p>
@@ -629,6 +577,58 @@
       <tags>
         <tag>学习</tag>
         <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>node.js原型链污染</title>
+    <url>/2024/03/11/node-js%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
+    <content><![CDATA[<h1 id="好东西"><a href="#好东西" class="headerlink" title="好东西"></a>好东西</h1><span id="more"></span>
+
+<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>原型链污染其实就是围绕着两个属性做文章</p>
+<p>属性<code>__proto__</code></p>
+<p>属性<code>prototype</code></p>
+<h2 id="从用法角度介绍"><a href="#从用法角度介绍" class="headerlink" title="从用法角度介绍"></a>从用法角度介绍</h2><p>试想一些通用的方法，我们是如何调用的呢，如<code>toString()</code></p>
+<p>我们在nodejs命令执行中写过一个</p>
+<p>payload:eval&#x3D;require(‘child_process’).spawnSync(‘tac’,[‘fl001g.txt’]).stdout.toString()</p>
+<p>那时我上官网文档里查看了一下child_process类中并没有toString()方法</p>
+<p>那它哪来的呢？</p>
+<h2 id="proto-和prototype"><a href="#proto-和prototype" class="headerlink" title="__proto__和prototype"></a><code>__proto__</code>和prototype</h2><p>首先这两都是属性，都是默认内置在每个对象当中</p>
+<p>prototype指向一个原型对象，这个对象很基础，包含了很多通用的方法和属性，比如刚刚的<code>toString()</code></p>
+<p><code>__proto__</code>则指向object.prototype，实际上也是指向原型对象</p>
+<p>问题还没解答，那toString()怎么用的呢?</p>
+<p>这就要说一下prototype的一些机制，当调用一个对象中的属性和方法时，先是在对象中寻找，若有则用，若无则去prototype指向的原型的对象中去找.</p>
+<p>以下为实验</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164432778.png"  alt="image-20240311164432778"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164445047.png"  alt="image-20240311164445047"></p>
+<p>可见b对象虽为空，但还是输出了go中的2</p>
+<p>到这里理论已经形成，下面看看实战</p>
+<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>题目给了源码，快进到路由中的login.js</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311165617963.png"  alt="image-20240311165617963"></p>
+<p>要求:让secert(作者是故意还是不小心打错的)中的ctfshow等于36dboy即可输出flag</p>
+<p>很容易就想到了原型链污染，在原型对象中注入一个ctfshow:36dboy即可</p>
+<p>那注入点在哪？</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170233201.png"  alt="image-20240311170233201"></p>
+<p>这里搞了个什么处理，打开utils中的common.js康康</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170337591.png"  alt="image-20240311170337591"></p>
+<p>真是炸炸又刚刚啊，简单介绍一下就是把我们写入的数据copy到了user对象中</p>
+<p>详细解释:</p>
+<p>1.传入两个对象，一个是user,一个是req.body,req.body由我们所控</p>
+<p>2.定义一个key不断读取req.body中的键名</p>
+<p>3.如果这个键名在user中存在，则继续调用copy，如果不存在则在则让user创建一个和key同名的键名，并且存储和req.body中相同的键值</p>
+<p>4.key读完了自动就跳出循环了</p>
+<p>抓个包看看它咋写</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311171328658.png"  alt="image-20240311171328658"></p>
+<p><code>payload:&#123;&quot;__proto__&quot;:&#123;&quot;ctfshow&quot;:&quot;36dboy&quot;&#125;&#125;</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172433837.png"  alt="image-20240311172433837"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172445135.png"  alt="image-20240311172445135"></p>
+<p>带出来了</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>js</tag>
       </tags>
   </entry>
 </search>
