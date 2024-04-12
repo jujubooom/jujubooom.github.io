@@ -78,33 +78,6 @@
       </tags>
   </entry>
   <entry>
-    <title>JavaWeb中级学习笔记</title>
-    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
-
-<h1 id="自定义异常"><a href="#自定义异常" class="headerlink" title="自定义异常"></a>自定义异常</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">attack</span><span class="params">(Hero h)</span> <span class="keyword">throws</span> EnemyDeadException&#123;</span><br><span class="line">        <span class="keyword">if</span>(h.hp == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">EnemyDeadException</span>(h.name+<span class="string">&quot;已经死了&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//击杀异常</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EnemyDeadException</span> <span class="keyword">extends</span> <span class="title class_">Exception</span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">            <span class="built_in">super</span>(msg);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    	<span class="type">Hero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        <span class="type">Hero</span> <span class="variable">chaospeo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        ewoji.name = <span class="string">&quot;ewoji&quot;</span>;</span><br><span class="line">        chaospeo.name = <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">        chaospeo.hp = <span class="number">0.0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            ewoji.attack(chaospeo);</span><br><span class="line">        &#125;<span class="keyword">catch</span> (EnemyDeadException e)&#123;</span><br><span class="line">            System.out.println(e.getMessage());</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329103008655.png"  alt="image-20240329103008655"></p>
-<h1 id="找出C盘中最大和最小的文件"><a href="#找出C盘中最大和最小的文件" class="headerlink" title="找出C盘中最大和最小的文件"></a>找出C盘中最大和最小的文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		<span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span><span class="number">0</span> ,n = <span class="number">0</span>;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;c://&quot;</span>);</span><br><span class="line">		File f[] = <span class="keyword">new</span> <span class="title class_">File</span>[f1.listFiles().length];</span><br><span class="line">		f = f1.listFiles();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; f.length; i++) &#123;</span><br><span class="line">		<span class="comment">//f.length()返回的是一个long型的数字</span></span><br><span class="line">			<span class="type">long</span> max,min;</span><br><span class="line">			max = f[<span class="number">0</span>].length();</span><br><span class="line">			min = f[<span class="number">0</span>].length();</span><br><span class="line">			<span class="keyword">if</span>(max&lt;f[i].length())&#123;</span><br><span class="line">				max = f[i].length();</span><br><span class="line">				m = i;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span>(min&gt;f[i].length())&#123;</span><br><span class="line">				min = f[i].length();</span><br><span class="line">				n=i;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">		System.out.println(<span class="string">&quot;最大的文件是&quot;</span>+f[m].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[m].length());</span><br><span class="line">		System.out.println(<span class="string">&quot;最小的文件是&quot;</span>+f[n].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[n].length());</span><br><span class="line">&#125;		</span><br></pre></td></tr></table></figure>
-
-<p>不知道是不是权限问题，扫出来好几个文件是0kb</p>
-<h1 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    <span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/双重url编码.py&quot;</span>);</span><br><span class="line">    <span class="keyword">try</span>(<span class="type">FileInputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f))&#123;</span><br><span class="line">       <span class="type">byte</span> text[] = <span class="keyword">new</span> <span class="title class_">byte</span>[(<span class="type">int</span>)f.length()];</span><br><span class="line">       <span class="type">char</span> tex[] = <span class="keyword">new</span> <span class="title class_">char</span>[text.length];</span><br><span class="line">       <span class="comment">//填充的是数字字节</span></span><br><span class="line">       fio.read(text);</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; text.length; i++) &#123;</span><br><span class="line">          tex[i] = (<span class="type">char</span>)text[i];</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="type">String</span> <span class="variable">my</span> <span class="operator">=</span> String.valueOf(tex);</span><br><span class="line">       System.out.println(my);</span><br><span class="line">    &#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">       e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="创建文件并且写入文件"><a href="#创建文件并且写入文件" class="headerlink" title="创建文件并且写入文件"></a>创建文件并且写入文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test.txt&quot;</span>);</span><br><span class="line">		<span class="comment">//创建</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			f.createNewFile();</span><br><span class="line">		&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//写入</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			<span class="type">FileOutputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f);</span><br><span class="line">			<span class="type">byte</span> ji[] = &#123;<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>&#125;;</span><br><span class="line">			fio.write(ji);</span><br><span class="line">			fio.close();</span><br><span class="line">		&#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329115117304.png"  alt="image-20240329115117304"></p>
-<h1 id="拆分文件"><a href="#拆分文件" class="headerlink" title="拆分文件"></a>拆分文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//拆分</span></span><br><span class="line"><span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test1.txt&quot;</span>);</span><br><span class="line"><span class="type">File</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test2.txt&quot;</span>);</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    f1.createNewFile();</span><br><span class="line">    f2.createNewFile();</span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f1);</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f2);</span><br><span class="line">    <span class="type">byte</span> kb1[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb2[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb3[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">100</span>];</span><br><span class="line">    <span class="type">FileInputStream</span> <span class="variable">fio3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f);</span><br><span class="line">    fio3.read(kb3);</span><br><span class="line">    fio3.close();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; kb1.length; i++) &#123;</span><br><span class="line">       kb1[i] = kb3[i];</span><br><span class="line">       kb2[i] = kb3[i];</span><br><span class="line">    &#125;</span><br><span class="line">    fio1.write(kb1);</span><br><span class="line">    fio2.write(kb2);</span><br><span class="line">    fio1.close();</span><br><span class="line">    fio2.close();</span><br><span class="line"></span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="用流复制图片"><a href="#用流复制图片" class="headerlink" title="用流复制图片"></a>用流复制图片</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">		<span class="type">FileInputStream</span> <span class="variable">fr</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;e://ctf/ljava/go.png&quot;</span>);</span><br><span class="line">		<span class="type">byte</span> kb[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">8192</span>];</span><br><span class="line">		fr.read(kb);</span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;e://ctf/ljava/go1.png&quot;</span>);</span><br><span class="line">		fw.write(kb);</span><br><span class="line">		fr.close();</span><br><span class="line">		fw.close();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//main</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-]]></content>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>JavaWeb基础学习笔记</title>
     <url>/2024/03/19/JavaWeb%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
@@ -205,6 +178,33 @@
         <tag>入门</tag>
         <tag>CTFSHOW</tag>
         <tag>学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JavaWeb中级学习笔记</title>
+    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
+
+<h1 id="自定义异常"><a href="#自定义异常" class="headerlink" title="自定义异常"></a>自定义异常</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">attack</span><span class="params">(Hero h)</span> <span class="keyword">throws</span> EnemyDeadException&#123;</span><br><span class="line">        <span class="keyword">if</span>(h.hp == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">EnemyDeadException</span>(h.name+<span class="string">&quot;已经死了&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//击杀异常</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EnemyDeadException</span> <span class="keyword">extends</span> <span class="title class_">Exception</span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">            <span class="built_in">super</span>(msg);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    	<span class="type">Hero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        <span class="type">Hero</span> <span class="variable">chaospeo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        ewoji.name = <span class="string">&quot;ewoji&quot;</span>;</span><br><span class="line">        chaospeo.name = <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">        chaospeo.hp = <span class="number">0.0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            ewoji.attack(chaospeo);</span><br><span class="line">        &#125;<span class="keyword">catch</span> (EnemyDeadException e)&#123;</span><br><span class="line">            System.out.println(e.getMessage());</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329103008655.png"  alt="image-20240329103008655"></p>
+<h1 id="找出C盘中最大和最小的文件"><a href="#找出C盘中最大和最小的文件" class="headerlink" title="找出C盘中最大和最小的文件"></a>找出C盘中最大和最小的文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		<span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span><span class="number">0</span> ,n = <span class="number">0</span>;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;c://&quot;</span>);</span><br><span class="line">		File f[] = <span class="keyword">new</span> <span class="title class_">File</span>[f1.listFiles().length];</span><br><span class="line">		f = f1.listFiles();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; f.length; i++) &#123;</span><br><span class="line">		<span class="comment">//f.length()返回的是一个long型的数字</span></span><br><span class="line">			<span class="type">long</span> max,min;</span><br><span class="line">			max = f[<span class="number">0</span>].length();</span><br><span class="line">			min = f[<span class="number">0</span>].length();</span><br><span class="line">			<span class="keyword">if</span>(max&lt;f[i].length())&#123;</span><br><span class="line">				max = f[i].length();</span><br><span class="line">				m = i;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span>(min&gt;f[i].length())&#123;</span><br><span class="line">				min = f[i].length();</span><br><span class="line">				n=i;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">		System.out.println(<span class="string">&quot;最大的文件是&quot;</span>+f[m].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[m].length());</span><br><span class="line">		System.out.println(<span class="string">&quot;最小的文件是&quot;</span>+f[n].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[n].length());</span><br><span class="line">&#125;		</span><br></pre></td></tr></table></figure>
+
+<p>不知道是不是权限问题，扫出来好几个文件是0kb</p>
+<h1 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    <span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/双重url编码.py&quot;</span>);</span><br><span class="line">    <span class="keyword">try</span>(<span class="type">FileInputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f))&#123;</span><br><span class="line">       <span class="type">byte</span> text[] = <span class="keyword">new</span> <span class="title class_">byte</span>[(<span class="type">int</span>)f.length()];</span><br><span class="line">       <span class="type">char</span> tex[] = <span class="keyword">new</span> <span class="title class_">char</span>[text.length];</span><br><span class="line">       <span class="comment">//填充的是数字字节</span></span><br><span class="line">       fio.read(text);</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; text.length; i++) &#123;</span><br><span class="line">          tex[i] = (<span class="type">char</span>)text[i];</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="type">String</span> <span class="variable">my</span> <span class="operator">=</span> String.valueOf(tex);</span><br><span class="line">       System.out.println(my);</span><br><span class="line">    &#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">       e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="创建文件并且写入文件"><a href="#创建文件并且写入文件" class="headerlink" title="创建文件并且写入文件"></a>创建文件并且写入文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test.txt&quot;</span>);</span><br><span class="line">		<span class="comment">//创建</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			f.createNewFile();</span><br><span class="line">		&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//写入</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			<span class="type">FileOutputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f);</span><br><span class="line">			<span class="type">byte</span> ji[] = &#123;<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>&#125;;</span><br><span class="line">			fio.write(ji);</span><br><span class="line">			fio.close();</span><br><span class="line">		&#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329115117304.png"  alt="image-20240329115117304"></p>
+<h1 id="拆分文件"><a href="#拆分文件" class="headerlink" title="拆分文件"></a>拆分文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//拆分</span></span><br><span class="line"><span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test1.txt&quot;</span>);</span><br><span class="line"><span class="type">File</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test2.txt&quot;</span>);</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    f1.createNewFile();</span><br><span class="line">    f2.createNewFile();</span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f1);</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f2);</span><br><span class="line">    <span class="type">byte</span> kb1[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb2[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb3[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">100</span>];</span><br><span class="line">    <span class="type">FileInputStream</span> <span class="variable">fio3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f);</span><br><span class="line">    fio3.read(kb3);</span><br><span class="line">    fio3.close();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; kb1.length; i++) &#123;</span><br><span class="line">       kb1[i] = kb3[i];</span><br><span class="line">       kb2[i] = kb3[i];</span><br><span class="line">    &#125;</span><br><span class="line">    fio1.write(kb1);</span><br><span class="line">    fio2.write(kb2);</span><br><span class="line">    fio1.close();</span><br><span class="line">    fio2.close();</span><br><span class="line"></span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="用流复制图片"><a href="#用流复制图片" class="headerlink" title="用流复制图片"></a>用流复制图片</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">		<span class="type">FileInputStream</span> <span class="variable">fr</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;e://ctf/ljava/go.png&quot;</span>);</span><br><span class="line">		<span class="type">byte</span> kb[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">8192</span>];</span><br><span class="line">		fr.read(kb);</span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;e://ctf/ljava/go1.png&quot;</span>);</span><br><span class="line">		fw.write(kb);</span><br><span class="line">		fr.close();</span><br><span class="line">		fw.close();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//main</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+]]></content>
+      <tags>
+        <tag>java</tag>
       </tags>
   </entry>
   <entry>
@@ -365,135 +365,6 @@
       </tags>
   </entry>
   <entry>
-    <title>node.js原型链污染</title>
-    <url>/2024/03/11/node-js%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
-    <content><![CDATA[<h1 id="好东西"><a href="#好东西" class="headerlink" title="好东西"></a>好东西</h1><span id="more"></span>
-
-<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>原型链污染其实就是围绕着两个属性做文章</p>
-<p>属性<code>__proto__</code></p>
-<p>属性<code>prototype</code></p>
-<h2 id="从用法角度介绍"><a href="#从用法角度介绍" class="headerlink" title="从用法角度介绍"></a>从用法角度介绍</h2><p>试想一些通用的方法，我们是如何调用的呢，如<code>toString()</code></p>
-<p>我们在nodejs命令执行中写过一个</p>
-<p>payload:eval&#x3D;require(‘child_process’).spawnSync(‘tac’,[‘fl001g.txt’]).stdout.toString()</p>
-<p>那时我上官网文档里查看了一下child_process类中并没有toString()方法</p>
-<p>那它哪来的呢？</p>
-<h2 id="proto-和prototype"><a href="#proto-和prototype" class="headerlink" title="__proto__和prototype"></a><code>__proto__</code>和prototype</h2><p>首先这两都是属性，都是默认内置在每个对象当中</p>
-<p>prototype指向一个原型对象，这个对象很基础，包含了很多通用的方法和属性，比如刚刚的<code>toString()</code></p>
-<p><code>__proto__</code>则指向object.prototype，实际上也是指向原型对象</p>
-<p>问题还没解答，那toString()怎么用的呢?</p>
-<p>这就要说一下prototype的一些机制，当调用一个对象中的属性和方法时，先是在对象中寻找，若有则用，若无则去prototype指向的原型的对象中去找.</p>
-<p>以下为实验</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164432778.png"  alt="image-20240311164432778"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164445047.png"  alt="image-20240311164445047"></p>
-<p>可见b对象虽为空，但还是输出了go中的2</p>
-<p>到这里理论已经形成，下面看看实战</p>
-<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>题目给了源码，快进到路由中的login.js</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311165617963.png"  alt="image-20240311165617963"></p>
-<p>要求:让secert(作者是故意还是不小心打错的)中的ctfshow等于36dboy即可输出flag</p>
-<p>很容易就想到了原型链污染，在原型对象中注入一个ctfshow:36dboy即可</p>
-<p>那注入点在哪？</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170233201.png"  alt="image-20240311170233201"></p>
-<p>这里搞了个什么处理，打开utils中的common.js康康</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170337591.png"  alt="image-20240311170337591"></p>
-<p>真是炸炸又刚刚啊，简单介绍一下就是把我们写入的数据copy到了user对象中</p>
-<p>详细解释:</p>
-<p>1.传入两个对象，一个是user,一个是req.body,req.body由我们所控</p>
-<p>2.定义一个key不断读取req.body中的键名</p>
-<p>3.如果这个键名在user中存在，则继续调用copy，如果不存在则在则让user创建一个和key同名的键名，并且存储和req.body中相同的键值</p>
-<p>4.key读完了自动就跳出循环了</p>
-<p>抓个包看看它咋写</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311171328658.png"  alt="image-20240311171328658"></p>
-<p><code>payload:&#123;&quot;__proto__&quot;:&#123;&quot;ctfshow&quot;:&quot;36dboy&quot;&#125;&#125;</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172433837.png"  alt="image-20240311172433837"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172445135.png"  alt="image-20240311172445135"></p>
-<p>带出来了</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>学习</tag>
-        <tag>js</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>nodejs-ctfshow</title>
-    <url>/2024/03/02/nodejs-ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web334"><a href="#web334" class="headerlink" title="web334"></a>web334</h1><p>给了两个源码文件和一个登录界面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303111933863.png"  alt="image-20240303111933863"></p>
-<p>前端可以看到的，以post数据提交用户名和密码，以json格式接受返回数据</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112015481.png"  alt="image-20240303112015481"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112028812.png"  alt="image-20240303112028812"></p>
-<p>这里给了用户名和密码，然后看了一下登录检验</p>
-<p>用户名不能为CTFSHOW，输入的用户名会经过<code>toUpperCase()</code>转化为大写后与数据比较，密码正常比较。</p>
-<p>既然会转化为大写，直接输入ctfshow(小写)即可</p>
-<h1 id="web335"><a href="#web335" class="headerlink" title="web335"></a>web335</h1><p>题面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124252606.png"  alt="image-20240303124252606"></p>
-<p>信息收集</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124304897.png"  alt="image-20240303124304897"></p>
-<p>抓包扫描后无果</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124335586.png"  alt="image-20240303124335586"></p>
-<p>传入eval&#x3D;1，出现回显，推测为console.log(传参)，反正能执行我的命令并且输出</p>
-<p>在nodejs中执行系统命令我们主要是使用child_process类</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304175348635.png"  alt="image-20240304175348635"></p>
-<p>可以看到这里有很多方法，有同步和异步创建进程的分类，我们这里需要的是异步创建进程，这里还不是很理解为什么同步创建进程不会有回显(大概是因为主程序没结束，子进程没有执行？)</p>
-<p>先看<code>execSync()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180214603.png"  alt="image-20240304180214603"></p>
-<p>官方文档看得不是很懂，希望以后有机会研读</p>
-<p>总之应对这题，只需要一个参数command足以</p>
-<p>payload:eval&#x3D;require(‘child_process’).execSync(‘ls’)</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180415820.png"  alt="image-20240304180415820"></p>
-<p>发现flag文件，改命令查看即可</p>
-<h1 id="web336"><a href="#web336" class="headerlink" title="web336"></a>web336</h1><p>这题相比上题，ban掉了exec，所以我们用另一个spawn</p>
-<h2 id="第一种方法spwanSync"><a href="#第一种方法spwanSync" class="headerlink" title="第一种方法spwanSync()"></a>第一种方法spwanSync()</h2><p>payload1:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;ls&#39;).stdout.toString()</code></p>
-<p>payload2:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;tac&#39;,[&#39;fl001g.txt&#39;]).stdout.toString()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305181344645.png"  alt="image-20240305181344645"></p>
-<p>学习一下<code>spawnSync()</code>方法</p>
-<p><code>spawnSync()</code>会同步创建一个子进程执行我们传入的命令，并且返回一个对象.</p>
-<h3 id="传入命令"><a href="#传入命令" class="headerlink" title="传入命令"></a>传入命令</h3><p>第一个参数是命令的名称</p>
-<p>第二个参数是一个数组，用来传递命令的参数</p>
-<h3 id="返回的对象"><a href="#返回的对象" class="headerlink" title="返回的对象"></a>返回的对象</h3><p>返回的这个对象包含命令执行后的信息</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305182634001.png"  alt="image-20240305182634001"></p>
-<p>这里我们需要的是标准输出流stdout，并用toString()将它转化为字符串即可输出</p>
-<h2 id="第二种方法-fs类"><a href="#第二种方法-fs类" class="headerlink" title="第二种方法 fs类"></a>第二种方法 fs类</h2><h3 id="两个魔术变量"><a href="#两个魔术变量" class="headerlink" title="两个魔术变量"></a>两个魔术变量</h3><p>__filename:返回当前模块文件被解析过后的绝对路径</p>
-<p>__dirname:返回当前模块文件解析后所在的文件夹的绝对路径</p>
-<h3 id="readdirSync和readFileSync"><a href="#readdirSync和readFileSync" class="headerlink" title="readdirSync和readFileSync"></a>readdirSync和readFileSync</h3><p>payload1:<code>eval=require(&#39;fs&#39;).readdirSync(&#39;.&#39;)</code>查看当前目录下的文件</p>
-<p>payload2:<code>eval=require(&#39;fs&#39;).readFileSync(&#39;fl001g.txt&#39;,&#39;utf-8&#39;)</code>查看文件</p>
-<h3 id="exec绕过"><a href="#exec绕过" class="headerlink" title="exec绕过"></a>exec绕过</h3><p>payload:?<code>eval=require(&#39;child_process&#39;)[&#39;exe&#39;+&#39;cSync&#39;](&#39;ls&#39;).toString()</code></p>
-<p>这里有个疑点，如果我想读取上一层目录的文件该如何处理,以后再想吧</p>
-<h1 id="web337"><a href="#web337" class="headerlink" title="web337"></a>web337</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240305201256890.png"  alt="image-20240305201256890"></p>
-<p>要求，传入两个数ab</p>
-<p>1.a的长度和b的长度一致</p>
-<p>2.a不等于b</p>
-<p>3.md5编码后的a+flag和b+flag相等</p>
-<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>这里我们的payload为a[]&#x3D;1&amp;b[]&#x3D;1</p>
-<p>1.数组.length即数组元素个数，满足相等</p>
-<p>2.JavaScript会比较等号两边数组的地址，弱不一样直接返回false(但是php不会)</p>
-<p>3.上本地测试图</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202533805.png"  alt="image-20240305202533805"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202543607.png"  alt="image-20240305202543607"></p>
-<p>ok了</p>
-<p>再看看如果数组里面有两个元素呢</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202622579.png"  alt="image-20240305202622579"></p>
-<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>payload:a[‘x’]&#x3D;1&amp;b[‘x’]&#x3D;1</p>
-<p>原理与上差不多相同，不过输出的东西不太同</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305203029034.png"  alt="image-20240305203029034"></p>
-<h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>原型链污染</p>
-<p>移步下一篇文章</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>ctfshow</tag>
-        <tag>js</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>XXE漏洞学习</title>
     <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
@@ -559,6 +430,58 @@
         <tag>ctf</tag>
         <tag>入门</tag>
         <tag>学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>node.js原型链污染</title>
+    <url>/2024/03/11/node-js%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
+    <content><![CDATA[<h1 id="好东西"><a href="#好东西" class="headerlink" title="好东西"></a>好东西</h1><span id="more"></span>
+
+<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>原型链污染其实就是围绕着两个属性做文章</p>
+<p>属性<code>__proto__</code></p>
+<p>属性<code>prototype</code></p>
+<h2 id="从用法角度介绍"><a href="#从用法角度介绍" class="headerlink" title="从用法角度介绍"></a>从用法角度介绍</h2><p>试想一些通用的方法，我们是如何调用的呢，如<code>toString()</code></p>
+<p>我们在nodejs命令执行中写过一个</p>
+<p>payload:eval&#x3D;require(‘child_process’).spawnSync(‘tac’,[‘fl001g.txt’]).stdout.toString()</p>
+<p>那时我上官网文档里查看了一下child_process类中并没有toString()方法</p>
+<p>那它哪来的呢？</p>
+<h2 id="proto-和prototype"><a href="#proto-和prototype" class="headerlink" title="__proto__和prototype"></a><code>__proto__</code>和prototype</h2><p>首先这两都是属性，都是默认内置在每个对象当中</p>
+<p>prototype指向一个原型对象，这个对象很基础，包含了很多通用的方法和属性，比如刚刚的<code>toString()</code></p>
+<p><code>__proto__</code>则指向object.prototype，实际上也是指向原型对象</p>
+<p>问题还没解答，那toString()怎么用的呢?</p>
+<p>这就要说一下prototype的一些机制，当调用一个对象中的属性和方法时，先是在对象中寻找，若有则用，若无则去prototype指向的原型的对象中去找.</p>
+<p>以下为实验</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164432778.png"  alt="image-20240311164432778"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311164445047.png"  alt="image-20240311164445047"></p>
+<p>可见b对象虽为空，但还是输出了go中的2</p>
+<p>到这里理论已经形成，下面看看实战</p>
+<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>题目给了源码，快进到路由中的login.js</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311165617963.png"  alt="image-20240311165617963"></p>
+<p>要求:让secert(作者是故意还是不小心打错的)中的ctfshow等于36dboy即可输出flag</p>
+<p>很容易就想到了原型链污染，在原型对象中注入一个ctfshow:36dboy即可</p>
+<p>那注入点在哪？</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170233201.png"  alt="image-20240311170233201"></p>
+<p>这里搞了个什么处理，打开utils中的common.js康康</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311170337591.png"  alt="image-20240311170337591"></p>
+<p>真是炸炸又刚刚啊，简单介绍一下就是把我们写入的数据copy到了user对象中</p>
+<p>详细解释:</p>
+<p>1.传入两个对象，一个是user,一个是req.body,req.body由我们所控</p>
+<p>2.定义一个key不断读取req.body中的键名</p>
+<p>3.如果这个键名在user中存在，则继续调用copy，如果不存在则在则让user创建一个和key同名的键名，并且存储和req.body中相同的键值</p>
+<p>4.key读完了自动就跳出循环了</p>
+<p>抓个包看看它咋写</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311171328658.png"  alt="image-20240311171328658"></p>
+<p><code>payload:&#123;&quot;__proto__&quot;:&#123;&quot;ctfshow&quot;:&quot;36dboy&quot;&#125;&#125;</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172433837.png"  alt="image-20240311172433837"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311172445135.png"  alt="image-20240311172445135"></p>
+<p>带出来了</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>js</tag>
       </tags>
   </entry>
   <entry>
@@ -755,6 +678,83 @@
       <tags>
         <tag>学习</tag>
         <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>nodejs-ctfshow</title>
+    <url>/2024/03/02/nodejs-ctfshow/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<h1 id="web334"><a href="#web334" class="headerlink" title="web334"></a>web334</h1><p>给了两个源码文件和一个登录界面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303111933863.png"  alt="image-20240303111933863"></p>
+<p>前端可以看到的，以post数据提交用户名和密码，以json格式接受返回数据</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112015481.png"  alt="image-20240303112015481"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112028812.png"  alt="image-20240303112028812"></p>
+<p>这里给了用户名和密码，然后看了一下登录检验</p>
+<p>用户名不能为CTFSHOW，输入的用户名会经过<code>toUpperCase()</code>转化为大写后与数据比较，密码正常比较。</p>
+<p>既然会转化为大写，直接输入ctfshow(小写)即可</p>
+<h1 id="web335"><a href="#web335" class="headerlink" title="web335"></a>web335</h1><p>题面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124252606.png"  alt="image-20240303124252606"></p>
+<p>信息收集</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124304897.png"  alt="image-20240303124304897"></p>
+<p>抓包扫描后无果</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124335586.png"  alt="image-20240303124335586"></p>
+<p>传入eval&#x3D;1，出现回显，推测为console.log(传参)，反正能执行我的命令并且输出</p>
+<p>在nodejs中执行系统命令我们主要是使用child_process类</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304175348635.png"  alt="image-20240304175348635"></p>
+<p>可以看到这里有很多方法，有同步和异步创建进程的分类，我们这里需要的是异步创建进程，这里还不是很理解为什么同步创建进程不会有回显(大概是因为主程序没结束，子进程没有执行？)</p>
+<p>先看<code>execSync()</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180214603.png"  alt="image-20240304180214603"></p>
+<p>官方文档看得不是很懂，希望以后有机会研读</p>
+<p>总之应对这题，只需要一个参数command足以</p>
+<p>payload:eval&#x3D;require(‘child_process’).execSync(‘ls’)</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180415820.png"  alt="image-20240304180415820"></p>
+<p>发现flag文件，改命令查看即可</p>
+<h1 id="web336"><a href="#web336" class="headerlink" title="web336"></a>web336</h1><p>这题相比上题，ban掉了exec，所以我们用另一个spawn</p>
+<h2 id="第一种方法spwanSync"><a href="#第一种方法spwanSync" class="headerlink" title="第一种方法spwanSync()"></a>第一种方法spwanSync()</h2><p>payload1:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;ls&#39;).stdout.toString()</code></p>
+<p>payload2:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;tac&#39;,[&#39;fl001g.txt&#39;]).stdout.toString()</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305181344645.png"  alt="image-20240305181344645"></p>
+<p>学习一下<code>spawnSync()</code>方法</p>
+<p><code>spawnSync()</code>会同步创建一个子进程执行我们传入的命令，并且返回一个对象.</p>
+<h3 id="传入命令"><a href="#传入命令" class="headerlink" title="传入命令"></a>传入命令</h3><p>第一个参数是命令的名称</p>
+<p>第二个参数是一个数组，用来传递命令的参数</p>
+<h3 id="返回的对象"><a href="#返回的对象" class="headerlink" title="返回的对象"></a>返回的对象</h3><p>返回的这个对象包含命令执行后的信息</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305182634001.png"  alt="image-20240305182634001"></p>
+<p>这里我们需要的是标准输出流stdout，并用toString()将它转化为字符串即可输出</p>
+<h2 id="第二种方法-fs类"><a href="#第二种方法-fs类" class="headerlink" title="第二种方法 fs类"></a>第二种方法 fs类</h2><h3 id="两个魔术变量"><a href="#两个魔术变量" class="headerlink" title="两个魔术变量"></a>两个魔术变量</h3><p>__filename:返回当前模块文件被解析过后的绝对路径</p>
+<p>__dirname:返回当前模块文件解析后所在的文件夹的绝对路径</p>
+<h3 id="readdirSync和readFileSync"><a href="#readdirSync和readFileSync" class="headerlink" title="readdirSync和readFileSync"></a>readdirSync和readFileSync</h3><p>payload1:<code>eval=require(&#39;fs&#39;).readdirSync(&#39;.&#39;)</code>查看当前目录下的文件</p>
+<p>payload2:<code>eval=require(&#39;fs&#39;).readFileSync(&#39;fl001g.txt&#39;,&#39;utf-8&#39;)</code>查看文件</p>
+<h3 id="exec绕过"><a href="#exec绕过" class="headerlink" title="exec绕过"></a>exec绕过</h3><p>payload:?<code>eval=require(&#39;child_process&#39;)[&#39;exe&#39;+&#39;cSync&#39;](&#39;ls&#39;).toString()</code></p>
+<p>这里有个疑点，如果我想读取上一层目录的文件该如何处理,以后再想吧</p>
+<h1 id="web337"><a href="#web337" class="headerlink" title="web337"></a>web337</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240305201256890.png"  alt="image-20240305201256890"></p>
+<p>要求，传入两个数ab</p>
+<p>1.a的长度和b的长度一致</p>
+<p>2.a不等于b</p>
+<p>3.md5编码后的a+flag和b+flag相等</p>
+<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>这里我们的payload为a[]&#x3D;1&amp;b[]&#x3D;1</p>
+<p>1.数组.length即数组元素个数，满足相等</p>
+<p>2.JavaScript会比较等号两边数组的地址，弱不一样直接返回false(但是php不会)</p>
+<p>3.上本地测试图</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202533805.png"  alt="image-20240305202533805"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202543607.png"  alt="image-20240305202543607"></p>
+<p>ok了</p>
+<p>再看看如果数组里面有两个元素呢</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202622579.png"  alt="image-20240305202622579"></p>
+<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>payload:a[‘x’]&#x3D;1&amp;b[‘x’]&#x3D;1</p>
+<p>原理与上差不多相同，不过输出的东西不太同</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305203029034.png"  alt="image-20240305203029034"></p>
+<h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>原型链污染</p>
+<p>移步下一篇文章</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>ctfshow</tag>
+        <tag>js</tag>
       </tags>
   </entry>
 </search>
