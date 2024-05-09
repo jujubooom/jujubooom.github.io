@@ -818,8 +818,7 @@
   <entry>
     <title>记录一题好玩的游戏题</title>
     <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
-    <content><![CDATA[<p>我给五星</p>
-<span id="more"></span>
+    <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
 
 <p><img   src="/../img/$%7Bfiilename%7D/image-20240509210350791.png"  alt="image-20240509210350791"></p>
 <p>需要我们控制小蛇生存60s，玩玩看</p>
@@ -838,7 +837,8 @@
 <p>因为小蛇速度会加快，那么我们就设置一个定时任务，每0.5秒重新设置一次速度就好了</p>
 <figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> ewoji = <span class="keyword">new</span> <span class="title class_">Snake</span>(<span class="string">&#x27;ewoji&#x27;</span>,<span class="number">1.5</span>,<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">myFunction</span>(<span class="params"></span>) &#123;</span><br><span class="line">  ewoji.<span class="property">speed</span> = <span class="number">1.5</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> intervalID = <span class="built_in">setInterval</span>(myFunction, <span class="number">500</span>);</span><br></pre></td></tr></table></figure>
 
-<p>或者干脆直接把speed设置为了，这样小蛇就会像bot一样在原地不动了</p>
+<p>或者干脆直接把speed设置为0，这样小蛇就会像bot一样在原地不动了</p>
+<p>嘻嘻</p>
 ]]></content>
       <tags>
         <tag>-ctf</tag>
