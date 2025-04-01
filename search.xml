@@ -178,7 +178,7 @@
 ]]></content>
   </entry>
   <entry>
-    <title></title>
+    <title>Http分块Chunk的妙用</title>
     <url>/2025/04/01/Http%E5%88%86%E5%9D%97Chunk%E7%9A%84%E5%A6%99%E7%94%A8/</url>
     <content><![CDATA[<h1 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h1><h2 id="Content-Length"><a href="#Content-Length" class="headerlink" title="Content_Length"></a>Content_Length</h2><p><strong>HTTP Connection有两种连接方式</strong>：短连接和长连接；<br><strong>短连接</strong>即一次请求对应一次TCP连接的建立和销毁过程，对应的也就是Connection: close。<br><strong>长连接</strong>是多个请求共用同一个连接这样可以节省大量连接建立时间提高通信效率。目前主流浏览器都会在请求头里面包含Connection:keep-alive字段，该字段的作用就是告诉HTTP服务器响应结束后不要关闭连接，浏览器会将建立的连接缓存起来，当在有限时效内有再次对相同服务器发送请求时则直接从缓存中取出连接进行通信。当然被缓存的连接如果空闲时间超过了设定值（如firefox为115s，IE为60s）则会关闭连接。</p>
 <p>在消息头中指定Transfer-Encoding: chunked 就表示整个response将使用分块传输编码来传输内容，一个完整的消息体由n个块组成，并以最后一个大小为0的块为结束。每个非空的块包括两部分，分别为：块的长度（用十六进制表示）后面跟一个CRLF （回车及换行），长度并不包括结尾的回车换行符。第二部分就是数据本身，同样以CRLF （回车及换行）结束。最后一块是单行，只由块大小（0）以及CRLF组成，不包含任何数据</p>
