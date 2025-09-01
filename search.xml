@@ -656,14 +656,15 @@
 <p>这里有资源指向的都比较好理解比如就是指向具体的cdef盘</p>
 <p>但是这个IPC就是可以了解一下</p>
 <blockquote>
-<h2 id="“通过了域控的-IPC-认证”意味着什么？"><a href="#“通过了域控的-IPC-认证”意味着什么？" class="headerlink" title="“通过了域控的 IPC 认证”意味着什么？"></a>“通过了域控的 IPC 认证”意味着什么？</h2><ol>
+<p> 通过了域控的 IPC 认证意味着什么？</p>
+<ol>
 <li>说明你已经用某个域账户在目标机器上完成了 NTLM&#x2F;Kerberos 认证<ul>
-<li>系统会为这个连接建立一个**会话凭据 (session)**。</li>
+<li>系统会为这个连接建立一个会话凭据 (session)。</li>
 </ul>
 </li>
-<li>这代表你已经在该主机上“登陆成功”，但能做什么取决于<strong>这个账户的权限</strong>。</li>
+<li>这代表你已经在该主机上“登陆成功”，但能做什么取决于这个账户的权限。</li>
 </ol>
-<p> 重点：<strong>IPC$ 只是做了通道建立和凭据传递，并不自动赋予你访问所有共享或使用管理接口的权限</strong>。</p>
+<p> 重点：IPC$ 只是做了通道建立和凭据传递，并不自动赋予你访问所有共享或使用管理接口的权限。</p>
 </blockquote>
 <h3 id="SMB的利用过程"><a href="#SMB的利用过程" class="headerlink" title="SMB的利用过程"></a>SMB的利用过程</h3><p>我们知道我们通过认证后就可以去使用域控默认的共享文件夹了，这意味着我们可以任意写入东西，所以可以任意上传一些远控木马，最后还需要通过一个sc命令去执行这个木马</p>
 <h4 id="SC命令"><a href="#SC命令" class="headerlink" title="SC命令"></a>SC命令</h4><p><code>sc</code> 是 <strong>Service Control</strong> 命令行工具，全称 <strong>Service Controller</strong>。</p>
@@ -688,7 +689,7 @@
 <p><a href="https://blog.csdn.net/a854596855/article/details/141059119">RemCom和impacket.psexec简介_remcom.exe-CSDN博客</a></p>
 <p>这里会利用smbexec.py和psexec.py然后能知道他们两个的区别即可</p>
 <blockquote>
-<p>psexec.py<br>功能：模仿 Microsoft 的 PSEXEC 工具，通过 SMB 协议和 RemComSvc 服务执行命令，提供交互式 Shell。<br>用法：<br>python3 psexec.py domain&#x2F;user:password@target_ip<br>特点：需要管理员权限，依赖 RemComSvc 服务，适合需要稳定 Shell 的场景。<br>示例：<br>python3 psexec.py CORP&#x2F;user1:<a href="mailto:&#x50;&#97;&#115;&#115;&#119;&#48;&#x72;&#100;&#64;&#x31;&#57;&#x32;&#x2e;&#49;&#54;&#56;&#x2e;&#49;&#x2e;&#x31;&#x30;&#x30;">&#x50;&#97;&#115;&#115;&#119;&#48;&#x72;&#100;&#64;&#x31;&#57;&#x32;&#x2e;&#49;&#54;&#56;&#x2e;&#49;&#x2e;&#x31;&#x30;&#x30;</a></p>
+<p>psexec.py<br>功能：模仿 Microsoft 的 PSEXEC 工具，通过 SMB 协议和 RemComSvc 服务执行命令，提供交互式 Shell。<br>用法：<br>python3 psexec.py domain&#x2F;user:password@target_ip<br>特点：需要管理员权限，依赖 RemComSvc 服务，适合需要稳定 Shell 的场景。<br>示例：<br>python3 psexec.py CORP&#x2F;user1:<a href="mailto:&#80;&#x61;&#115;&#115;&#119;&#48;&#114;&#x64;&#64;&#49;&#x39;&#50;&#46;&#x31;&#54;&#56;&#46;&#49;&#x2e;&#49;&#x30;&#48;">&#80;&#x61;&#115;&#115;&#119;&#48;&#114;&#x64;&#64;&#49;&#x39;&#50;&#46;&#x31;&#54;&#56;&#46;&#49;&#x2e;&#49;&#x30;&#48;</a></p>
 <p>smbexec.py<br>功能：类似 psexec.py，但不依赖 RemComSvc，通过 SMB 协议创建临时服务执行命令，输出通过本地 SMB Server 接收。<br>用法：<br>python3 smbexec.py domain&#x2F;user:password@target_ip<br>特点：无需目标有可写共享目录，隐蔽性较高。<br>注意：可能在高安全环境下触发告警。</p>
 </blockquote>
 <p>一语概括就是psexec是会形成交互式shell的，而smbexec就是执行一个命令输出一次类似一句话木马</p>
