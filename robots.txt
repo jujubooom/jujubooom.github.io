@@ -10,5 +10,5 @@ Disallow: /fonts/
 Disallow: /lib/
 Disallow: /images/
 
-Sitemap: https://jujubooom.github.io/sitemap.xml
-Sitemap: https://jujubooom.github.io/baidusitemap.xml
+Sitemap: https://ewoji.cn/sitemap.xml
+Sitemap: https://ewoji.cn/baidusitemap.xml
